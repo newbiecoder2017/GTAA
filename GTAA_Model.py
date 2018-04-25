@@ -109,20 +109,26 @@ def backtest_metrics(returnsframe):
     cummulative_return = (1 + returnsframe).cumprod()
     cpr = cummulative_return[-1:]
     N = len(returnsframe) / 12
-    AnnReturns = 100 * (cpr.pow(1 / N) - 1)
-    AnnRisk = 100 * (np.sqrt(12) * returnsframe.std())
-    AnnSharpe = AnnReturns / AnnRisk
+    AnnReturns = (cpr.pow(1 / N) - 1)
+    AnnRisk = (np.sqrt(12) * returnsframe.std())
+    AnnSharpe = (AnnReturns-0.025) / AnnRisk
     dd = [drawdown(cummulative_return[c])[0] for c in cummulative_return.columns]
     mdd = [drawdown(cummulative_return[c])[1] for c in cummulative_return.columns]
     up = portfolio_returns[returnsframe > 0].count() / returnsframe.count()
     down = portfolio_returns[returnsframe < 0].count() / returnsframe.count()
-
     average_up = portfolio_returns[returnsframe > 0].mean()
     average_down = portfolio_returns[returnsframe < 0].mean()
-
-    # drawdown(p_df['b_NAV'])
     gain_to_loss = (average_up) / (-1 * average_down)
 
+    metric_df = pd.DataFrame(AnnReturns.values.tolist(), index = ['AnnRet(%)','AnnRisk(%)','AnnSharpe(2.5%)','Avg_DD(%)','MaxDD(%)','WinRate(%)','Gain_to_Loss'],columns = ['Avg_Universe', 'BM', 'eq_wt', 'risk_wt'])
+    metric_df.loc['AnnRet(%)'] = round(metric_df.loc['AnnRet(%)'], 3)*100
+    metric_df.loc['AnnRisk(%)'] = 100 * AnnRisk
+    metric_df.loc['AnnSharpe(2.5%)'] = AnnSharpe.values.tolist()[0]
+    metric_df.loc['Avg_DD(%)'] =  [round(abs(i), 3) * 100 for i in dd]
+    metric_df.loc['MaxDD(%)'] = [round(abs(i), 3) * 100 for i in mdd]
+    metric_df.loc['WinRate(%)'] = round(up * 100, 3)
+    metric_df.loc['Gain_to_Loss'] = round(gain_to_loss, 3)
+    return metric_df
 
 
 if __name__ == "__main__":
@@ -145,7 +151,8 @@ if __name__ == "__main__":
     bm_ret = adjusted_price['5/30/2007':].pct_change()
     bm_ret =bm_ret[:-1]
     portfolio_returns = pd.DataFrame({'eq_wt' : eq_wt_portfolio, 'risk_wt' : risk_wt_portfolio, 'BM' : bm_ret['SPY'],"Avg_Universe" : bm_ret.mean(axis=1)}, index = risk_wt_portfolio.index)
-    backtest_metrics(portfolio_returns)
+    print(backtest_metrics(portfolio_returns))
+
 
 
 
