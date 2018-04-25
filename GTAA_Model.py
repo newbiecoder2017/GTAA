@@ -55,12 +55,12 @@ def equal_weight_portfolio(px_data, signal):
     return total_return
 
 
-def risk_weight_portfolio(px_data, signal):
+def risk_weight_portfolio(px_data, signal, window):
 
     trading_universe = signal.columns.tolist()
     data_trading = px_data[trading_universe]['5/30/2007':]
     returns_df = data_trading.pct_change()
-    std_df = 1.0 / returns_df.rolling(10).std()
+    std_df = 1.0 / returns_df.rolling(window).std()
 
     returns_df = data_trading.pct_change().shift(1)
 
@@ -111,6 +111,10 @@ def backtest_metrics(returnsframe):
     N = len(returnsframe) / 12
     AnnReturns = (cpr.pow(1 / N) - 1)
     AnnRisk = (np.sqrt(12) * returnsframe.std())
+    df_thres = returnsframe - 0.05
+    df_thres[df_thres > 0] = 0
+    downward_risk = (np.sqrt(12) * df_thres.std())
+    sortino_ratio = (AnnReturns-0.05) / downward_risk
     AnnSharpe = (AnnReturns-0.025) / AnnRisk
     dd = [drawdown(cummulative_return[c])[0] for c in cummulative_return.columns]
     mdd = [drawdown(cummulative_return[c])[1] for c in cummulative_return.columns]
@@ -119,8 +123,10 @@ def backtest_metrics(returnsframe):
     average_up = portfolio_returns[returnsframe > 0].mean()
     average_down = portfolio_returns[returnsframe < 0].mean()
     gain_to_loss = (average_up) / (-1 * average_down)
+    mar_ratio = AnnReturns / mdd
+    sterling_ratio = AnnReturns / ([i*12 for i in dd])
 
-    metric_df = pd.DataFrame(AnnReturns.values.tolist(), index = ['AnnRet(%)','AnnRisk(%)','AnnSharpe(2.5%)','Avg_DD(%)','MaxDD(%)','WinRate(%)','Gain_to_Loss'],columns = ['Avg_Universe', 'BM', 'eq_wt', 'risk_wt'])
+    metric_df = pd.DataFrame(AnnReturns.values.tolist(), index = ['AnnRet(%)','AnnRisk(%)','AnnSharpe(2.5%)','Avg_DD(%)','MaxDD(%)','WinRate(%)','Gain_to_Loss','RoMDD','Sortino(5%)','Sterling_Ratio'],columns = ['Avg_Universe', 'S&P500', 'eq_wt', 'risk_wt'])
     metric_df.loc['AnnRet(%)'] = round(metric_df.loc['AnnRet(%)'], 3)*100
     metric_df.loc['AnnRisk(%)'] = 100 * AnnRisk
     metric_df.loc['AnnSharpe(2.5%)'] = AnnSharpe.values.tolist()[0]
@@ -128,13 +134,19 @@ def backtest_metrics(returnsframe):
     metric_df.loc['MaxDD(%)'] = [round(abs(i), 3) * 100 for i in mdd]
     metric_df.loc['WinRate(%)'] = round(up * 100, 3)
     metric_df.loc['Gain_to_Loss'] = round(gain_to_loss, 3)
+    metric_df.loc['RoMDD'] = [round(abs(i),3) for i in mar_ratio.values.tolist()[0]]
+    metric_df.loc['Sortino(5%)'] = sortino_ratio.values.tolist()[0]
+    metric_df.loc['Sterling_Ratio'] = [round(abs(i),3) for i in sterling_ratio.values.tolist()[0]]
+
     return metric_df
 
 
 if __name__ == "__main__":
 
+    window = 5
     # universe list for the model
     universe_list = ['DBC', 'GLD', 'SPY', 'IEV', 'EWJ', 'EEM', 'IYR', 'RWX', 'IEF', 'TLT', 'BIL', 'SHY']
+    trading_universe = ['DBC', 'GLD', 'SPY', 'IEV', 'EWJ', 'EEM', 'IYR', 'RWX', 'IEF', 'TLT']
     #   Universe Adj.Close dataframe
     #   df = pd.DataFrame({s:pull_data(s) for s in universe_list})
     #   df.to_csv("C:/Python27/Git/SMA_GTAA/adj_close.csv")
@@ -142,16 +154,29 @@ if __name__ == "__main__":
 
     adjusted_price = read_price_file('BM')
     #generate signal dataframe
-    df_signal = ma_signal(adjusted_price, 10)
+    df_signal = ma_signal(adjusted_price, window)
 
     #equal weight portfolio
 
-    eq_wt_portfolio = equal_weight_portfolio(adjusted_price, df_signal).ffill()
-    risk_wt_portfolio = risk_weight_portfolio(adjusted_price, df_signal).ffill()
+    eq_wt_portfolio = equal_weight_portfolio(adjusted_price, df_signal)
+    risk_wt_portfolio = risk_weight_portfolio(adjusted_price, df_signal, window)
     bm_ret = adjusted_price['5/30/2007':].pct_change()
     bm_ret =bm_ret[:-1]
-    portfolio_returns = pd.DataFrame({'eq_wt' : eq_wt_portfolio, 'risk_wt' : risk_wt_portfolio, 'BM' : bm_ret['SPY'],"Avg_Universe" : bm_ret.mean(axis=1)}, index = risk_wt_portfolio.index)
+    portfolio_returns = pd.DataFrame({'eq_wt' : eq_wt_portfolio, 'risk_wt' : risk_wt_portfolio, 'S&P500' : bm_ret['SPY'],"Avg_Universe" : bm_ret[trading_universe].mean(axis=1)}, index = risk_wt_portfolio.index)
     print(backtest_metrics(portfolio_returns))
+
+    #Portfolio Return Plot
+    # portfolio_returns.cumsum().plot()
+    # plt.legend()
+    # plt.grid()
+    # plt.show()
+
+    # correaltion Plot
+    # plt.matshow(bm_ret.corr())
+    # plt.xticks(range(len(bm_ret.columns)), bm_ret.columns)
+    # plt.yticks(range(len(bm_ret.columns)), bm_ret.columns)
+    # plt.colorbar()
+    # plt.show()
 
 
 
