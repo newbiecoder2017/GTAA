@@ -75,6 +75,55 @@ def risk_weight_portfolio(px_data, signal):
     total_return = (pos_wt * (holdings_std*holdings_returns).sum(axis=1)) + (cash_wt * cash_ret) - 0.001
     return total_return
 
+def drawdown(s):
+
+    # Get SPY data for past several years
+    SPY_Dat = s
+
+    # We are going to use a trailing 252 trading day window
+
+    # Calculate the max drawdown in the past window days for each day in the series.
+    # Use min_periods=1 if you want to let the first 252 days data have an expanding window
+    Roll_Max = SPY_Dat.rolling(center=False, min_periods=1, window=12).max()
+
+    Daily_Drawdown = SPY_Dat / Roll_Max - 1.0
+
+    # Next we calculate the minimum (negative) daily drawdown in that window.
+    # Again, use min_periods=1 if you want to allow the expanding window
+    #     Max_Daily_Drawdown = pd.rolling_min(Daily_Drawdown, window, min_periods=1)
+
+    Max_Daily_Drawdown = Daily_Drawdown.rolling(center=False, min_periods=1, window=12).min()
+
+    return Daily_Drawdown.mean(), Max_Daily_Drawdown.min()
+
+    # Plot the results
+    # Daily_Drawdown.plot()
+    # Max_Daily_Drawdown.plot()
+    # plt.legend()
+    # plt.grid()
+    # plt.title("DrawDown and MaxDD for %s" %(s.name))
+    # plt.show()
+
+def backtest_metrics(returnsframe):
+
+    cummulative_return = (1 + returnsframe).cumprod()
+    cpr = cummulative_return[-1:]
+    N = len(returnsframe) / 12
+    AnnReturns = 100 * (cpr.pow(1 / N) - 1)
+    AnnRisk = 100 * (np.sqrt(12) * returnsframe.std())
+    AnnSharpe = AnnReturns / AnnRisk
+    dd = [drawdown(cummulative_return[c])[0] for c in cummulative_return.columns]
+    mdd = [drawdown(cummulative_return[c])[1] for c in cummulative_return.columns]
+    up = portfolio_returns[returnsframe > 0].count() / returnsframe.count()
+    down = portfolio_returns[returnsframe < 0].count() / returnsframe.count()
+
+    average_up = portfolio_returns[returnsframe > 0].mean()
+    average_down = portfolio_returns[returnsframe < 0].mean()
+
+    # drawdown(p_df['b_NAV'])
+    gain_to_loss = (average_up) / (-1 * average_down)
+
+
 
 if __name__ == "__main__":
 
@@ -95,11 +144,9 @@ if __name__ == "__main__":
     risk_wt_portfolio = risk_weight_portfolio(adjusted_price, df_signal).ffill()
     bm_ret = adjusted_price['5/30/2007':].pct_change()
     bm_ret =bm_ret[:-1]
-    portfolio_returns = pd.DataFrame({'eq_wt' : eq_wt_portfolio, 'risk_wt' : risk_wt_portfolio, 'BM' : bm_ret['SPY'] }, index = risk_wt_portfolio.index)
-    print(portfolio_returns)
-    portfolio_returns.groupby(portfolio_returns.index.year).mean().plot(kind='bar')
-    # portfolio_returns.cumsum().plot()
-    plt.legend()
-    plt.show()
+    portfolio_returns = pd.DataFrame({'eq_wt' : eq_wt_portfolio, 'risk_wt' : risk_wt_portfolio, 'BM' : bm_ret['SPY'],"Avg_Universe" : bm_ret.mean(axis=1)}, index = risk_wt_portfolio.index)
+    backtest_metrics(portfolio_returns)
+
+
 
 
