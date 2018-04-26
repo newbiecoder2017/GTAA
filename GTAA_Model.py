@@ -31,48 +31,53 @@ def read_price_file(frq = 'BM'):
     df_price = df_price.resample(frq, closed='right').last()
     return df_price
 
-def ma_signal(data, window):
+def ma_signal(data, trading_universe, window):
 
-    trading_universe = ['DBC', 'GLD', 'SPY', 'IEV', 'EWJ', 'EEM', 'IYR', 'RWX', 'IEF', 'TLT']
+    # trading_universe = ['DBC', 'GLD', 'SPY', 'IEV', 'EWJ', 'EEM', 'IYR', 'RWX', 'IEF', 'TLT']
+
+    #calculating the rolling sma
     RollMa = data.rolling(window).mean()
     RollMa = RollMa[trading_universe]['5/30/2007':]
+
+    #aligning price with the trading universe
     data_trading = data[trading_universe]['5/30/2007':]
-    returns_df = data_trading.pct_change().shift(1)
+
+    # #calulating the monthly returns and shifting it one period for mapping
+    # returns_df = data_trading.pct_change().shift(1)
+
     #buy rule: if px(t) > 10M SMA(t)
     signal_df = data_trading > RollMa
-    return signal_df[:-1]
+    return signal_df
 
 def equal_weight_portfolio(px_data, signal):
 
     trading_universe = signal.columns.tolist()
     data_trading = px_data[trading_universe]['5/30/2007':]
-    returns_df = data_trading.pct_change().shift(1)
-    cash_ret = px_data['BIL']['5/30/2007':].pct_change().shift(1)[:-1]
-    holdings_returns = returns_df[signal][:-1]
+    returns_df = data_trading.pct_change()
+    cash_ret = px_data['BIL']['5/30/2007':].pct_change()
+    holdings_returns = returns_df[signal.shift(1).bfill()]
     pos_wt = (len(trading_universe) - holdings_returns.isnull().sum(axis=1)) / len(trading_universe)
     cash_wt = 1 - pos_wt
-    total_return =  (pos_wt * holdings_returns.mean(axis=1)) + (cash_wt * cash_ret) - 0.001
+    total_return =  (pos_wt * holdings_returns.mean(axis=1).fillna(0)) + (cash_wt * cash_ret) - 0.001
     return total_return
-
 
 def risk_weight_portfolio(px_data, signal, window):
 
     trading_universe = signal.columns.tolist()
     data_trading = px_data[trading_universe]['5/30/2007':]
     returns_df = data_trading.pct_change()
-    std_df = 1.0 / returns_df.rolling(window).std()
-
-    returns_df = data_trading.pct_change().shift(1)
-
-    cash_ret = px_data['BIL']['5/30/2007':].pct_change().shift(1)[:-1]
-    holdings_returns = returns_df[signal][:-1]
-    holdings_std = std_df[signal][:-1]
+    std_df = 1.0 / returns_df.rolling(3).std()
+    returns_df = data_trading.pct_change()
+    cash_ret = px_data['BIL']['5/30/2007':].pct_change()
+    holdings_returns = returns_df[signal.shift(1).bfill()]
+    holdings_std = std_df[signal]
     std_sum = holdings_std.sum(axis = 1)
     holdings_std = holdings_std.divide(std_sum, axis=0)
-
+    holdings_std = holdings_std.shift(1)
     pos_wt = (len(trading_universe) - holdings_returns.isnull().sum(axis=1)) / len(trading_universe)
     cash_wt = 1 - pos_wt
-    total_return = (pos_wt * (holdings_std*holdings_returns).sum(axis=1)) + (cash_wt * cash_ret) - 0.001
+    # total_return = (pos_wt * (holdings_std*holdings_returns).sum(axis=1).fillna(0)) + (cash_wt * cash_ret) - 0.001
+    total_return = ((holdings_std * holdings_returns).sum(axis=1).fillna(0)) - 0.001
     return total_return
 
 def drawdown(s):
@@ -84,7 +89,7 @@ def drawdown(s):
 
     # Calculate the max drawdown in the past window days for each day in the series.
     # Use min_periods=1 if you want to let the first 252 days data have an expanding window
-    Roll_Max = SPY_Dat.rolling(center=False, min_periods=1, window=12).max()
+    Roll_Max = SPY_Dat.rolling(center=False, min_periods=1, window=26).max()
 
     Daily_Drawdown = SPY_Dat / Roll_Max - 1.0
 
@@ -143,7 +148,7 @@ def backtest_metrics(returnsframe):
 
 if __name__ == "__main__":
 
-    window = 5
+    window = 8
     # universe list for the model
     universe_list = ['DBC', 'GLD', 'SPY', 'IEV', 'EWJ', 'EEM', 'IYR', 'RWX', 'IEF', 'TLT', 'BIL', 'SHY']
     trading_universe = ['DBC', 'GLD', 'SPY', 'IEV', 'EWJ', 'EEM', 'IYR', 'RWX', 'IEF', 'TLT']
@@ -154,22 +159,24 @@ if __name__ == "__main__":
 
     adjusted_price = read_price_file('BM')
     #generate signal dataframe
-    df_signal = ma_signal(adjusted_price, window)
+    df_signal = ma_signal(adjusted_price, trading_universe, window)
 
     #equal weight portfolio
 
     eq_wt_portfolio = equal_weight_portfolio(adjusted_price, df_signal)
     risk_wt_portfolio = risk_weight_portfolio(adjusted_price, df_signal, window)
     bm_ret = adjusted_price['5/30/2007':].pct_change()
-    bm_ret =bm_ret[:-1]
+    bm_ret =bm_ret
     portfolio_returns = pd.DataFrame({'eq_wt' : eq_wt_portfolio, 'risk_wt' : risk_wt_portfolio, 'S&P500' : bm_ret['SPY'],"Avg_Universe" : bm_ret[trading_universe].mean(axis=1)}, index = risk_wt_portfolio.index)
+    portfolio_returns = portfolio_returns[:-1]
     print(backtest_metrics(portfolio_returns))
 
     #Portfolio Return Plot
-    # portfolio_returns.cumsum().plot()
-    # plt.legend()
-    # plt.grid()
-    # plt.show()
+    print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
+    portfolio_returns.cumsum().plot()
+    plt.legend()
+    plt.grid()
+    plt.show()
 
     # correaltion Plot
     # plt.matshow(bm_ret.corr())
