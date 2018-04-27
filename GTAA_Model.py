@@ -79,6 +79,7 @@ def risk_weight_portfolio(px_data, signal, window):
     cash_wt = 1 - pos_wt
     # total_return = (pos_wt * (holdings_std*holdings_returns).sum(axis=1).fillna(0)) + (cash_wt * cash_ret) - 0.001
     total_return = ((holdings_std * holdings_returns).sum(axis=1).fillna(0)) - 0.001
+<<<<<<< HEAD
     return total_return
 
 def risk_weight_benchmark(px_data, signal):
@@ -96,6 +97,8 @@ def risk_weight_benchmark(px_data, signal):
 
     # total_return = (pos_wt * (holdings_std*holdings_returns).sum(axis=1).fillna(0)) + (cash_wt * cash_ret) - 0.001
     total_return = ((holdings_std * returns_df).sum(axis=1).fillna(0))
+=======
+>>>>>>> 737075e16e0519730c0d83bf3f2f2c95ef89ce4e
     return total_return
 
 def drawdown(s):
@@ -187,8 +190,14 @@ if __name__ == "__main__":
     risk_wt_benchmark = risk_weight_benchmark(adjusted_price, df_signal)
     bm_ret = adjusted_price['5/30/2007':].pct_change()
     bm_ret =bm_ret
+<<<<<<< HEAD
     portfolio_returns = pd.DataFrame({'eq_wt' : eq_wt_portfolio, 'risk_wt' : risk_wt_portfolio, 'S&P500' : bm_ret['SPY'], 'Avg_Universe' : bm_ret[trading_universe].mean(axis=1), 'risk_wt_bm' :risk_wt_benchmark},
                                         index = risk_wt_portfolio.index)
+=======
+    portfolio_returns = pd.DataFrame({'eq_wt' : eq_wt_portfolio, 'risk_wt' : risk_wt_portfolio, 'S&P500' : bm_ret['SPY'],"Avg_Universe" : bm_ret[trading_universe].mean(axis=1)}, index = risk_wt_portfolio.index)
+    portfolio_returns = portfolio_returns[:-1]
+    print(backtest_metrics(portfolio_returns))
+>>>>>>> 737075e16e0519730c0d83bf3f2f2c95ef89ce4e
 
 
     stats_df = backtest_metrics(portfolio_returns)
@@ -197,12 +206,20 @@ if __name__ == "__main__":
     stats_df.loc['Best_Year', :] = 100 * portfolio_returns.groupby(portfolio_returns.index.year).sum().max()
     stats_df.loc['Worst_Year', :] = 100 * portfolio_returns.groupby(portfolio_returns.index.year).sum().min()
     #Portfolio Return Plot
+<<<<<<< HEAD
     # portfolio_returns = portfolio_returns[['eq_wt', 'risk_wt', "Avg_Universe"]]
     # print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
     # portfolio_returns.cumsum().plot()
     # plt.legend()
     # plt.grid()
     # plt.show()
+=======
+    print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
+    portfolio_returns.cumsum().plot()
+    plt.legend()
+    plt.grid()
+    plt.show()
+>>>>>>> 737075e16e0519730c0d83bf3f2f2c95ef89ce4e
 
     # correaltion Plot
     # plt.matshow(bm_ret.corr())
