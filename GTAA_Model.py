@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 import fix_yahoo_finance as yf
 from pandas_datareader import data as pdr
 yf.pdr_override() # <== that's all it takes :-)
+pd.set_option('precision',4)
 
 
 
@@ -49,7 +50,7 @@ def ma_signal(data, trading_universe, window):
     signal_df = data_trading > RollMa
     return signal_df
 
-def equal_weight_portfolio(px_data, signal):
+def equal_weight_cash_portfolio(px_data, signal):
 
     trading_universe = signal.columns.tolist()
     data_trading = px_data[trading_universe]['5/30/2007':]
@@ -78,6 +79,23 @@ def risk_weight_portfolio(px_data, signal, window):
     cash_wt = 1 - pos_wt
     # total_return = (pos_wt * (holdings_std*holdings_returns).sum(axis=1).fillna(0)) + (cash_wt * cash_ret) - 0.001
     total_return = ((holdings_std * holdings_returns).sum(axis=1).fillna(0)) - 0.001
+    return total_return
+
+def risk_weight_benchmark(px_data, signal):
+
+    data_trading = px_data[signal.columns.tolist()]
+    data_trading = data_trading['5/30/2007':]
+    returns_df = data_trading.pct_change()
+    std_df = 1.0 / returns_df.rolling(3).std()
+    # returns_df = data_trading.pct_change()
+
+    std_sum = std_df.sum(axis = 1)
+    holdings_std = std_df.divide(std_sum, axis=0)
+    # holdings_std = holdings_std.shift(1)
+    pos_wt = (len(returns_df) - returns_df.isnull().sum(axis=1)) / len(returns_df)
+
+    # total_return = (pos_wt * (holdings_std*holdings_returns).sum(axis=1).fillna(0)) + (cash_wt * cash_ret) - 0.001
+    total_return = ((holdings_std * returns_df).sum(axis=1).fillna(0))
     return total_return
 
 def drawdown(s):
@@ -120,7 +138,7 @@ def backtest_metrics(returnsframe):
     df_thres[df_thres > 0] = 0
     downward_risk = (np.sqrt(12) * df_thres.std())
     sortino_ratio = (AnnReturns-0.05) / downward_risk
-    AnnSharpe = (AnnReturns-0.025) / AnnRisk
+    AnnSharpe = (AnnReturns-0.0052) / AnnRisk
     dd = [drawdown(cummulative_return[c])[0] for c in cummulative_return.columns]
     mdd = [drawdown(cummulative_return[c])[1] for c in cummulative_return.columns]
     up = portfolio_returns[returnsframe > 0].count() / returnsframe.count()
@@ -132,7 +150,7 @@ def backtest_metrics(returnsframe):
     sterling_ratio = AnnReturns / ([i*12 for i in dd])
 
     metric_df = pd.DataFrame(AnnReturns.values.tolist(), index = ['AnnRet(%)','AnnRisk(%)','AnnSharpe(2.5%)','Avg_DD(%)','MaxDD(%)','WinRate(%)','Gain_to_Loss','RoMDD','Sortino(5%)','Sterling_Ratio'],
-                             columns = ['Avg_Universe', 'S&P500', 'eq_wt', 'risk_wt'])
+                             columns = ['Avg_Universe', 'S&P500', 'eq_wt', 'risk_wt', 'risk_wt_bm'])
     metric_df.loc['AnnRet(%)'] = round(metric_df.loc['AnnRet(%)'], 3)*100
     metric_df.loc['AnnRisk(%)'] = 100 * AnnRisk
     metric_df.loc['AnnSharpe(2.5%)'] = AnnSharpe.values.tolist()[0]
@@ -164,22 +182,27 @@ if __name__ == "__main__":
 
     #equal weight portfolio
 
-    eq_wt_portfolio = equal_weight_portfolio(adjusted_price, df_signal)
+    eq_wt_portfolio = equal_weight_cash_portfolio(adjusted_price, df_signal)
     risk_wt_portfolio = risk_weight_portfolio(adjusted_price, df_signal, window)
+    risk_wt_benchmark = risk_weight_benchmark(adjusted_price, df_signal)
     bm_ret = adjusted_price['5/30/2007':].pct_change()
     bm_ret =bm_ret
-    portfolio_returns = pd.DataFrame({'eq_wt' : eq_wt_portfolio, 'risk_wt' : risk_wt_portfolio, 'S&P500' : bm_ret['SPY'], "Avg_Universe" : bm_ret[trading_universe].mean(axis=1)},
+    portfolio_returns = pd.DataFrame({'eq_wt' : eq_wt_portfolio, 'risk_wt' : risk_wt_portfolio, 'S&P500' : bm_ret['SPY'], 'Avg_Universe' : bm_ret[trading_universe].mean(axis=1), 'risk_wt_bm' :risk_wt_benchmark},
                                         index = risk_wt_portfolio.index)
 
-    portfolio_returns = portfolio_returns[:-1]
-    print(backtest_metrics(portfolio_returns))
 
+    stats_df = backtest_metrics(portfolio_returns)
+    stats_df.loc['Best_Month', :] = 100 * portfolio_returns.max()
+    stats_df.loc['Worst_Month', :] = 100 * portfolio_returns.min()
+    stats_df.loc['Best_Year', :] = 100 * portfolio_returns.groupby(portfolio_returns.index.year).sum().max()
+    stats_df.loc['Worst_Year', :] = 100 * portfolio_returns.groupby(portfolio_returns.index.year).sum().min()
     #Portfolio Return Plot
-    print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
-    portfolio_returns[['eq_wt', 'risk_wt', "Avg_Universe"]].cumsum().plot()
-    plt.legend()
-    plt.grid()
-    plt.show()
+    # portfolio_returns = portfolio_returns[['eq_wt', 'risk_wt', "Avg_Universe"]]
+    # print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
+    # portfolio_returns.cumsum().plot()
+    # plt.legend()
+    # plt.grid()
+    # plt.show()
 
     # correaltion Plot
     # plt.matshow(bm_ret.corr())
@@ -187,6 +210,8 @@ if __name__ == "__main__":
     # plt.yticks(range(len(bm_ret.columns)), bm_ret.columns)
     # plt.colorbar()
     # plt.show()
+
+    print(stats_df)
 
 
 
