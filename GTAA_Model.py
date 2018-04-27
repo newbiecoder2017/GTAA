@@ -131,7 +131,8 @@ def backtest_metrics(returnsframe):
     mar_ratio = AnnReturns / mdd
     sterling_ratio = AnnReturns / ([i*12 for i in dd])
 
-    metric_df = pd.DataFrame(AnnReturns.values.tolist(), index = ['AnnRet(%)','AnnRisk(%)','AnnSharpe(2.5%)','Avg_DD(%)','MaxDD(%)','WinRate(%)','Gain_to_Loss','RoMDD','Sortino(5%)','Sterling_Ratio'],columns = ['Avg_Universe', 'S&P500', 'eq_wt', 'risk_wt'])
+    metric_df = pd.DataFrame(AnnReturns.values.tolist(), index = ['AnnRet(%)','AnnRisk(%)','AnnSharpe(2.5%)','Avg_DD(%)','MaxDD(%)','WinRate(%)','Gain_to_Loss','RoMDD','Sortino(5%)','Sterling_Ratio'],
+                             columns = ['Avg_Universe', 'S&P500', 'eq_wt', 'risk_wt'])
     metric_df.loc['AnnRet(%)'] = round(metric_df.loc['AnnRet(%)'], 3)*100
     metric_df.loc['AnnRisk(%)'] = 100 * AnnRisk
     metric_df.loc['AnnSharpe(2.5%)'] = AnnSharpe.values.tolist()[0]
@@ -167,13 +168,15 @@ if __name__ == "__main__":
     risk_wt_portfolio = risk_weight_portfolio(adjusted_price, df_signal, window)
     bm_ret = adjusted_price['5/30/2007':].pct_change()
     bm_ret =bm_ret
-    portfolio_returns = pd.DataFrame({'eq_wt' : eq_wt_portfolio, 'risk_wt' : risk_wt_portfolio, 'S&P500' : bm_ret['SPY'],"Avg_Universe" : bm_ret[trading_universe].mean(axis=1)}, index = risk_wt_portfolio.index)
+    portfolio_returns = pd.DataFrame({'eq_wt' : eq_wt_portfolio, 'risk_wt' : risk_wt_portfolio, 'S&P500' : bm_ret['SPY'], "Avg_Universe" : bm_ret[trading_universe].mean(axis=1)},
+                                        index = risk_wt_portfolio.index)
+
     portfolio_returns = portfolio_returns[:-1]
     print(backtest_metrics(portfolio_returns))
 
     #Portfolio Return Plot
     print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
-    portfolio_returns.cumsum().plot()
+    portfolio_returns[['eq_wt', 'risk_wt', "Avg_Universe"]].cumsum().plot()
     plt.legend()
     plt.grid()
     plt.show()
