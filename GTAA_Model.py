@@ -140,7 +140,7 @@ def backtest_metrics(returnsframe):
     df_thres[df_thres > 0] = 0
     downward_risk = (np.sqrt(12) * df_thres.std())
     sortino_ratio = (AnnReturns-0.05) / downward_risk
-    AnnSharpe = (AnnReturns-0.0052) / AnnRisk
+    AnnSharpe = (AnnReturns-0.025) / AnnRisk
     dd = [drawdown(cummulative_return[c])[0] for c in cummulative_return.columns]
     mdd = [drawdown(cummulative_return[c])[1] for c in cummulative_return.columns]
     up = portfolio_returns[returnsframe > 0].count() / returnsframe.count()
@@ -192,7 +192,7 @@ if __name__ == "__main__":
 
     portfolio_returns = pd.DataFrame({'eq_wt' : eq_wt_portfolio, 'risk_wt' : risk_wt_portfolio, 'S&P500' : bm_ret['SPY'], 'Avg_Universe' : bm_ret[trading_universe].mean(axis=1), 'risk_wt_bm' :risk_wt_benchmark},
                                         index = risk_wt_portfolio.index)
-
+    portfolio_returns = portfolio_returns[1:][:-1]
     stats_df = backtest_metrics(portfolio_returns)
     stats_df.loc['Best_Month', :] = 100 * portfolio_returns.max()
     stats_df.loc['Worst_Month', :] = 100 * portfolio_returns.min()
