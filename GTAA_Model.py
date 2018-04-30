@@ -12,6 +12,10 @@
 #TLT - Long Treasuries (Barclays 20+ Year Treasury Index)
 #BIL - 1-3 Month T Bill
 #SHY - Barclays Capital U.S. 1-3 Year Treasury Bond Index
+#PGAIX - PIMCO Global Multi-Asset Fund Institutional Class
+#GYLD - Arrow Dow Jones Global Yield ETF
+#ACWI - iShares MSCI ACWI ETF
+#AGG - iShares Core U.S. Aggregate Bond ETF  AGG
 
 import pandas as pd
 import numpy as np
@@ -73,12 +77,12 @@ def risk_weight_portfolio(px_data, signal, window):
     holdings_returns = returns_df[signal.shift(1).bfill()]
     holdings_std = std_df[signal]
     std_sum = holdings_std.sum(axis = 1)
-    holdings_std = holdings_std.divide(std_sum, axis=0)
-    holdings_std = holdings_std.shift(1)
+    holdings_std_wt = holdings_std.divide(std_sum, axis=0)
+    holdings_std_wt = holdings_std_wt.shift(1)
     pos_wt = (len(trading_universe) - holdings_returns.isnull().sum(axis=1)) / len(trading_universe)
     cash_wt = 1 - pos_wt
     # total_return = (pos_wt * (holdings_std*holdings_returns).sum(axis=1).fillna(0)) + (cash_wt * cash_ret) - 0.001
-    total_return = ((holdings_std * holdings_returns).sum(axis=1).fillna(0)) - 0.001
+    total_return = ((holdings_std_wt * holdings_returns).sum(axis=1).fillna(0)) - 0.001
 
     return total_return
 
