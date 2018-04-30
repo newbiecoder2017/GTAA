@@ -167,9 +167,9 @@ if __name__ == "__main__":
     risk_wt_portfolio = risk_weight_portfolio(adjusted_price, df_signal, window)
     bm_ret = adjusted_price['5/30/2007':].pct_change()
     bm_ret =bm_ret
-    portfolio_returns = pd.DataFrame({'eq_wt' : eq_wt_portfolio, 'risk_wt' : risk_wt_portfolio, 'S&P500' : bm_ret['SPY'],"Avg_Universe" : bm_ret[trading_universe].mean(axis=1)}, index = risk_wt_portfolio.index)
+    portfolio_returns = pd.DataFrame({'eq_wt': eq_wt_portfolio, 'risk_wt': risk_wt_portfolio, 'S&P500': bm_ret['SPY'], "Avg_Universe" : bm_ret[trading_universe].mean(axis=1)}, index = risk_wt_portfolio.index)
     portfolio_returns = portfolio_returns[:-1]
-    print(backtest_metrics(portfolio_returns))
+    print(backtest_metrics(portfolio_returns['2016':]))
 
     #Portfolio Return Plot
     print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
@@ -179,11 +179,12 @@ if __name__ == "__main__":
     plt.show()
 
     # correaltion Plot
-    # plt.matshow(bm_ret.corr())
-    # plt.xticks(range(len(bm_ret.columns)), bm_ret.columns)
-    # plt.yticks(range(len(bm_ret.columns)), bm_ret.columns)
+    # plt.matshow(portfolio_returns.corr())
+    # plt.xticks(range(len(portfolio_returns.columns)), portfolio_returns.columns)
+    # plt.yticks(range(len(portfolio_returns.columns)), portfolio_returns.columns)
     # plt.colorbar()
     # plt.show()
+
 
 
 
