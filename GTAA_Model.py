@@ -86,7 +86,7 @@ def risk_weight_portfolio(px_data, signal, window):
     buy_wts = holdings_std_wt[-1:]
     holdings_std_wt = holdings_std_wt.shift(1)
     pos_wt = (len(trading_universe) - holdings_returns.isnull().sum(axis=1)) / len(trading_universe)
-    cash_wt = 1 - pos_wt
+    # cash_wt = 1 - pos_wt
     # total_return = (pos_wt * (holdings_std*holdings_returns).sum(axis=1).fillna(0)) + (cash_wt * cash_ret) - 0.001
     total_return = ((holdings_std_wt * holdings_returns).sum(axis=1).fillna(0)) - 0.001
 
@@ -178,7 +178,7 @@ def backtest_metrics(returnsframe, rfr):
 
     metric_df = pd.DataFrame(AnnReturns.values.tolist(), index = ['AnnRet(%)','AnnRisk(%)','AnnSharpe(2.5%)','Avg_DD(%)','MaxDD(%)','WinRate(%)','Gain_to_Loss','RoMDD','Sortino(5%)',
                                                                   'Sterling_Ratio','beta','ann_alpha','R_squared','p_value', 'std_err'],
-                                                                    columns = ['Avg_Universe', 'S&P500', 'eq_wt', 'risk_wt', 'risk_wt_bm','bm_6040'])
+                                                                    columns = ['Avg_Universe', 'S&P500', 'bm_6040','eq_wt', 'momo_6040', 'momo_index', 'q_momo', 'qo_momo', 'risk_wt', 'risk_wt_bm'])
     metric_df.loc['AnnRet(%)'] = round(metric_df.loc['AnnRet(%)'], 3)*100
     metric_df.loc['AnnRisk(%)'] = 100 * AnnRisk
     metric_df.loc['AnnSharpe(2.5%)'] = AnnSharpe.values.tolist()[0]
@@ -219,16 +219,20 @@ if __name__ == "__main__":
     bm_ret = adjusted_price['5/30/2007':].pct_change()
     bm_ret =bm_ret
     bm_6040 = adjusted_price[['ACWI','AGG']]['5/30/2007':].pct_change()
-    bm_6040_index = (bm_6040['ACWI'] * 0.6 + bm_6040['ACWI'] * 0.4).fillna(0)
+    bm_6040_index = ((bm_6040['ACWI'] * 0.6) + (bm_6040['AGG'] * 0.4)).fillna(0)
+
+    momo_df = pd.read_csv("momo_returns.csv", index_col = 0, parse_dates = True)
+    momo_df = momo_df.resample('BM', closed='right').last().ffill()
+    momo_df =momo_df['5/30/2007':]
+    momo_6040 = (0.6* momo_df['qo_rebal']) + (0.4 * risk_wt_portfolio)
+    momo_6040_index = ((momo_df['qqqe'] * 0.6) + (risk_wt_portfolio * 0.4)).fillna(0)
 
 
     buy_list = tuple(zip(df_signal[-1:].columns.tolist(), buyWeights.values.tolist()[0]))
 
-    print("Trade Recommendation: ", buy_list)
-
     portfolio_returns = pd.DataFrame({'eq_wt' : eq_wt_portfolio, 'risk_wt' : risk_wt_portfolio, 'S&P500' : bm_ret['SPY'], 'Avg_Universe' : bm_ret[trading_universe].mean(axis=1),
-                                      'risk_wt_bm' :risk_wt_benchmark, 'bm_6040' : bm_6040_index}, index = risk_wt_portfolio.index)
-
+                                      'risk_wt_bm' :risk_wt_benchmark, 'bm_6040' : bm_6040_index, 'qo_momo' : momo_df['qo_rebal'],
+                                      'q_momo': momo_df['q_rebal'], 'momo_6040' : momo_6040, 'momo_index' : momo_6040_index}, index = risk_wt_portfolio.index)
     portfolio_returns = portfolio_returns[1:]
     stats_df = backtest_metrics(portfolio_returns, rfr)
     stats_df.loc['Best_Month', :] = 100 * portfolio_returns.max()
@@ -236,9 +240,11 @@ if __name__ == "__main__":
     stats_df.loc['Best_Year', :] = 100 * portfolio_returns.groupby(portfolio_returns.index.year).sum().max()
     stats_df.loc['Worst_Year', :] = 100 * portfolio_returns.groupby(portfolio_returns.index.year).sum().min()
     for c in stats_df.columns:
-        stats_df[c].loc[['beta','ann_alpha','R_squared','p_value','std_err']] = regression_fit(portfolio_returns, c, 'bm_6040', rfr)
+        stats_df[c].loc[['beta','ann_alpha','R_squared','p_value','std_err']] = regression_fit(portfolio_returns, c, 'S&P500', rfr)
 
-
+    # print("Trade Recommendation: ", buy_list)
+    trade_reco = pd.DataFrame([v for i, v in buy_list], index=[i for i, v in buy_list], columns=['Weights'])
+    print(trade_reco)
 
     #Portfolio Return Plot
 
@@ -262,7 +268,7 @@ if __name__ == "__main__":
     # plt.colorbar()
     # plt.show()
 
-    print(portfolio_returns)
+    print(stats_df)
 
 
 
