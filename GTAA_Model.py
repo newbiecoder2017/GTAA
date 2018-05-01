@@ -27,12 +27,13 @@ from pandas_datareader import data as pdr
 from scipy import stats
 yf.pdr_override() # <== that's all it takes :-)
 pd.set_option('precision',4)
+pd.options.display.float_format = '{:.3f}'.format
 
 
 
 #Function to pull data from yahoo
 def pull_data(s):
-    return pdr.get_data_yahoo(s, start="2000-12-31", end="2018-04-23")['Adj Close']
+    return pdr.get_data_yahoo(s, start="2000-12-31", end="2018-04-30")['Adj Close']
 
 def read_price_file(frq = 'BM'):
     df_price = pd.read_csv("C:/Python27/Git/SMA_GTAA/adj_close.csv", index_col='Date', parse_dates=True)
@@ -55,6 +56,7 @@ def ma_signal(data, trading_universe, window):
 
     #buy rule: if px(t) > 10M SMA(t)
     signal_df = data_trading > RollMa
+
     return signal_df
 
 def equal_weight_cash_portfolio(px_data, signal):
@@ -81,13 +83,14 @@ def risk_weight_portfolio(px_data, signal, window):
     holdings_std = std_df[signal]
     std_sum = holdings_std.sum(axis = 1)
     holdings_std_wt = holdings_std.divide(std_sum, axis=0)
+    buy_wts = holdings_std_wt[-1:]
     holdings_std_wt = holdings_std_wt.shift(1)
     pos_wt = (len(trading_universe) - holdings_returns.isnull().sum(axis=1)) / len(trading_universe)
     cash_wt = 1 - pos_wt
     # total_return = (pos_wt * (holdings_std*holdings_returns).sum(axis=1).fillna(0)) + (cash_wt * cash_ret) - 0.001
     total_return = ((holdings_std_wt * holdings_returns).sum(axis=1).fillna(0)) - 0.001
 
-    return total_return
+    return total_return, buy_wts
 
 def risk_weight_benchmark(px_data, signal):
 
@@ -139,33 +142,16 @@ def drawdown(s):
 def regression_fit(returnsframe, port, bm, rfr):
     # risk free rate
     rfr = rfr['5/30/2007':].fillna(0)
-    rfr = rfr[:-1]
+    rfr = rfr
     # excess returns
     eY = (returnsframe[port] - rfr).fillna(0)
     eX = (returnsframe[bm] - rfr).fillna(0)
 
-    # #reshaping the array
-    # eY = np.array(eY).reshape(-1, 1)
-    # eX = np.array(eX).reshape(-1, 1)
-    #
-    # #fitting the regression model
-    # regr = linear_model.LinearRegression()
-    # regr.fit(eX, eY)
-    #
-    # print(regr.coef_)
-    # print(regr.intercept_)
-    # print(regr.score(eX, eY))
-    # print(r2_score(train_data, test_data))
-
     # scipy.stats regression
     slope, intercept, r_value, p_value, std_err = stats.linregress(eX, eY)
+    intercept = (1+intercept)**12 - 1
 
     return slope, intercept, r_value, p_value, std_err
-    # print("beta : {:.2f}".format(slope))
-    # print("annualized alpha : {:0.2f}".format((1 + intercept) ** 12 - 1))
-    # print("r-square: {:0.2f}".format(r_value))
-    # print("p-value: {:0.2f}".format(p_value))
-    # print("std.error: {:0.2f}".format(std_err))
 
 
 def backtest_metrics(returnsframe, rfr):
@@ -191,7 +177,8 @@ def backtest_metrics(returnsframe, rfr):
     sterling_ratio = AnnReturns / ([i*12 for i in dd])
 
     metric_df = pd.DataFrame(AnnReturns.values.tolist(), index = ['AnnRet(%)','AnnRisk(%)','AnnSharpe(2.5%)','Avg_DD(%)','MaxDD(%)','WinRate(%)','Gain_to_Loss','RoMDD','Sortino(5%)',
-                                                                  'Sterling_Ratio','beta','alpha','R_squared','p_value', 'std_err'], columns = ['Avg_Universe', 'S&P500', 'eq_wt', 'risk_wt', 'risk_wt_bm'])
+                                                                  'Sterling_Ratio','beta','ann_alpha','R_squared','p_value', 'std_err'],
+                                                                    columns = ['Avg_Universe', 'S&P500', 'eq_wt', 'risk_wt', 'risk_wt_bm','bm_6040'])
     metric_df.loc['AnnRet(%)'] = round(metric_df.loc['AnnRet(%)'], 3)*100
     metric_df.loc['AnnRisk(%)'] = 100 * AnnRisk
     metric_df.loc['AnnSharpe(2.5%)'] = AnnSharpe.values.tolist()[0]
@@ -209,51 +196,49 @@ if __name__ == "__main__":
 
     window = 8
     # universe list for the model
-    universe_list = ['DBC', 'GLD', 'SPY', 'IEV', 'EWJ', 'EEM', 'IYR', 'RWX', 'IEF', 'TLT', 'BIL', 'SHY']
+    universe_list = ['DBC', 'GLD', 'SPY', 'IEV', 'EWJ', 'EEM', 'IYR', 'RWX', 'IEF', 'TLT', 'BIL', 'SHY','ACWI','AGG','GYLD']
     trading_universe = ['DBC', 'GLD', 'SPY', 'IEV', 'EWJ', 'EEM', 'IYR', 'RWX', 'IEF', 'TLT']
-    #   Universe Adj.Close dataframe
-    #   df = pd.DataFrame({s:pull_data(s) for s in universe_list})
-    #   df.to_csv("C:/Python27/Git/SMA_GTAA/adj_close.csv")
+    #Universe Adj.Close dataframe
+    # df = pd.DataFrame({s:pull_data(s) for s in universe_list})
+    # df.to_csv("C:/Python27/Git/SMA_GTAA/adj_close.csv")
     # read_price_file('BM')
 
     adjusted_price = read_price_file('BM')
     #risk free rate
 
+
     rfr = adjusted_price.BIL.pct_change()
     #generate signal dataframe
-    df_signal = ma_signal(adjusted_price, trading_universe, window)
+    df_signal= ma_signal(adjusted_price, trading_universe, window)
 
     #equal weight portfolio
 
     eq_wt_portfolio = equal_weight_cash_portfolio(adjusted_price, df_signal)
-    risk_wt_portfolio = risk_weight_portfolio(adjusted_price, df_signal, window)
+    risk_wt_portfolio,  buyWeights = risk_weight_portfolio(adjusted_price, df_signal, window)
     risk_wt_benchmark = risk_weight_benchmark(adjusted_price, df_signal)
     bm_ret = adjusted_price['5/30/2007':].pct_change()
     bm_ret =bm_ret
-<<<<<<< HEAD
-    portfolio_returns = pd.DataFrame({'eq_wt': eq_wt_portfolio, 'risk_wt': risk_wt_portfolio, 'S&P500': bm_ret['SPY'], "Avg_Universe" : bm_ret[trading_universe].mean(axis=1)}, index = risk_wt_portfolio.index)
-    portfolio_returns = portfolio_returns[:-1]
-    print(backtest_metrics(portfolio_returns['2016':]))
-=======
+    bm_6040 = adjusted_price[['ACWI','AGG']]['5/30/2007':].pct_change()
+    bm_6040_index = (bm_6040['ACWI'] * 0.6 + bm_6040['ACWI'] * 0.4).fillna(0)
+
+
+    buy_list = tuple(zip(df_signal[-1:].columns.tolist(), buyWeights.values.tolist()[0]))
+
+    print("Trade Recommendation: ", buy_list)
 
     portfolio_returns = pd.DataFrame({'eq_wt' : eq_wt_portfolio, 'risk_wt' : risk_wt_portfolio, 'S&P500' : bm_ret['SPY'], 'Avg_Universe' : bm_ret[trading_universe].mean(axis=1),
-                                      'risk_wt_bm' :risk_wt_benchmark}, index = risk_wt_portfolio.index)
-    portfolio_returns = portfolio_returns[1:][:-1]
+                                      'risk_wt_bm' :risk_wt_benchmark, 'bm_6040' : bm_6040_index}, index = risk_wt_portfolio.index)
+
+    portfolio_returns = portfolio_returns[1:]
     stats_df = backtest_metrics(portfolio_returns, rfr)
     stats_df.loc['Best_Month', :] = 100 * portfolio_returns.max()
     stats_df.loc['Worst_Month', :] = 100 * portfolio_returns.min()
     stats_df.loc['Best_Year', :] = 100 * portfolio_returns.groupby(portfolio_returns.index.year).sum().max()
     stats_df.loc['Worst_Year', :] = 100 * portfolio_returns.groupby(portfolio_returns.index.year).sum().min()
     for c in stats_df.columns:
+        stats_df[c].loc[['beta','ann_alpha','R_squared','p_value','std_err']] = regression_fit(portfolio_returns, c, 'bm_6040', rfr)
 
-        # stats_df[c].loc['beta'] = regression_fit(portfolio_returns, c, 'S&P500', rfr)[0]
-        # stats_df[c].loc['alpha'] = regression_fit(portfolio_returns, c, 'S&P500', rfr)[1]
-        # stats_df[c].loc['R_squared'] = regression_fit(portfolio_returns, c, 'S&P500', rfr)[2]
-        # stats_df[c].loc['p_value'] = regression_fit(portfolio_returns, c, 'S&P500', rfr)[3]
-        # stats_df[c].loc['std_err'] = regression_fit(portfolio_returns, c, 'S&P500', rfr)[4]
-        stats_df[c].loc[['beta','alpha','R_squared','p_value','std_err']] = regression_fit(portfolio_returns, c, 'S&P500', rfr)
-    print(stats_df.loc['beta'])
->>>>>>> f8d5b65874462e0efd25abfbda651dedceeb6df0
+
 
     #Portfolio Return Plot
 
@@ -270,16 +255,14 @@ if __name__ == "__main__":
     # plt.grid()
     # plt.show()
 
-    # correaltion Plot
+    #correaltion Plot
     # plt.matshow(portfolio_returns.corr())
     # plt.xticks(range(len(portfolio_returns.columns)), portfolio_returns.columns)
     # plt.yticks(range(len(portfolio_returns.columns)), portfolio_returns.columns)
     # plt.colorbar()
     # plt.show()
 
-    print(stats_df)
-
-
+    print(portfolio_returns)
 
 
 
