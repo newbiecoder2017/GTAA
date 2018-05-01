@@ -159,21 +159,35 @@ def backtest_metrics(returnsframe, rfr):
     cummulative_return = (1 + returnsframe).cumprod()
     cpr = cummulative_return[-1:]
     N = len(returnsframe) / 12
+    #Annualized returns
     AnnReturns = (cpr.pow(1 / N) - 1)
+    #Annualized Risk
     AnnRisk = (np.sqrt(12) * returnsframe.std())
+    #Sharpe Ratio with 2.5% annualized RFR
+    AnnSharpe = (AnnReturns - 0.025) / AnnRisk
+
+    #The Sortino ratio takes the asset's return and subtracts the risk-free rate, and then divides that amount by the asset's downside deviation. MAR is 5%
     df_thres = returnsframe - 0.05
     df_thres[df_thres > 0] = 0
     downward_risk = (np.sqrt(12) * df_thres.std())
     sortino_ratio = (AnnReturns-0.05) / downward_risk
-    AnnSharpe = (AnnReturns-0.025) / AnnRisk
+    # AnnSharpe = (AnnReturns-0.025) / AnnRisk
+
+#   # Calulate Average Daily Drawdowns and Max DD
     dd = [drawdown(cummulative_return[c])[0] for c in cummulative_return.columns]
     mdd = [drawdown(cummulative_return[c])[1] for c in cummulative_return.columns]
+
+    # Calulate the win ratio and Gain to Loss ratio
     up = portfolio_returns[returnsframe > 0].count() / returnsframe.count()
     down = portfolio_returns[returnsframe < 0].count() / returnsframe.count()
     average_up = portfolio_returns[returnsframe > 0].mean()
     average_down = portfolio_returns[returnsframe < 0].mean()
     gain_to_loss = (average_up) / (-1 * average_down)
+
+    #MAR ratio, annualised return over MDD. Higher the better
     mar_ratio = AnnReturns / mdd
+
+    # Annualisec return over average annual DD
     sterling_ratio = AnnReturns / ([i*12 for i in dd])
 
     metric_df = pd.DataFrame(AnnReturns.values.tolist(), index = ['AnnRet(%)','AnnRisk(%)','AnnSharpe(2.5%)','Avg_DD(%)','MaxDD(%)','WinRate(%)','Gain_to_Loss','RoMDD','Sortino(5%)',
@@ -224,8 +238,8 @@ if __name__ == "__main__":
     momo_df = pd.read_csv("momo_returns.csv", index_col = 0, parse_dates = True)
     momo_df = momo_df.resample('BM', closed='right').last().ffill()
     momo_df =momo_df['5/30/2007':]
-    momo_6040 = (0.6* momo_df['qo_rebal']) + (0.4 * risk_wt_portfolio)
-    momo_6040_index = ((momo_df['qqqe'] * 0.6) + (risk_wt_portfolio * 0.4)).fillna(0)
+    momo_6040 = (0.7* momo_df['qo_rebal']) + (0.3 * risk_wt_portfolio)
+    momo_6040_index = ((momo_df['qqqe'] * 0.7) + (risk_wt_portfolio * 0.3)).fillna(0)
 
 
     buy_list = tuple(zip(df_signal[-1:].columns.tolist(), buyWeights.values.tolist()[0]))
