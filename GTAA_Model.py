@@ -226,33 +226,54 @@ if __name__ == "__main__":
     df_signal= ma_signal(adjusted_price, trading_universe, window)
 
     #equal weight portfolio
-
     eq_wt_portfolio = equal_weight_cash_portfolio(adjusted_price, df_signal)
+
+    #risk weight portfolio
     risk_wt_portfolio,  buyWeights = risk_weight_portfolio(adjusted_price, df_signal, window)
+
+    #risk weight benchmark
     risk_wt_benchmark = risk_weight_benchmark(adjusted_price, df_signal)
+
+    #Broad Market Benchmark : IVV
     bm_ret = adjusted_price['5/30/2007':].pct_change()
     bm_ret =bm_ret
+
+    #Custom Benchmark 60% ACWi and 40% AGG
     bm_6040 = adjusted_price[['ACWI','AGG']]['5/30/2007':].pct_change()
     bm_6040_index = ((bm_6040['ACWI'] * 0.6) + (bm_6040['AGG'] * 0.4)).fillna(0)
 
+    #reading NASDAQ MoMo returns and QQQE
     momo_df = pd.read_csv("momo_returns.csv", index_col = 0, parse_dates = True)
     momo_df = momo_df.resample('BM', closed='right').last().ffill()
     momo_df =momo_df['5/30/2007':]
+
+
+    # Custom portfolio  for Nasdaq model and Risk weight GTAA portfolio - 60/40
     momo_6040 = (0.7* momo_df['qo_rebal']) + (0.3 * risk_wt_portfolio)
+
+    # Custom portfolio for Nasdaq Equal Weight index and risk weight portfolio
     momo_6040_index = ((momo_df['qqqe'] * 0.7) + (risk_wt_portfolio * 0.3)).fillna(0)
 
-
+    #Generates the tuple with buy candidates and its weights
     buy_list = tuple(zip(df_signal[-1:].columns.tolist(), buyWeights.values.tolist()[0]))
 
+
+    #DataFrame for all the portfolios and benchmarks
     portfolio_returns = pd.DataFrame({'eq_wt' : eq_wt_portfolio, 'risk_wt' : risk_wt_portfolio, 'S&P500' : bm_ret['IVV'], 'Avg_Universe' : bm_ret[trading_universe].mean(axis=1),
                                       'risk_wt_bm' :risk_wt_benchmark, 'bm_6040' : bm_6040_index, 'qo_momo' : momo_df['qo_rebal'],
                                       'q_momo': momo_df['q_rebal'], 'momo_6040' : momo_6040, 'momo_index' : momo_6040_index}, index = risk_wt_portfolio.index)
+
+    # Remove the first row with NaN's
     portfolio_returns = portfolio_returns[1:]
+
+    #BackTest Statistics for all teh portfolios and indexes
     stats_df = backtest_metrics(portfolio_returns, rfr)
     stats_df.loc['Best_Month', :] = 100 * portfolio_returns.max()
     stats_df.loc['Worst_Month', :] = 100 * portfolio_returns.min()
     stats_df.loc['Best_Year', :] = 100 * portfolio_returns.groupby(portfolio_returns.index.year).sum().max()
     stats_df.loc['Worst_Year', :] = 100 * portfolio_returns.groupby(portfolio_returns.index.year).sum().min()
+
+    #Regression stats for all portfolios and indices
     for c in stats_df.columns:
         stats_df[c].loc[['beta','ann_alpha','R_squared','p_value','std_err']] = regression_fit(portfolio_returns, c, 'S&P500', rfr)
 
@@ -261,7 +282,6 @@ if __name__ == "__main__":
     print(trade_reco)
 
     #Portfolio Return Plot
-
     # portfolio_returns = portfolio_returns[['eq_wt', 'risk_wt', "Avg_Universe"]]
     # print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
     # portfolio_returns.cumsum().plot()
@@ -269,7 +289,9 @@ if __name__ == "__main__":
     # plt.grid()
     # plt.show()
 
-    # print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
+    #Returns grouped by year
+    print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
+    print(100 * np.sqrt(12) * portfolio_returns.groupby(portfolio_returns.index.year).std())
     # portfolio_returns.cumsum().plot()
     # plt.legend()
     # plt.grid()
@@ -282,7 +304,7 @@ if __name__ == "__main__":
     # plt.colorbar()
     # plt.show()
 
-    print(stats_df)
+    # print(stats_df)
 
 
 
