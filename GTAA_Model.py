@@ -159,10 +159,26 @@ def backtest_metrics(returnsframe, rfr):
     cummulative_return = (1 + returnsframe).cumprod()
     cpr = cummulative_return[-1:]
     N = len(returnsframe) / 12
+
     #Annualized returns
     AnnReturns = (cpr.pow(1 / N) - 1)
     #Annualized Risk
     AnnRisk = (np.sqrt(12) * returnsframe.std())
+
+    def returns_risk(retFrame, per):
+
+        #1Yr Return
+        returnsframe_N = retFrame[-per:]
+        N = len(returnsframe_N) / 12
+        cpr_N = (1 + returnsframe_N).cumprod()
+        annRet_N = (cpr_N[-1:].pow(1/N) - 1)
+        std_N = np.sqrt(12) * returnsframe_N.std()
+        return annRet_N.values.tolist(), std_N
+
+    ret_12m, std_12m = returns_risk(returnsframe, 12 )
+    ret_36m, std_36m = returns_risk(returnsframe, 36)
+    ret_60m, std_60m = returns_risk(returnsframe, 60)
+
     #Sharpe Ratio with 2.5% annualized RFR
     AnnSharpe = (AnnReturns - 0.025) / AnnRisk
 
@@ -191,7 +207,8 @@ def backtest_metrics(returnsframe, rfr):
     sterling_ratio = AnnReturns / ([i*12 for i in dd])
 
     metric_df = pd.DataFrame(AnnReturns.values.tolist(), index = ['AnnRet(%)','AnnRisk(%)','AnnSharpe(2.5%)','Avg_DD(%)','MaxDD(%)','WinRate(%)','Gain_to_Loss','RoMDD','Sortino(5%)',
-                                                                  'Sterling_Ratio','beta','ann_alpha','R_squared','p_value', 'std_err'],
+                                                                  'Sterling_Ratio','beta','ann_alpha','R_squared','p_value', 'std_err',
+                                                                  '1YrReturns', '1YrRisk','3YrReturns', '3YrRisk', '5YrReturns', '5YrRisk'],
                                                                     columns = ['Avg_Universe', 'S&P500', 'bm_6040','eq_wt', 'momo_6040', 'momo_index', 'q_momo', 'qo_momo', 'risk_wt', 'risk_wt_bm'])
     metric_df.loc['AnnRet(%)'] = round(metric_df.loc['AnnRet(%)'], 3)*100
     metric_df.loc['AnnRisk(%)'] = 100 * AnnRisk
@@ -203,6 +220,12 @@ def backtest_metrics(returnsframe, rfr):
     metric_df.loc['RoMDD'] = [round(abs(i),3) for i in mar_ratio.values.tolist()[0]]
     metric_df.loc['Sortino(5%)'] = sortino_ratio.values.tolist()[0]
     metric_df.loc['Sterling_Ratio'] = [round(abs(i),3) for i in sterling_ratio.values.tolist()[0]]
+    metric_df.loc['1YrReturns'] = [i*100.00 for i in ret_12m[0]]
+    metric_df.loc['1YrRisk'] = 100 * std_12m
+    metric_df.loc['3YrReturns'] = [i*100.00 for i in ret_36m[0]]
+    metric_df.loc['3YrRisk'] = 100 * std_36m
+    metric_df.loc['5YrReturns'] = [i*100.00 for i in ret_60m[0]]
+    metric_df.loc['5YrRisk'] = 100 * std_60m
     return metric_df
 
 
@@ -290,8 +313,15 @@ if __name__ == "__main__":
     # plt.show()
 
     #Returns grouped by year
-    print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
-    print(100 * np.sqrt(12) * portfolio_returns.groupby(portfolio_returns.index.year).std())
+    portfolio_returns.rename(columns = {'eq_wt':'EW_GTAA', 'risk_wt':'RiskWt_GTAA', 'Avg_Universe':'EW_GTAA_Universe', 'risk_wt_bm':'RiskWt_GTAA_Universe',
+                                        'bm_6040':'60/40_ACWI/AGG', 'qo_momo':'MomoPortfoli_QO', 'q_momo':'MomoPortfolio_Q',
+                                        'momo_6040':'70/30_QO_MP/RW_GTAA','momo_index':'70/30_QQQE/RW_GTAA_bm'}, inplace = True)
+
+    portfolio_returns = portfolio_returns[['EW_GTAA', 'EW_GTAA_Universe', 'RiskWt_GTAA', 'RiskWt_GTAA_Universe',
+                                           'MomoPortfoli_QO', 'MomoPortfolio_Q', '70/30_QO_MP/RW_GTAA',
+                                           '70/30_QQQE/RW_GTAA_bm', '60/40_ACWI/AGG', 'S&P500']]
+    # print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
+    # print(100 * np.sqrt(12) * portfolio_returns.groupby(portfolio_returns.index.year).std())
     # portfolio_returns.cumsum().plot()
     # plt.legend()
     # plt.grid()
@@ -303,8 +333,23 @@ if __name__ == "__main__":
     # plt.yticks(range(len(portfolio_returns.columns)), portfolio_returns.columns)
     # plt.colorbar()
     # plt.show()
+    stats_df.rename(columns={'eq_wt': 'EW_GTAA', 'risk_wt': 'RiskWt_GTAA', 'Avg_Universe': 'EW_GTAA_Universe',
+                                      'risk_wt_bm': 'RiskWt_GTAA_Universe',
+                                      'bm_6040': '60/40_ACWI/AGG', 'qo_momo': 'MomoPortfoli_QO',
+                                      'q_momo': 'MomoPortfolio_Q',
+                                      'momo_6040': '70/30_QO_MP/RW_GTAA', 'momo_index': '70/30_QQQE/RW_GTAA_bm'},
+                             inplace=True)
 
-    # print(stats_df)
+    stats_df = stats_df[['EW_GTAA', 'EW_GTAA_Universe', 'RiskWt_GTAA', 'RiskWt_GTAA_Universe',
+                                           'MomoPortfoli_QO', 'MomoPortfolio_Q', '70/30_QO_MP/RW_GTAA',
+                                           '70/30_QQQE/RW_GTAA_bm', '60/40_ACWI/AGG', 'S&P500']]
+    print(stats_df)
+    print(portfolio_returns)
+    ts1 = 100 * portfolio_returns.groupby(portfolio_returns.index.year).sum()
+    ts2 = 100 * np.sqrt(12) * portfolio_returns.groupby(portfolio_returns.index.year).std()
+    stats_df.to_csv("C:/Python27/Git/SMA_GTAA/Summary_Statistics.csv")
+    ts1.to_csv("C:/Python27/Git/SMA_GTAA/Return_Summary.csv")
+    ts2.to_csv("C:/Python27/Git/SMA_GTAA/Risk_Summary.csv")
 
 
 
