@@ -343,13 +343,16 @@ if __name__ == "__main__":
     stats_df = stats_df[['EW_GTAA', 'EW_GTAA_Universe', 'RiskWt_GTAA', 'RiskWt_GTAA_Universe',
                                            'MomoPortfoli_QO', 'MomoPortfolio_Q', '70/30_QO_MP/RW_GTAA',
                                            '70/30_QQQE/RW_GTAA_bm', '60/40_ACWI/AGG', 'S&P500']]
-    print(stats_df)
-    print(portfolio_returns)
-    ts1 = 100 * portfolio_returns.groupby(portfolio_returns.index.year).sum()
-    ts2 = 100 * np.sqrt(12) * portfolio_returns.groupby(portfolio_returns.index.year).std()
-    stats_df.to_csv("C:/Python27/Git/SMA_GTAA/Summary_Statistics.csv")
-    ts1.to_csv("C:/Python27/Git/SMA_GTAA/Return_Summary.csv")
-    ts2.to_csv("C:/Python27/Git/SMA_GTAA/Risk_Summary.csv")
+    # print(stats_df)
+    tcor = pd.rolling_corr(portfolio_returns['RiskWt_GTAA'],portfolio_returns['MomoPortfoli_QO'],6)
+    tcor.plot()
+    plt.show()
+    # ts1 = 100 * portfolio_returns.groupby(portfolio_returns.index.year).sum()
+    # ts2 = 100 * np.sqrt(12) * portfolio_returns.groupby(portfolio_returns.index.year).std()
+    # stats_df.to_csv("C:/Python27/Git/SMA_GTAA/Summary_Statistics.csv")
+    # ts1.to_csv("C:/Python27/Git/SMA_GTAA/Return_Summary.csv")
+    # ts2.to_csv("C:/Python27/Git/SMA_GTAA/Risk_Summary.csv")
+
 
 
 
