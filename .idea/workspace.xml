@@ -1,14 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="cbb7a844-cb06-4f4f-b6e7-4cc3ead753cd" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/GTAA_Model.py" beforeDir="false" afterPath="$PROJECT_DIR$/GTAA_Model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Portfolio.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/Portfolio.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Return_Summary.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Return_Summary.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Risk_Summary.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Risk_Summary.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Summary_Statistics.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Summary_Statistics.csv" afterDir="false" />
-    </list>
+    <list default="true" id="cbb7a844-cb06-4f4f-b6e7-4cc3ead753cd" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -21,8 +14,8 @@
       <file leaf-file-name="GTAA_Model.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/GTAA_Model.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="582">
-              <caret line="349" column="79" lean-forward="true" selection-start-line="349" selection-start-column="79" selection-end-line="349" selection-end-column="79" />
+            <state relative-caret-position="400">
+              <caret line="357" lean-forward="true" selection-start-line="357" selection-end-line="357" />
               <folding>
                 <element signature="e#1308#1387#0" />
                 <element signature="e#1426#1607#0" />
@@ -148,13 +141,13 @@
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.086406745" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32960895" />
       <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.50052685" side_tool="true" weight="0.37513873" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49947312" weight="0.2659218" />
       <window_info anchor="bottom" id="Version Control" order="8" weight="0.32963374" />
       <window_info anchor="bottom" id="Python Console" order="9" weight="0.32960895" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49947312" weight="0.2659218" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info anchor="bottom" id="Terminal" order="10" weight="0.32960895" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.37765363" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="10" visible="true" weight="0.32960895" />
       <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.37765363" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -202,6 +195,19 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/GTAA_Model.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="9423">
+          <caret line="349" column="79" lean-forward="true" selection-start-line="349" selection-start-column="79" selection-end-line="349" selection-end-column="79" />
+          <folding>
+            <element signature="e#1308#1387#0" />
+            <element signature="e#1426#1607#0" />
+            <element signature="e#1661#2212#0" />
+            <element signature="e#2269#2781#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/GTAA_Model.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="9342">
@@ -374,8 +380,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/GTAA_Model.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="582">
-          <caret line="349" column="79" lean-forward="true" selection-start-line="349" selection-start-column="79" selection-end-line="349" selection-end-column="79" />
+        <state relative-caret-position="400">
+          <caret line="357" lean-forward="true" selection-start-line="357" selection-end-line="357" />
           <folding>
             <element signature="e#1308#1387#0" />
             <element signature="e#1426#1607#0" />
