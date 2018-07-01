@@ -33,7 +33,7 @@ pd.options.display.float_format = '{:.3f}'.format
 
 #Function to pull data from yahoo
 def pull_data(s):
-    return pdr.get_data_yahoo(s, start="2000-12-31", end="2018-04-30")['Adj Close']
+    return pdr.get_data_yahoo(s, start="2000-12-31", end="2018-05-31")['Adj Close']
 
 def read_price_file(frq = 'BM'):
     df_price = pd.read_csv("C:/Python27/Git/SMA_GTAA/adj_close.csv", index_col='Date', parse_dates=True)
@@ -236,8 +236,8 @@ if __name__ == "__main__":
     universe_list = ['DBC', 'GLD', 'IVV', 'IEV', 'EWJ', 'EEM', 'IYR', 'RWX', 'IEF', 'TLT', 'BIL', 'SHY','ACWI','AGG','GYLD']
     trading_universe = ['DBC', 'GLD', 'IVV', 'IEV', 'EWJ', 'EEM', 'IYR', 'RWX', 'IEF', 'TLT']
     #Universe Adj.Close dataframe
-    # df = pd.DataFrame({s:pull_data(s) for s in universe_list})
-    # df.to_csv("C:/Python27/Git/SMA_GTAA/adj_close.csv")
+    df = pd.DataFrame({s:pull_data(s) for s in universe_list})
+    df.to_csv("C:/Python27/Git/SMA_GTAA/adj_close.csv")
     # read_price_file('BM')
 
     adjusted_price = read_price_file('BM')
