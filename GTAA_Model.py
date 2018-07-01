@@ -289,7 +289,7 @@ if __name__ == "__main__":
     # Remove the first row with NaN's
     portfolio_returns = portfolio_returns[1:]
 
-    #BackTest Statistics for all teh portfolios and indexes
+    #BackTest Statistics for all the portfolios and indexes
     stats_df = backtest_metrics(portfolio_returns, rfr)
     stats_df.loc['Best_Month', :] = 100 * portfolio_returns.max()
     stats_df.loc['Worst_Month', :] = 100 * portfolio_returns.min()
