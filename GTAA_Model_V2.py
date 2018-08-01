@@ -23,6 +23,7 @@ import matplotlib.pyplot as plt
 import fix_yahoo_finance as yf
 from pandas_datareader import data as pdr
 from scipy import stats
+import statsmodels.api as sm
 yf.pdr_override() # <== that's all it takes :-)
 pd.set_option('precision',4)
 pd.options.display.float_format = '{:.3f}'.format
@@ -34,13 +35,13 @@ def pull_data(s):
     return pdr.get_data_yahoo(s, start="2000-12-31", end="2018-06-29")['Adj Close']
 
 def read_price_file(frq = 'BM'):
-    df_price = pd.read_csv("C:/Python27/Git/SMA_GTAA/adj_close.csv", index_col='Date', parse_dates=True)
+    df_price = pd.read_csv("C:/Python27/Git/SMA_GTAA/adj_close_v2.csv", index_col='Date', parse_dates=True)
     df_price = df_price.resample(frq, closed='right').last()
     return df_price
 
 def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
-    df = pd.read_csv("C:/Python27/Git/SMA_GTAA/adj_close.csv", index_col='Date', parse_dates=True)
-
+    df = pd.read_csv("C:/Python27/Git/SMA_GTAA/adj_close_v2.csv", index_col='Date', parse_dates=True)
+    df = df['05-2012':]
     #calculating the daily return for benchmarks
     rframe = df.resample('BM', closed='right').last().pct_change()
 
@@ -143,7 +144,7 @@ def drawdown(s):
 
     # Calculate the max drawdown in the past window days for each day in the series.
     # Use min_periods=1 if you want to let the first 252 days data have an expanding window
-    Roll_Max = SPY_Dat.rolling(center=False, min_periods=1, window=26).max()
+    Roll_Max = SPY_Dat.rolling(center=False, min_periods=1, window=12).max()
 
     Daily_Drawdown = SPY_Dat / Roll_Max - 1.0
 
@@ -155,32 +156,38 @@ def drawdown(s):
 
     return Daily_Drawdown.mean(), Max_Daily_Drawdown.min()
 
-def regression_fit(port, rfr):
+def regression_fit(port, bm, rfr):
     # risk free rate
     rfr = rfr['05-2012':].fillna(0)
     port = port['05-2012':]
 
     excess_return = port - rfr
-    # excess returns
-    eY = excess_return['Average']
-    eX = excess_return['bmGAL']
+        # excess returns
+    eY = excess_return
+    eX = bm-rfr
     eX = sm.add_constant(eX)
 
     # scipy.stats regression
-    slope, intercept, r_value, p_value, std_err = stats.linregress(eX, eY)
-    intercept = (1+intercept)**12 - 1
+    model = sm.OLS(eY,eX)
+    result = model.fit()
+    # result.params[0], result.params.loc['const'], result.rsquared_adj, result.pvalues, result.tvalues.loc['const']
+    # intercept = (1+intercept)**12 - 1
 
-    return slope, intercept, r_value, p_value, std_err
+    return [result.params[0], result.params.loc['const'], result.rsquared_adj, result.pvalues, result.tvalues.loc['const']]
 
 
 def backtest_metrics(returnsframe, rfr):
-
+    returnsframe['RFR'] = rfr
     cummulative_return = (1 + returnsframe).cumprod()
     cpr = cummulative_return[-1:]
     N = len(returnsframe) / 12
 
     #Annualized returns
     AnnReturns = (cpr.pow(1 / N) - 1)
+    RFR_AnnRet = AnnReturns.RFR
+    AnnReturns = AnnReturns.drop(['RFR'], axis = 1)
+    returnsframe = returnsframe.drop(['RFR'], axis = 1)
+    cummulative_return = cummulative_return.drop(['RFR'], axis = 1)
     #Annualized Risk
     AnnRisk = (np.sqrt(12) * returnsframe.std())
 
@@ -199,52 +206,54 @@ def backtest_metrics(returnsframe, rfr):
     ret_60m, std_60m = returns_risk(returnsframe, 60)
 
     #Sharpe Ratio with 2.5% annualized RFR
-    AnnSharpe = (AnnReturns - 0.025) / AnnRisk
+    AnnSharpe = (AnnReturns - RFR_AnnRet.iloc[0]) / AnnRisk
 
     #The Sortino ratio takes the asset's return and subtracts the risk-free rate, and then divides that amount by the asset's downside deviation. MAR is 5%
     df_thres = returnsframe - 0.05
     df_thres[df_thres > 0] = 0
     downward_risk = (np.sqrt(12) * df_thres.std())
-    sortino_ratio = (AnnReturns-0.05) / downward_risk
+    sortino_ratio = (AnnReturns- RFR_AnnRet.iloc[0]) / downward_risk
     # AnnSharpe = (AnnReturns-0.025) / AnnRisk
 
 #   # Calulate Average Daily Drawdowns and Max DD
-    dd = [drawdown(cummulative_return)[0] for c in cummulative_return.columns]
-    mdd = [drawdown(cummulative_return)[1] for c in cummulative_return.columns]
+#
+
+    dd = [drawdown(cummulative_return)[0]]
+    mdd = [drawdown(cummulative_return)[1]]
 
     # Calulate the win ratio and Gain to Loss ratio
-    up = [returnsframe > 0].count() / returnsframe.count()
-    down = [returnsframe < 0].count() / returnsframe.count()
+    up = returnsframe[returnsframe > 0].count() / returnsframe.count()
+    down = returnsframe[returnsframe < 0].count() / returnsframe.count()
     average_up = returnsframe[returnsframe > 0].mean()
     average_down = returnsframe[returnsframe < 0].mean()
     gain_to_loss = (average_up) / (-1 * average_down)
 
     #MAR ratio, annualised return over MDD. Higher the better
-    mar_ratio = AnnReturns / mdd
+    mar_ratio = abs(AnnReturns / [mdd[0][i] for i in range(len(mdd[0]))])
 
     # Annualisec return over average annual DD
-    sterling_ratio = AnnReturns / ([i*12 for i in dd])
+    sterling_ratio = abs(AnnReturns / [mdd[0][i] for i in range(len(mdd[0]))])
 
     metric_df = pd.DataFrame(AnnReturns.values.tolist(), index = ['AnnRet(%)','AnnRisk(%)','AnnSharpe(2.5%)','Avg_DD(%)','MaxDD(%)','WinRate(%)','Gain_to_Loss','RoMDD','Sortino(5%)',
-                                                                  'Sterling_Ratio','beta','ann_alpha','R_squared','p_value', 'std_err',
+                                                                  'Sterling_Ratio','beta','ann_alpha','R_squared','p_value', 'tvalue',
                                                                   '1YrReturns', '1YrRisk','3YrReturns', '3YrRisk', '5YrReturns', '5YrRisk'],
-                                                                    columns = ['Avg_Universe', 'S&P500', 'bm_6040','eq_wt', 'momo_6040', 'momo_index', 'q_momo', 'qo_momo', 'risk_wt', 'risk_wt_bm'])
+                                                                    columns = ['Average', 'GAL','IVV','ACWI' ])
     metric_df.loc['AnnRet(%)'] = round(metric_df.loc['AnnRet(%)'], 3)*100
-    metric_df.loc['AnnRisk(%)'] = 100 * AnnRisk
+    metric_df.loc['AnnRisk(%)'] = [100*i for i in AnnRisk]
     metric_df.loc['AnnSharpe(2.5%)'] = AnnSharpe.values.tolist()[0]
-    metric_df.loc['Avg_DD(%)'] =  [round(abs(i), 3) * 100 for i in dd]
-    metric_df.loc['MaxDD(%)'] = [round(abs(i), 3) * 100 for i in mdd]
-    metric_df.loc['WinRate(%)'] = round(up * 100, 3)
-    metric_df.loc['Gain_to_Loss'] = round(gain_to_loss, 3)
+    metric_df.loc['Avg_DD(%)'] =  [round(float(i), 3) for i in [abs(i) * 100 for i in dd[0]]]
+    metric_df.loc['MaxDD(%)'] = [round(float(i), 3) for i in [abs(i) * 100 for i in mdd[0]]]
+    metric_df.loc['WinRate(%)'] = [100* round(float(i), 3) for i in up.values.tolist()]
+    metric_df.loc['Gain_to_Loss'] = [round(float(i),3) for i in gain_to_loss.values.tolist()]
     metric_df.loc['RoMDD'] = [round(abs(i),3) for i in mar_ratio.values.tolist()[0]]
     metric_df.loc['Sortino(5%)'] = sortino_ratio.values.tolist()[0]
     metric_df.loc['Sterling_Ratio'] = [round(abs(i),3) for i in sterling_ratio.values.tolist()[0]]
     metric_df.loc['1YrReturns'] = [i*100.00 for i in ret_12m[0]]
-    metric_df.loc['1YrRisk'] = 100 * std_12m
+    metric_df.loc['1YrRisk'] = [100 * i for i in std_12m.values.tolist()]
     metric_df.loc['3YrReturns'] = [i*100.00 for i in ret_36m[0]]
-    metric_df.loc['3YrRisk'] = 100 * std_36m
+    metric_df.loc['3YrRisk'] = [100 * i for i in std_36m.values.tolist()]
     metric_df.loc['5YrReturns'] = [i*100.00 for i in ret_60m[0]]
-    metric_df.loc['5YrRisk'] = 100 * std_60m
+    metric_df.loc['5YrRisk'] = [100 * i for i in std_60m.values.tolist()]
     return metric_df
 
 
@@ -257,7 +266,7 @@ if __name__ == "__main__":
 
     # Universe Adj.Close dataframe
     # df = pd.DataFrame({s:pull_data(s) for s in universe_list})
-    # df.to_csv("C:/Python27/Git/SMA_GTAA/adj_close.csv")
+    # df.to_csv("C:/Python27/Git/SMA_GTAA/adj_close_v2.csv")
 
     adjusted_price = read_price_file('BM')
 
@@ -279,17 +288,17 @@ if __name__ == "__main__":
     # portfolio_returns = portfolio_returns[1:]
     #
     # #BackTest Statistics for all the portfolios and indexes
-    stats_df = backtest_metrics(model[['Average','bmGAL']], rfr = model.bmBIL)
-    portfolio_returns = model[['Average','bmGAL']]
-    stats_df.loc['Best_Month', :] = 100 * portfolio_returns.max()
-    stats_df.loc['Worst_Month', :] = 100 * portfolio_returns.min()
-    stats_df.loc['Best_Year', :] = 100 * portfolio_returns.groupby(portfolio_returns.index.year).sum().max()
-    stats_df.loc['Worst_Year', :] = 100 * portfolio_returns.groupby(portfolio_returns.index.year).sum().min()
+    stats_df = backtest_metrics(model[['Average','bmGAL','bmIVV','bmACWI']], rfr = model.bmBIL)
+    portfolio_returns = model[['Average','bmGAL','bmIVV','bmACWI']]
+    stats_df.loc['Best_Month', :] = [100 * float(i) for i in portfolio_returns.max().values.tolist()]
+    stats_df.loc['Worst_Month', :] = [100 * float(i) for i in portfolio_returns.min().values.tolist()]
+    stats_df.loc['Best_Year', :] = [100 * float(i) for i in portfolio_returns.groupby(portfolio_returns.index.year).sum().max()]
+    stats_df.loc['Worst_Year', :] = [100 * float(i) for i in portfolio_returns.groupby(portfolio_returns.index.year).sum().min()]
     print(stats_df)
     #
-    # #Regression stats for all portfolios and indices
-    # for c in stats_df.columns:
-    #     stats_df[c].loc[['beta','ann_alpha','R_squared','p_value','std_err']] = regression_fit(portfolio_returns, c, 'S&P500', rfr)
+    #Regression stats for all portfolios and indices
+    for c in stats_df.columns:
+        stats_df[c].loc[['beta','ann_alpha','R_squared','p_value','tvalue']] = regression_fit(portfolio_returns[c], model.bmGAL.fillna(0), model.bmBIL.fillna(0))
     #
     # # print("Trade Recommendation: ", buy_list)
     # trade_reco = pd.DataFrame([v for i, v in buy_list], index=[i for i, v in buy_list], columns=['Weights'])
