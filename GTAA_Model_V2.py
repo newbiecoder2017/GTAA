@@ -22,8 +22,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import fix_yahoo_finance as yf
 from pandas_datareader import data as pdr
-# from sklearn import datasets, linear_model
-# from sklearn.metrics import mean_squared_error, r2_score
 from scipy import stats
 yf.pdr_override() # <== that's all it takes :-)
 pd.set_option('precision',4)
@@ -40,75 +38,101 @@ def read_price_file(frq = 'BM'):
     df_price = df_price.resample(frq, closed='right').last()
     return df_price
 
-def ma_signal(data, trading_universe, window):
+def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
+    df = pd.read_csv("C:/Python27/Git/SMA_GTAA/adj_close.csv", index_col='Date', parse_dates=True)
 
-    # trading_universe = ['DBC', 'GLD', 'SPY', 'IEV', 'EWJ', 'EEM', 'IYR', 'RWX', 'IEF', 'TLT']
+    #calculating the daily return for benchmarks
+    rframe = df.resample('BM', closed='right').last().pct_change()
 
-    #calculating the rolling sma
-    RollMa = data.rolling(window).mean()
-    RollMa = RollMa[trading_universe]['5/30/2007':]
+    bmivv = rframe.IVV
 
-    #aligning price with the trading universe
-    data_trading = data[trading_universe]['5/30/2007':]
+    bmgal= rframe.GAL
 
-    # #calulating the monthly returns and shifting it one period for mapping
-    # returns_df = data_trading.pct_change().shift(1)
+    bmacwi =rframe.ACWI
 
-    #buy rule: if px(t) > 10M SMA(t)
-    signal_df = data_trading > RollMa
+    bmbil = rframe.BIL
 
-    return signal_df
+    def clean_universe(df, rs='BM', per=1, cutoff=0.5):
+        # resampling price frame
+        resamp_df = df.resample(rs, closed='right').last()
 
-def equal_weight_cash_portfolio(px_data, signal):
+        # calculating the resampled price returns
+        ret_frame = resamp_df.pct_change(per)
 
-    trading_universe = signal.columns.tolist()
-    data_trading = px_data[trading_universe]['5/30/2007':]
-    returns_df = data_trading.pct_change()
-    cash_ret = px_data['BIL']['5/30/2007':].pct_change()
-    holdings_returns = returns_df[signal.shift(1).bfill()]
-    pos_wt = (len(trading_universe) - holdings_returns.isnull().sum(axis=1)) / len(trading_universe)
-    cash_wt = 1 - pos_wt
-    total_return =  (pos_wt * holdings_returns.mean(axis=1).fillna(0)) + (cash_wt * cash_ret) - 0.001
-    return total_return
+        # calculating the daily returns
+        riskChg = df.pct_change()
 
-def risk_weight_portfolio(px_data, signal, window):
+        # calculating the rolling std deviations and re-sample the df
+        risk_df = riskChg.rolling(22).apply(np.std).resample(rs, closed='right').last()
 
-    trading_universe = signal.columns.tolist()
-    data_trading = px_data[trading_universe]['5/30/2007':]
-    returns_df = data_trading.pct_change()
-    std_df = 1.0 / returns_df.rolling(3).std()
-    returns_df = data_trading.pct_change()
-    cash_ret = px_data['BIL']['5/30/2007':].pct_change()
-    holdings_returns = returns_df[signal.shift(1).bfill()]
-    holdings_std = std_df[signal]
-    std_sum = holdings_std.sum(axis = 1)
-    holdings_std_wt = holdings_std.divide(std_sum, axis=0)
-    buy_wts = holdings_std_wt[-1:]
-    holdings_std_wt = holdings_std_wt.shift(1)
-    pos_wt = (len(trading_universe) - holdings_returns.isnull().sum(axis=1)) / len(trading_universe)
-    # cash_wt = 1 - pos_wt
-    # total_return = (pos_wt * (holdings_std*holdings_returns).sum(axis=1).fillna(0)) + (cash_wt * cash_ret) - 0.001
-    total_return = ((holdings_std_wt * holdings_returns).sum(axis=1).fillna(0)) - 0.001
+        # returning the risk asdjusted return frames
+        return ret_frame / risk_df
 
-    return total_return, buy_wts
 
-def risk_weight_benchmark(px_data, signal):
+    #1 month risk adjusted  frame
+    df_1m = clean_universe(df, rs='BM', cutoff=0.5, per=1)
 
-    data_trading = px_data[signal.columns.tolist()]
-    data_trading = data_trading['5/30/2007':]
-    returns_df = data_trading.pct_change()
-    std_df = 1.0 / returns_df.rolling(3).std()
-    # returns_df = data_trading.pct_change()
+    #Drop the benchmark from the return frame. Add symbols to the list to eliminate from teh return frame
+    rframe.drop(['GAL'], inplace=True, axis=1)
 
-    std_sum = std_df.sum(axis = 1)
-    holdings_std = std_df.divide(std_sum, axis=0)
-    # holdings_std = holdings_std.shift(1)
-    pos_wt = (len(returns_df) - returns_df.isnull().sum(axis=1)) / len(returns_df)
+    df_1m.drop(['GAL'], inplace=True, axis=1)
 
-    # total_return = (pos_wt * (holdings_std*holdings_returns).sum(axis=1).fillna(0)) + (cash_wt * cash_ret) - 0.001
-    total_return = ((holdings_std * returns_df).sum(axis=1).fillna(0))
+    df.drop(['GAL'], inplace=True, axis=1)
 
-    return total_return
+    # 3 month risk adjusted frame
+    df_3m = clean_universe(df, rs='BM', cutoff=0.5, per=3)
+
+    # 6 month risk adjusted  frame
+    df_6m = clean_universe(df, rs='BM', cutoff=0.5, per=6)
+
+    # 12 month risk adjusted  frame
+    df_12m = clean_universe(df, rs='BM', cutoff=0.5, per=12)
+
+
+    #Zscore the risk adjusted return frames
+
+    zs_1m = pd.DataFrame([(df_1m.iloc[i] - df_1m.iloc[i].mean())/df_1m.iloc[i].std() for i in range(len(df_1m))])
+    zs_3m = pd.DataFrame([(df_3m.iloc[i] - df_3m.iloc[i].mean())/df_3m.iloc[i].std() for i in range(len(df_3m))])
+    zs_6m = pd.DataFrame([(df_6m.iloc[i] - df_6m.iloc[i].mean())/df_6m.iloc[i].std() for i in range(len(df_6m))])
+    zs_12m = pd.DataFrame([(df_12m.iloc[i] - df_12m.iloc[i].mean())/df_12m.iloc[i].std() for i in range(len(df_12m))])
+
+    def return_persistence(data):
+        return ((data > 0).sum() - (data < 0).sum())
+
+    #Generate the dataframe for Persistence return Factor from 1 month data frame
+    persistence_long = df_1m.rolling(6).apply(return_persistence)
+    persistence_short = df_1m.rolling(3).apply(return_persistence)
+
+    #composte frame for the long and short persistence factors
+    composite_persistence = 0.9 * persistence_long  + 0.1 * persistence_short
+
+    #Generate the zscore of composite persistence dataframe
+    persistence_zscore = pd.DataFrame([(composite_persistence.iloc[i] - composite_persistence.iloc[i].mean()) / composite_persistence.iloc[i].std() for i in range(len(composite_persistence))])
+
+    #Genrate the composite zscore of return frames for different period returns frame
+    rank_comp = wList[0] * zs_1m + wList[1] * zs_3m + wList[2] * zs_6m + wList[3] * zs_12m
+
+    #Generate 1 month forward return based on the filtered composite zscore retrun dataframe
+    df_portfolio = rframe.shift(-1)[rank_comp >= cut_off]
+
+    #Using the persistence zscore dataframe to generate the position weights
+    persistence_zscore = persistence_zscore[rank_comp >= cut_off]
+    df_weights = pd.DataFrame([persistence_zscore.iloc[i] / abs(persistence_zscore.iloc[i]).sum() for i in range(len(persistence_zscore))]).abs()
+
+    #Generate the weighted portfolio returns
+    df_portfolio = df_weights.multiply(df_portfolio)
+
+    #Realigining the index of the portfolio
+    df_portfolio = df_portfolio.shift(1)
+
+    #calculate the portfolio return series and benchmark. Annual expense of 35bps is deducted monthly from the portfolio
+    df_portfolio['Average'] = df_portfolio.sum(axis=1) - .0003
+    df_portfolio['bmIVV'] = bmivv
+    df_portfolio['bmACWI'] = bmacwi
+    df_portfolio['bmGAL'] = bmgal
+    df_portfolio['bmBIL'] = bmbil
+
+    return df_portfolio, df_weights
 
 def drawdown(s):
 
@@ -131,21 +155,16 @@ def drawdown(s):
 
     return Daily_Drawdown.mean(), Max_Daily_Drawdown.min()
 
-    # Plot the results
-    # Daily_Drawdown.plot()
-    # Max_Daily_Drawdown.plot()
-    # plt.legend()
-    # plt.grid()
-    # plt.title("DrawDown and MaxDD for %s" %(s.name))
-    # plt.show()
-
-def regression_fit(returnsframe, port, bm, rfr):
+def regression_fit(port, rfr):
     # risk free rate
-    rfr = rfr['5/30/2007':].fillna(0)
-    rfr = rfr
+    rfr = rfr['05-2012':].fillna(0)
+    port = port['05-2012':]
+
+    excess_return = port - rfr
     # excess returns
-    eY = (returnsframe[port] - rfr).fillna(0)
-    eX = (returnsframe[bm] - rfr).fillna(0)
+    eY = excess_return['Average']
+    eX = excess_return['bmGAL']
+    eX = sm.add_constant(eX)
 
     # scipy.stats regression
     slope, intercept, r_value, p_value, std_err = stats.linregress(eX, eY)
@@ -190,14 +209,14 @@ def backtest_metrics(returnsframe, rfr):
     # AnnSharpe = (AnnReturns-0.025) / AnnRisk
 
 #   # Calulate Average Daily Drawdowns and Max DD
-    dd = [drawdown(cummulative_return[c])[0] for c in cummulative_return.columns]
-    mdd = [drawdown(cummulative_return[c])[1] for c in cummulative_return.columns]
+    dd = [drawdown(cummulative_return)[0] for c in cummulative_return.columns]
+    mdd = [drawdown(cummulative_return)[1] for c in cummulative_return.columns]
 
     # Calulate the win ratio and Gain to Loss ratio
-    up = portfolio_returns[returnsframe > 0].count() / returnsframe.count()
-    down = portfolio_returns[returnsframe < 0].count() / returnsframe.count()
-    average_up = portfolio_returns[returnsframe > 0].mean()
-    average_down = portfolio_returns[returnsframe < 0].mean()
+    up = [returnsframe > 0].count() / returnsframe.count()
+    down = [returnsframe < 0].count() / returnsframe.count()
+    average_up = returnsframe[returnsframe > 0].mean()
+    average_down = returnsframe[returnsframe < 0].mean()
     gain_to_loss = (average_up) / (-1 * average_down)
 
     #MAR ratio, annualised return over MDD. Higher the better
@@ -233,125 +252,97 @@ if __name__ == "__main__":
 
     window = 8
     # universe list for the model
-    universe_list = ['DBC', 'GLD', 'IVV', 'IEV', 'EWJ', 'EEM', 'IYR', 'RWX', 'IEF', 'TLT', 'BIL', 'SHY','ACWI','AGG','GYLD']
-    trading_universe = ['DBC', 'GLD', 'IVV', 'IEV', 'EWJ', 'EEM', 'IYR', 'RWX', 'IEF', 'TLT']
+    # universe_list = ['DBC', 'GLD', 'IVV', 'IEV', 'EWJ', 'EEM', 'IYR', 'RWX', 'IEF', 'TLT', 'BIL', 'SHY','ACWI','AGG','GYLD']
+    # trading_universe = ['DBC', 'GLD', 'IVV', 'IEV', 'EWJ', 'EEM', 'IYR', 'RWX', 'IEF', 'TLT']
 
     # Universe Adj.Close dataframe
     # df = pd.DataFrame({s:pull_data(s) for s in universe_list})
     # df.to_csv("C:/Python27/Git/SMA_GTAA/adj_close.csv")
 
     adjusted_price = read_price_file('BM')
-    #risk free rate
-    rfr = adjusted_price.BIL.pct_change()
 
     # read_price_file('BM')
-    #generate signal dataframe
-    df_signal= ma_signal(adjusted_price, trading_universe, window)
 
-    #equal weight portfolio
-    eq_wt_portfolio = equal_weight_cash_portfolio(adjusted_price, df_signal)
+    model, wts = model_portfolios(cut_off=0.2, wList=[0.0, 0.35, 0.65, 0.0])
 
-    #risk weight portfolio
-    risk_wt_portfolio,  buyWeights = risk_weight_portfolio(adjusted_price, df_signal, window)
-
-    #risk weight benchmark
-    risk_wt_benchmark = risk_weight_benchmark(adjusted_price, df_signal)
-
-    #Broad Market Benchmark : IVV
-    bm_ret = adjusted_price['5/30/2007':].pct_change()
-    bm_ret =bm_ret
-
-    #Custom Benchmark 60% ACWi and 40% AGG
-    bm_6040 = adjusted_price[['ACWI','AGG']]['5/30/2007':].pct_change()
-    bm_6040_index = ((bm_6040['ACWI'] * 0.6) + (bm_6040['AGG'] * 0.4)).fillna(0)
-
-    #reading NASDAQ MoMo returns and QQQE
-    momo_df = pd.read_csv("momo_returns.csv", index_col = 0, parse_dates = True)
-    momo_df = momo_df.resample('BM', closed='right').last().ffill()
-    momo_df =momo_df['5/30/2007':]
-
-
-    # Custom portfolio  for Nasdaq model and Risk weight GTAA portfolio - 60/40
-    momo_6040 = (0.7* momo_df['qo_rebal']) + (0.3 * risk_wt_portfolio)
-
-    # Custom portfolio for Nasdaq Equal Weight index and risk weight portfolio
-    momo_6040_index = ((momo_df['qqqe'] * 0.7) + (risk_wt_portfolio * 0.3)).fillna(0)
-
-    #Generates the tuple with buy candidates and its weights
-    buy_list = tuple(zip(df_signal[-1:].columns.tolist(), buyWeights.values.tolist()[0]))
-
-
-    #DataFrame for all the portfolios and benchmarks
-    portfolio_returns = pd.DataFrame({'eq_wt' : eq_wt_portfolio, 'risk_wt' : risk_wt_portfolio, 'S&P500' : bm_ret['IVV'], 'Avg_Universe' : bm_ret[trading_universe].mean(axis=1),
-                                      'risk_wt_bm' :risk_wt_benchmark, 'bm_6040' : bm_6040_index, 'qo_momo' : momo_df['qo_rebal'],
-                                      'q_momo': momo_df['q_rebal'], 'momo_6040' : momo_6040, 'momo_index' : momo_6040_index}, index = risk_wt_portfolio.index)
-
-    # Remove the first row with NaN's
-    portfolio_returns = portfolio_returns[1:]
-
-    #BackTest Statistics for all the portfolios and indexes
-    stats_df = backtest_metrics(portfolio_returns, rfr)
+    # print(model.tail())
+    # print(wts.tail())
+    # print(buy_wts[-1:])
+    #
+    #
+    # #DataFrame for all the portfolios and benchmarks
+    # portfolio_returns = pd.DataFrame({'eq_wt' : eq_wt_portfolio, 'risk_wt' : risk_wt_portfolio, 'S&P500' : bm_ret['IVV'], 'Avg_Universe' : bm_ret[trading_universe].mean(axis=1),
+    #                                   'risk_wt_bm' :risk_wt_benchmark, 'bm_6040' : bm_6040_index, 'qo_momo' : momo_df['qo_rebal'],
+    #                                   'q_momo': momo_df['q_rebal'], 'momo_6040' : momo_6040, 'momo_index' : momo_6040_index}, index = risk_wt_portfolio.index)
+    #
+    # # Remove the first row with NaN's
+    # portfolio_returns = portfolio_returns[1:]
+    #
+    # #BackTest Statistics for all the portfolios and indexes
+    stats_df = backtest_metrics(model[['Average','bmGAL']], rfr = model.bmBIL)
+    portfolio_returns = model[['Average','bmGAL']]
     stats_df.loc['Best_Month', :] = 100 * portfolio_returns.max()
     stats_df.loc['Worst_Month', :] = 100 * portfolio_returns.min()
     stats_df.loc['Best_Year', :] = 100 * portfolio_returns.groupby(portfolio_returns.index.year).sum().max()
     stats_df.loc['Worst_Year', :] = 100 * portfolio_returns.groupby(portfolio_returns.index.year).sum().min()
-
-    #Regression stats for all portfolios and indices
-    for c in stats_df.columns:
-        stats_df[c].loc[['beta','ann_alpha','R_squared','p_value','std_err']] = regression_fit(portfolio_returns, c, 'S&P500', rfr)
-
-    # print("Trade Recommendation: ", buy_list)
-    trade_reco = pd.DataFrame([v for i, v in buy_list], index=[i for i, v in buy_list], columns=['Weights'])
-    print(trade_reco)
-
-    #Portfolio Return Plot
-    # portfolio_returns = portfolio_returns[['eq_wt', 'risk_wt', "Avg_Universe"]]
-    # print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
-    # portfolio_returns.cumsum().plot()
-    # plt.legend()
-    # plt.grid()
+    print(stats_df)
+    #
+    # #Regression stats for all portfolios and indices
+    # for c in stats_df.columns:
+    #     stats_df[c].loc[['beta','ann_alpha','R_squared','p_value','std_err']] = regression_fit(portfolio_returns, c, 'S&P500', rfr)
+    #
+    # # print("Trade Recommendation: ", buy_list)
+    # trade_reco = pd.DataFrame([v for i, v in buy_list], index=[i for i, v in buy_list], columns=['Weights'])
+    # print(trade_reco)
+    #
+    # #Portfolio Return Plot
+    # # portfolio_returns = portfolio_returns[['eq_wt', 'risk_wt', "Avg_Universe"]]
+    # # print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
+    # # portfolio_returns.cumsum().plot()
+    # # plt.legend()
+    # # plt.grid()
+    # # plt.show()
+    #
+    # #Returns grouped by year
+    # portfolio_returns.rename(columns = {'eq_wt':'EW_GTAA', 'risk_wt':'RiskWt_GTAA', 'Avg_Universe':'EW_GTAA_Universe', 'risk_wt_bm':'RiskWt_GTAA_Universe',
+    #                                     'bm_6040':'60/40_ACWI/AGG', 'qo_momo':'MomoPortfoli_QO', 'q_momo':'MomoPortfolio_Q',
+    #                                     'momo_6040':'70/30_QO_MP/RW_GTAA','momo_index':'70/30_QQQE/RW_GTAA_bm'}, inplace = True)
+    #
+    # portfolio_returns = portfolio_returns[['EW_GTAA', 'EW_GTAA_Universe', 'RiskWt_GTAA', 'RiskWt_GTAA_Universe',
+    #                                        'MomoPortfoli_QO', 'MomoPortfolio_Q', '70/30_QO_MP/RW_GTAA',
+    #                                        '70/30_QQQE/RW_GTAA_bm', '60/40_ACWI/AGG', 'S&P500']]
+    # # print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
+    # # print(100 * np.sqrt(12) * portfolio_returns.groupby(portfolio_returns.index.year).std())
+    # # portfolio_returns.cumsum().plot()
+    # # plt.legend()
+    # # plt.grid()
+    # # plt.show()
+    #
+    # #correaltion Plot
+    # # plt.matshow(portfolio_returns.corr())
+    # # plt.xticks(range(len(portfolio_returns.columns)), portfolio_returns.columns)
+    # # plt.yticks(range(len(portfolio_returns.columns)), portfolio_returns.columns)
+    # # plt.colorbar()
+    # # plt.show()
+    # stats_df.rename(columns={'eq_wt': 'EW_GTAA', 'risk_wt': 'RiskWt_GTAA', 'Avg_Universe': 'EW_GTAA_Universe',
+    #                                   'risk_wt_bm': 'RiskWt_GTAA_Universe',
+    #                                   'bm_6040': '60/40_ACWI/AGG', 'qo_momo': 'MomoPortfoli_QO',
+    #                                   'q_momo': 'MomoPortfolio_Q',
+    #                                   'momo_6040': '70/30_QO_MP/RW_GTAA', 'momo_index': '70/30_QQQE/RW_GTAA_bm'},
+    #                          inplace=True)
+    #
+    # stats_df = stats_df[['EW_GTAA', 'EW_GTAA_Universe', 'RiskWt_GTAA', 'RiskWt_GTAA_Universe',
+    #                                        'MomoPortfoli_QO', 'MomoPortfolio_Q', '70/30_QO_MP/RW_GTAA',
+    #                                        '70/30_QQQE/RW_GTAA_bm', '60/40_ACWI/AGG', 'S&P500']]
+    # # print(stats_df)
+    # tcor = pd.rolling_corr(portfolio_returns['RiskWt_GTAA'],portfolio_returns['MomoPortfoli_QO'],6)
+    # tcor.plot()
     # plt.show()
-
-    #Returns grouped by year
-    portfolio_returns.rename(columns = {'eq_wt':'EW_GTAA', 'risk_wt':'RiskWt_GTAA', 'Avg_Universe':'EW_GTAA_Universe', 'risk_wt_bm':'RiskWt_GTAA_Universe',
-                                        'bm_6040':'60/40_ACWI/AGG', 'qo_momo':'MomoPortfoli_QO', 'q_momo':'MomoPortfolio_Q',
-                                        'momo_6040':'70/30_QO_MP/RW_GTAA','momo_index':'70/30_QQQE/RW_GTAA_bm'}, inplace = True)
-
-    portfolio_returns = portfolio_returns[['EW_GTAA', 'EW_GTAA_Universe', 'RiskWt_GTAA', 'RiskWt_GTAA_Universe',
-                                           'MomoPortfoli_QO', 'MomoPortfolio_Q', '70/30_QO_MP/RW_GTAA',
-                                           '70/30_QQQE/RW_GTAA_bm', '60/40_ACWI/AGG', 'S&P500']]
-    # print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
-    # print(100 * np.sqrt(12) * portfolio_returns.groupby(portfolio_returns.index.year).std())
-    # portfolio_returns.cumsum().plot()
-    # plt.legend()
-    # plt.grid()
-    # plt.show()
-
-    #correaltion Plot
-    # plt.matshow(portfolio_returns.corr())
-    # plt.xticks(range(len(portfolio_returns.columns)), portfolio_returns.columns)
-    # plt.yticks(range(len(portfolio_returns.columns)), portfolio_returns.columns)
-    # plt.colorbar()
-    # plt.show()
-    stats_df.rename(columns={'eq_wt': 'EW_GTAA', 'risk_wt': 'RiskWt_GTAA', 'Avg_Universe': 'EW_GTAA_Universe',
-                                      'risk_wt_bm': 'RiskWt_GTAA_Universe',
-                                      'bm_6040': '60/40_ACWI/AGG', 'qo_momo': 'MomoPortfoli_QO',
-                                      'q_momo': 'MomoPortfolio_Q',
-                                      'momo_6040': '70/30_QO_MP/RW_GTAA', 'momo_index': '70/30_QQQE/RW_GTAA_bm'},
-                             inplace=True)
-
-    stats_df = stats_df[['EW_GTAA', 'EW_GTAA_Universe', 'RiskWt_GTAA', 'RiskWt_GTAA_Universe',
-                                           'MomoPortfoli_QO', 'MomoPortfolio_Q', '70/30_QO_MP/RW_GTAA',
-                                           '70/30_QQQE/RW_GTAA_bm', '60/40_ACWI/AGG', 'S&P500']]
-    # print(stats_df)
-    tcor = pd.rolling_corr(portfolio_returns['RiskWt_GTAA'],portfolio_returns['MomoPortfoli_QO'],6)
-    tcor.plot()
-    plt.show()
-    # ts1 = 100 * portfolio_returns.groupby(portfolio_returns.index.year).sum()
-    # ts2 = 100 * np.sqrt(12) * portfolio_returns.groupby(portfolio_returns.index.year).std()
-    # stats_df.to_csv("C:/Python27/Git/SMA_GTAA/Summary_Statistics.csv")
-    # ts1.to_csv("C:/Python27/Git/SMA_GTAA/Return_Summary.csv")
-    # ts2.to_csv("C:/Python27/Git/SMA_GTAA/Risk_Summary.csv")
+    # # ts1 = 100 * portfolio_returns.groupby(portfolio_returns.index.year).sum()
+    # # ts2 = 100 * np.sqrt(12) * portfolio_returns.groupby(portfolio_returns.index.year).std()
+    # # stats_df.to_csv("C:/Python27/Git/SMA_GTAA/Summary_Statistics.csv")
+    # # ts1.to_csv("C:/Python27/Git/SMA_GTAA/Return_Summary.csv")
+    # # ts2.to_csv("C:/Python27/Git/SMA_GTAA/Risk_Summary.csv")
 
 
 
