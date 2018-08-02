@@ -53,6 +53,8 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
 
     bmbil = rframe.BIL
 
+
+
     def clean_universe(df, rs='BM', per=1, cutoff=0.5):
         # resampling price frame
         resamp_df = df.resample(rs, closed='right').last()
@@ -74,11 +76,11 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     df_1m = clean_universe(df, rs='BM', cutoff=0.5, per=1)
 
     #Drop the benchmark from the return frame. Add symbols to the list to eliminate from teh return frame
-    rframe.drop(['GAL'], inplace=True, axis=1)
+    rframe.drop(['GAL','BIL','GYLD'], inplace=True, axis=1)
 
-    df_1m.drop(['GAL'], inplace=True, axis=1)
+    df_1m.drop(['GAL','BIL','GYLD'], inplace=True, axis=1)
 
-    df.drop(['GAL'], inplace=True, axis=1)
+    df.drop(['GAL','BIL','GYLD'], inplace=True, axis=1)
 
     # 3 month risk adjusted frame
     df_3m = clean_universe(df, rs='BM', cutoff=0.5, per=3)
@@ -105,7 +107,7 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     persistence_short = df_1m.rolling(3).apply(return_persistence)
 
     #composte frame for the long and short persistence factors
-    composite_persistence = 0.9 * persistence_long  + 0.1 * persistence_short
+    composite_persistence = 0.1* persistence_long  + 0.9 * persistence_short
 
     #Generate the zscore of composite persistence dataframe
     persistence_zscore = pd.DataFrame([(composite_persistence.iloc[i] - composite_persistence.iloc[i].mean()) / composite_persistence.iloc[i].std() for i in range(len(composite_persistence))])
@@ -163,8 +165,8 @@ def regression_fit(port, bm, rfr):
 
     excess_return = port - rfr
         # excess returns
-    eY = excess_return
-    eX = bm-rfr
+    eY = excess_return.fillna(0)
+    eX = bm-rfr.fillna(0)
     eX = sm.add_constant(eX)
 
     # scipy.stats regression
@@ -173,7 +175,7 @@ def regression_fit(port, bm, rfr):
     # result.params[0], result.params.loc['const'], result.rsquared_adj, result.pvalues, result.tvalues.loc['const']
     # intercept = (1+intercept)**12 - 1
 
-    return [result.params[0], result.params.loc['const'], result.rsquared_adj, result.pvalues, result.tvalues.loc['const']]
+    return [result.params[0], result.params.loc['const'], result.rsquared_adj, result.pvalues.loc['const'], result.tvalues.loc['const']]
 
 
 def backtest_metrics(returnsframe, rfr):
@@ -235,9 +237,9 @@ def backtest_metrics(returnsframe, rfr):
     sterling_ratio = abs(AnnReturns / [mdd[0][i] for i in range(len(mdd[0]))])
 
     metric_df = pd.DataFrame(AnnReturns.values.tolist(), index = ['AnnRet(%)','AnnRisk(%)','AnnSharpe(2.5%)','Avg_DD(%)','MaxDD(%)','WinRate(%)','Gain_to_Loss','RoMDD','Sortino(5%)',
-                                                                  'Sterling_Ratio','beta','ann_alpha','R_squared','p_value', 'tvalue',
+                                                                  'Sterling_Ratio(over MDD)','beta','ann_alpha','R_squared','p_value', 'tvalue',
                                                                   '1YrReturns', '1YrRisk','3YrReturns', '3YrRisk', '5YrReturns', '5YrRisk'],
-                                                                    columns = ['Average', 'GAL','IVV','ACWI' ])
+                                                                    columns = ['Average', 'bmGAL','bmIVV','bmACWI' ])
     metric_df.loc['AnnRet(%)'] = round(metric_df.loc['AnnRet(%)'], 3)*100
     metric_df.loc['AnnRisk(%)'] = [100*i for i in AnnRisk]
     metric_df.loc['AnnSharpe(2.5%)'] = AnnSharpe.values.tolist()[0]
@@ -247,7 +249,7 @@ def backtest_metrics(returnsframe, rfr):
     metric_df.loc['Gain_to_Loss'] = [round(float(i),3) for i in gain_to_loss.values.tolist()]
     metric_df.loc['RoMDD'] = [round(abs(i),3) for i in mar_ratio.values.tolist()[0]]
     metric_df.loc['Sortino(5%)'] = sortino_ratio.values.tolist()[0]
-    metric_df.loc['Sterling_Ratio'] = [round(abs(i),3) for i in sterling_ratio.values.tolist()[0]]
+    metric_df.loc['Sterling_Ratio(over MDD)'] = [round(abs(i),3) for i in sterling_ratio.values.tolist()[0]]
     metric_df.loc['1YrReturns'] = [i*100.00 for i in ret_12m[0]]
     metric_df.loc['1YrRisk'] = [100 * i for i in std_12m.values.tolist()]
     metric_df.loc['3YrReturns'] = [i*100.00 for i in ret_36m[0]]
@@ -269,10 +271,15 @@ if __name__ == "__main__":
     # df.to_csv("C:/Python27/Git/SMA_GTAA/adj_close_v2.csv")
 
     adjusted_price = read_price_file('BM')
+    modBiL = adjusted_price.BIL.pct_change()
 
     # read_price_file('BM')
 
-    model, wts = model_portfolios(cut_off=0.2, wList=[0.0, 0.35, 0.65, 0.0])
+    model, wts = model_portfolios(cut_off=0.3, wList=[0.0, 0.0, 0.9, 0.1])
+
+    #Try with BIL and GYLD, w/o BIL and GYLD and combinations
+    #best persistence set is 0.1, 0.9 - Long/Short
+    #Best sets are  [0.1,0,0.8,0.1], [0.0,0,0.9,.1], [0.0,0,0.8,0.2] an combinations
 
     # print(model.tail())
     # print(wts.tail())
@@ -288,18 +295,19 @@ if __name__ == "__main__":
     # portfolio_returns = portfolio_returns[1:]
     #
     # #BackTest Statistics for all the portfolios and indexes
-    stats_df = backtest_metrics(model[['Average','bmGAL','bmIVV','bmACWI']], rfr = model.bmBIL)
+    stats_df = backtest_metrics(model[['Average','bmGAL','bmIVV','bmACWI']], rfr = modBiL)
     portfolio_returns = model[['Average','bmGAL','bmIVV','bmACWI']]
     stats_df.loc['Best_Month', :] = [100 * float(i) for i in portfolio_returns.max().values.tolist()]
     stats_df.loc['Worst_Month', :] = [100 * float(i) for i in portfolio_returns.min().values.tolist()]
     stats_df.loc['Best_Year', :] = [100 * float(i) for i in portfolio_returns.groupby(portfolio_returns.index.year).sum().max()]
     stats_df.loc['Worst_Year', :] = [100 * float(i) for i in portfolio_returns.groupby(portfolio_returns.index.year).sum().min()]
-    print(stats_df)
-    #
+       #
     #Regression stats for all portfolios and indices
     for c in stats_df.columns:
+
         stats_df[c].loc[['beta','ann_alpha','R_squared','p_value','tvalue']] = regression_fit(portfolio_returns[c], model.bmGAL.fillna(0), model.bmBIL.fillna(0))
-    #
+
+    print(stats_df)
     # # print("Trade Recommendation: ", buy_list)
     # trade_reco = pd.DataFrame([v for i, v in buy_list], index=[i for i, v in buy_list], columns=['Weights'])
     # print(trade_reco)
@@ -344,15 +352,17 @@ if __name__ == "__main__":
     #                                        'MomoPortfoli_QO', 'MomoPortfolio_Q', '70/30_QO_MP/RW_GTAA',
     #                                        '70/30_QQQE/RW_GTAA_bm', '60/40_ACWI/AGG', 'S&P500']]
     # # print(stats_df)
-    # tcor = pd.rolling_corr(portfolio_returns['RiskWt_GTAA'],portfolio_returns['MomoPortfoli_QO'],6)
+    # tcor = pd.rolling_corr(portfolio_returns['Average'],portfolio_returns['bmGAL'],6)
     # tcor.plot()
     # plt.show()
-    # # ts1 = 100 * portfolio_returns.groupby(portfolio_returns.index.year).sum()
-    # # ts2 = 100 * np.sqrt(12) * portfolio_returns.groupby(portfolio_returns.index.year).std()
+    # ts1 = 100 * portfolio_returns.groupby(portfolio_returns.index.year).sum()
+    # ts2 = 100 * np.sqrt(12) * portfolio_returns.groupby(portfolio_returns.index.year).std()
+    # print(ts1)
+    # print(ts2)
     # # stats_df.to_csv("C:/Python27/Git/SMA_GTAA/Summary_Statistics.csv")
     # # ts1.to_csv("C:/Python27/Git/SMA_GTAA/Return_Summary.csv")
     # # ts2.to_csv("C:/Python27/Git/SMA_GTAA/Risk_Summary.csv")
-
+    print(wts.tail(10))
 
 
 
