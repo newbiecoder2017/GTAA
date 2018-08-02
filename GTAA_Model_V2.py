@@ -27,12 +27,14 @@ import statsmodels.api as sm
 yf.pdr_override() # <== that's all it takes :-)
 pd.set_option('precision',4)
 pd.options.display.float_format = '{:.3f}'.format
+import seaborn as sns
+sns.set_palette(sns.color_palette("hls", 20))
 
 
 
 #Function to pull data from yahoo
 def pull_data(s):
-    return pdr.get_data_yahoo(s, start="2000-12-31", end="2018-06-29")['Adj Close']
+    return pdr.get_data_yahoo(s, start="2000-12-31", end="2018-07-31")['Adj Close']
 
 def read_price_file(frq = 'BM'):
     df_price = pd.read_csv("C:/Python27/Git/SMA_GTAA/adj_close_v2.csv", index_col='Date', parse_dates=True)
@@ -41,7 +43,7 @@ def read_price_file(frq = 'BM'):
 
 def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     df = pd.read_csv("C:/Python27/Git/SMA_GTAA/adj_close_v2.csv", index_col='Date', parse_dates=True)
-    df = df['05-2012':]
+    df = df['01-2012':]
     #calculating the daily return for benchmarks
     rframe = df.resample('BM', closed='right').last().pct_change()
 
@@ -66,7 +68,7 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
         riskChg = df.pct_change()
 
         # calculating the rolling std deviations and re-sample the df
-        risk_df = riskChg.rolling(22).apply(np.std).resample(rs, closed='right').last()
+        risk_df = riskChg.rolling(30).apply(np.std).resample(rs, closed='right').last()
 
         # returning the risk asdjusted return frames
         return ret_frame / risk_df
@@ -107,7 +109,7 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     persistence_short = df_1m.rolling(3).apply(return_persistence)
 
     #composte frame for the long and short persistence factors
-    composite_persistence = 0.1* persistence_long  + 0.9 * persistence_short
+    composite_persistence = 0.1 * persistence_long  + 0.9 * persistence_short
 
     #Generate the zscore of composite persistence dataframe
     persistence_zscore = pd.DataFrame([(composite_persistence.iloc[i] - composite_persistence.iloc[i].mean()) / composite_persistence.iloc[i].std() for i in range(len(composite_persistence))])
@@ -123,13 +125,13 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     df_weights = pd.DataFrame([persistence_zscore.iloc[i] / abs(persistence_zscore.iloc[i]).sum() for i in range(len(persistence_zscore))]).abs()
 
     #Generate the weighted portfolio returns
-    df_portfolio = df_weights.multiply(df_portfolio)
+    df_portfolio = df_weights * df_portfolio
 
     #Realigining the index of the portfolio
     df_portfolio = df_portfolio.shift(1)
 
     #calculate the portfolio return series and benchmark. Annual expense of 35bps is deducted monthly from the portfolio
-    df_portfolio['Average'] = df_portfolio.sum(axis=1) - .0003
+    df_portfolio['Average'] = df_portfolio.sum(axis=1) - .0003  #50bp of fees and transaction cost
     df_portfolio['bmIVV'] = bmivv
     df_portfolio['bmACWI'] = bmacwi
     df_portfolio['bmGAL'] = bmgal
@@ -160,8 +162,8 @@ def drawdown(s):
 
 def regression_fit(port, bm, rfr):
     # risk free rate
-    rfr = rfr['05-2012':].fillna(0)
-    port = port['05-2012':]
+    rfr = rfr['01-2012':].fillna(0)
+    port = port['01-2012':]
 
     excess_return = port - rfr
         # excess returns
@@ -225,7 +227,7 @@ def backtest_metrics(returnsframe, rfr):
 
     # Calulate the win ratio and Gain to Loss ratio
     up = returnsframe[returnsframe > 0].count() / returnsframe.count()
-    down = returnsframe[returnsframe < 0].count() / returnsframe.count()
+    # down = returnsframe[returnsframe < 0].count() / returnsframe.count()
     average_up = returnsframe[returnsframe > 0].mean()
     average_down = returnsframe[returnsframe < 0].mean()
     gain_to_loss = (average_up) / (-1 * average_down)
@@ -261,9 +263,8 @@ def backtest_metrics(returnsframe, rfr):
 
 if __name__ == "__main__":
 
-    window = 8
-    # universe list for the model
-    # universe_list = ['DBC', 'GLD', 'IVV', 'IEV', 'EWJ', 'EEM', 'IYR', 'RWX', 'IEF', 'TLT', 'BIL', 'SHY','ACWI','AGG','GYLD']
+     # universe list for the model
+    universe_list = ['DBC', 'GLD', 'IVV', 'IEV', 'EWJ', 'EEM', 'IYR', 'RWX', 'IEF', 'TLT', 'BIL', 'SHY','ACWI','AGG','GYLD','GAL']
     # trading_universe = ['DBC', 'GLD', 'IVV', 'IEV', 'EWJ', 'EEM', 'IYR', 'RWX', 'IEF', 'TLT']
 
     # Universe Adj.Close dataframe
@@ -274,8 +275,11 @@ if __name__ == "__main__":
     modBiL = adjusted_price.BIL.pct_change()
 
     # read_price_file('BM')
-
-    model, wts = model_portfolios(cut_off=0.3, wList=[0.0, 0.0, 0.9, 0.1])
+    n1 = 0.0
+    n2 = 0.0
+    n3 = 0.9
+    n4 = 0.1
+    model, wts = model_portfolios(cut_off=0.3, wList=[n1,n2,n3,n4])
 
     #Try with BIL and GYLD, w/o BIL and GYLD and combinations
     #best persistence set is 0.1, 0.9 - Long/Short
@@ -307,19 +311,26 @@ if __name__ == "__main__":
 
         stats_df[c].loc[['beta','ann_alpha','R_squared','p_value','tvalue']] = regression_fit(portfolio_returns[c], model.bmGAL.fillna(0), model.bmBIL.fillna(0))
 
-    print(stats_df)
+    # stats_df.to_csv("C:/Python27/Git/SMA_GTAA/"+str(n1)+"_"+str(n2)+"_"+str(n3)+"_"+str(n4)+".csv")
+    # print(stats_df)
     # # print("Trade Recommendation: ", buy_list)
     # trade_reco = pd.DataFrame([v for i, v in buy_list], index=[i for i, v in buy_list], columns=['Weights'])
-    # print(trade_reco)
+    print(wts[-1:])
+
+    #Plot the rolling weights
+    # y = np.vstack([wts[c].fillna(0) for c in wts.columns])
+    # plt.stackplot(wts.index, y, labels = wts.columns)
+    # plt.legend()
+    # plt.show()
     #
     # #Portfolio Return Plot
-    # # portfolio_returns = portfolio_returns[['eq_wt', 'risk_wt', "Avg_Universe"]]
-    # # print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
-    # # portfolio_returns.cumsum().plot()
-    # # plt.legend()
-    # # plt.grid()
-    # # plt.show()
-    #
+    # portfolio_returns = portfolio_returns[['Average','bmGAL','bmIVV','bmACWI']]
+    # print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
+    # portfolio_returns.cumsum().plot()
+    # plt.legend()
+    # plt.grid()
+    # plt.show()
+
     # #Returns grouped by year
     # portfolio_returns.rename(columns = {'eq_wt':'EW_GTAA', 'risk_wt':'RiskWt_GTAA', 'Avg_Universe':'EW_GTAA_Universe', 'risk_wt_bm':'RiskWt_GTAA_Universe',
     #                                     'bm_6040':'60/40_ACWI/AGG', 'qo_momo':'MomoPortfoli_QO', 'q_momo':'MomoPortfolio_Q',
@@ -336,11 +347,11 @@ if __name__ == "__main__":
     # # plt.show()
     #
     # #correaltion Plot
-    # # plt.matshow(portfolio_returns.corr())
-    # # plt.xticks(range(len(portfolio_returns.columns)), portfolio_returns.columns)
-    # # plt.yticks(range(len(portfolio_returns.columns)), portfolio_returns.columns)
-    # # plt.colorbar()
-    # # plt.show()
+    # plt.matshow(portfolio_returns.corr())
+    # plt.xticks(range(len(portfolio_returns.columns)), portfolio_returns.columns)
+    # plt.yticks(range(len(portfolio_returns.columns)), portfolio_returns.columns)
+    # plt.colorbar()
+    # plt.show()
     # stats_df.rename(columns={'eq_wt': 'EW_GTAA', 'risk_wt': 'RiskWt_GTAA', 'Avg_Universe': 'EW_GTAA_Universe',
     #                                   'risk_wt_bm': 'RiskWt_GTAA_Universe',
     #                                   'bm_6040': '60/40_ACWI/AGG', 'qo_momo': 'MomoPortfoli_QO',
@@ -362,7 +373,7 @@ if __name__ == "__main__":
     # # stats_df.to_csv("C:/Python27/Git/SMA_GTAA/Summary_Statistics.csv")
     # # ts1.to_csv("C:/Python27/Git/SMA_GTAA/Return_Summary.csv")
     # # ts2.to_csv("C:/Python27/Git/SMA_GTAA/Risk_Summary.csv")
-    print(wts.tail(10))
+    # print(wts.tail(10))
 
 
 
