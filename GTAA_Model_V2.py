@@ -301,6 +301,7 @@ if __name__ == "__main__":
     # #BackTest Statistics for all the portfolios and indexes
     stats_df = backtest_metrics(model[['Average','bmGAL','bmIVV','bmACWI']], rfr = modBiL)
     portfolio_returns = model[['Average','bmGAL','bmIVV','bmACWI']]
+    portfolio_returns.to_csv("C:/Python27/Git/SMA_GTAA/returns.csv")
     stats_df.loc['Best_Month', :] = [100 * float(i) for i in portfolio_returns.max().values.tolist()]
     stats_df.loc['Worst_Month', :] = [100 * float(i) for i in portfolio_returns.min().values.tolist()]
     stats_df.loc['Best_Year', :] = [100 * float(i) for i in portfolio_returns.groupby(portfolio_returns.index.year).sum().max()]
