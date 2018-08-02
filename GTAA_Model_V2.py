@@ -101,6 +101,11 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     zs_6m = pd.DataFrame([(df_6m.iloc[i] - df_6m.iloc[i].mean())/df_6m.iloc[i].std() for i in range(len(df_6m))])
     zs_12m = pd.DataFrame([(df_12m.iloc[i] - df_12m.iloc[i].mean())/df_12m.iloc[i].std() for i in range(len(df_12m))])
 
+    zs_1m = zs_1m.clip(lower=-3.0, upper=3.0, axis=1)
+    zs_3m = zs_3m.clip(lower=-3.0, upper=3.0, axis=1)
+    zs_6m = zs_6m.clip(lower=-3.0, upper=3.0, axis=1)
+    zs_12m = zs_12m.clip(lower=-3.0, upper=3.0, axis=1)
+
     def return_persistence(data):
         return ((data > 0).sum() - (data < 0).sum())
 
@@ -114,6 +119,7 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     #Generate the zscore of composite persistence dataframe
     persistence_zscore = pd.DataFrame([(composite_persistence.iloc[i] - composite_persistence.iloc[i].mean()) / composite_persistence.iloc[i].std() for i in range(len(composite_persistence))])
 
+    persistence_zscore = persistence_zscore.clip(lower=-3.0, upper=3.0, axis=1)
     #Genrate the composite zscore of return frames for different period returns frame
     rank_comp = wList[0] * zs_1m + wList[1] * zs_3m + wList[2] * zs_6m + wList[3] * zs_12m
 
@@ -313,7 +319,7 @@ if __name__ == "__main__":
         stats_df[c].loc[['beta','ann_alpha','R_squared','p_value','tvalue']] = regression_fit(portfolio_returns[c], model.bmGAL.fillna(0), model.bmBIL.fillna(0))
 
     # stats_df.to_csv("C:/Python27/Git/SMA_GTAA/"+str(n1)+"_"+str(n2)+"_"+str(n3)+"_"+str(n4)+".csv")
-    # print(stats_df)
+    print(stats_df)
     # # print("Trade Recommendation: ", buy_list)
     # trade_reco = pd.DataFrame([v for i, v in buy_list], index=[i for i, v in buy_list], columns=['Weights'])
     print(wts[-1:])
@@ -325,12 +331,12 @@ if __name__ == "__main__":
     # plt.show()
     #
     # #Portfolio Return Plot
-    # portfolio_returns = portfolio_returns[['Average','bmGAL','bmIVV','bmACWI']]
-    # print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
-    # portfolio_returns.cumsum().plot()
-    # plt.legend()
-    # plt.grid()
-    # plt.show()
+    portfolio_returns = portfolio_returns[['Average','bmGAL','bmIVV','bmACWI']]
+    print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
+    portfolio_returns.cumsum().plot()
+    plt.legend()
+    plt.grid()
+    plt.show()
 
     # #Returns grouped by year
     # portfolio_returns.rename(columns = {'eq_wt':'EW_GTAA', 'risk_wt':'RiskWt_GTAA', 'Avg_Universe':'EW_GTAA_Universe', 'risk_wt_bm':'RiskWt_GTAA_Universe',
