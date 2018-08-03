@@ -326,17 +326,19 @@ if __name__ == "__main__":
 
     #Plot the rolling weights
     # y = np.vstack([wts[c].fillna(0) for c in wts.columns])
-    # plt.stackplot(wts.index, y, labels = wts.columns)
-    # plt.legend()
-    # plt.show()
-    #
-    # #Portfolio Return Plot
-    portfolio_returns = portfolio_returns[['Average','bmGAL','bmIVV','bmACWI']]
-    print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
-    portfolio_returns.cumsum().plot()
+    # plt.stackplot(wts.index, y, labels = ['SHY'])
+    wts[['GLD','SHY','AGG']].fillna(0).rolling(6).mean().plot()
     plt.legend()
-    plt.grid()
+     plt.grid()
     plt.show()
+
+    # # #Portfolio Return Plot
+    # portfolio_returns = portfolio_returns[['Average','bmGAL','bmIVV','bmACWI']]
+    # print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
+    # portfolio_returns.cumsum().plot()
+    # plt.legend()
+    # plt.grid()
+    # plt.show()
 
     # #Returns grouped by year
     # portfolio_returns.rename(columns = {'eq_wt':'EW_GTAA', 'risk_wt':'RiskWt_GTAA', 'Avg_Universe':'EW_GTAA_Universe', 'risk_wt_bm':'RiskWt_GTAA_Universe',
