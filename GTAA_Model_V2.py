@@ -264,6 +264,7 @@ def backtest_metrics(returnsframe, rfr):
     metric_df.loc['3YrRisk'] = [100 * i for i in std_36m.values.tolist()]
     metric_df.loc['5YrReturns'] = [i*100.00 for i in ret_60m[0]]
     metric_df.loc['5YrRisk'] = [100 * i for i in std_60m.values.tolist()]
+    metric_df.loc['Total Return'] = returnsframe.cumsum()[-1:].values[0].tolist()
     return metric_df
 
 
@@ -317,8 +318,8 @@ if __name__ == "__main__":
     for c in stats_df.columns:
 
         stats_df[c].loc[['beta','ann_alpha','R_squared','p_value','tvalue']] = regression_fit(portfolio_returns[c], model.bmGAL.fillna(0), model.bmBIL.fillna(0))
-
-    # stats_df.to_csv("C:/Python27/Git/SMA_GTAA/"+str(n1)+"_"+str(n2)+"_"+str(n3)+"_"+str(n4)+".csv")
+    # cutt_off=1.5
+    # stats_df.to_csv("C:/Python27/Git/SMA_GTAA/"+str(n1)+"_"+str(n2)+"_"+str(n3)+"_"+str(n4)+"_"+str(cutt_off)+".csv")
     print(stats_df)
     # # print("Trade Recommendation: ", buy_list)
     # trade_reco = pd.DataFrame([v for i, v in buy_list], index=[i for i, v in buy_list], columns=['Weights'])
@@ -327,10 +328,10 @@ if __name__ == "__main__":
     #Plot the rolling weights
     # y = np.vstack([wts[c].fillna(0) for c in wts.columns])
     # plt.stackplot(wts.index, y, labels = ['SHY'])
-    wts[['GLD','SHY','AGG']].fillna(0).rolling(6).mean().plot()
-    plt.legend()
-     plt.grid()
-    plt.show()
+    # wts[['GLD','SHY','AGG']].fillna(0).rolling(6).mean().plot()
+    # plt.legend()
+    #  plt.grid()
+    # plt.show()
 
     # # #Portfolio Return Plot
     # portfolio_returns = portfolio_returns[['Average','bmGAL','bmIVV','bmACWI']]
