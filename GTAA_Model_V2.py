@@ -349,7 +349,7 @@ if __name__ == "__main__":
     # portfolio_returns = portfolio_returns[['EW_GTAA', 'EW_GTAA_Universe', 'RiskWt_GTAA', 'RiskWt_GTAA_Universe',
     #                                        'MomoPortfoli_QO', 'MomoPortfolio_Q', '70/30_QO_MP/RW_GTAA',
     #                                        '70/30_QQQE/RW_GTAA_bm', '60/40_ACWI/AGG', 'S&P500']]
-    # # print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
+    print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
     # # print(100 * np.sqrt(12) * portfolio_returns.groupby(portfolio_returns.index.year).std())
     # # portfolio_returns.cumsum().plot()
     # # plt.legend()
