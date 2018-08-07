@@ -56,6 +56,8 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
 
         # calculating the resampled price returns
         ret_frame = resamp_df.pct_change(per)
+        ret_frame = pd.DataFrame({s: ret_frame[s] - ret_frame.SPY for s in ret_frame.columns}, index=ret_frame.index)
+
 
         # calculating the daily returns
         riskChg = df.pct_change()
@@ -75,7 +77,7 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
 
     df_1m.drop(['SPY','BIL'], inplace=True, axis=1)
 
-    df.drop(['SPY','BIL'], inplace=True, axis=1)
+    # df.drop(['SPY','BIL'], inplace=True, axis=1)
 
     # 3 month risk adjusted frame
     df_3m = clean_universe(df, rs='BM', cutoff=0.5, per=3)
@@ -85,6 +87,11 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
 
     # 12 month risk adjusted  frame
     df_12m = clean_universe(df, rs='BM', cutoff=0.5, per=12)
+    #delete these
+    df.drop(['SPY', 'BIL'], inplace=True, axis=1)
+    df_3m.drop(['SPY', 'BIL'], inplace=True, axis=1)
+    df_6m.drop(['SPY', 'BIL'], inplace=True, axis=1)
+    df_12m.drop(['SPY', 'BIL'], inplace=True, axis=1)
 
 
     #Zscore the risk adjusted return frames
@@ -107,7 +114,7 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     persistence_short = df_1m.rolling(3).apply(return_persistence)
 
     #composte frame for the long and short persistence factors
-    composite_persistence = 0.1 * persistence_long  + 0.9 * persistence_short
+    composite_persistence = 0.8 * persistence_long  + 0.2* persistence_short
 
     #Generate the zscore of composite persistence dataframe
     persistence_zscore = pd.DataFrame([(composite_persistence.iloc[i] - composite_persistence.iloc[i].mean()) / composite_persistence.iloc[i].std() for i in range(len(composite_persistence))])
@@ -145,7 +152,7 @@ def drawdown(s):
 
     # Calculate the max drawdown in the past window days for each day in the series.
     # Use min_periods=1 if you want to let the first 252 days data have an expanding window
-    Roll_Max = SPY_Dat.rolling(center=False, min_periods=1, window=12).max()
+    Roll_Max = SPY_Dat.rolling(center=False, min_periods=6, window=12).max()
 
     Daily_Drawdown = SPY_Dat / Roll_Max - 1.0
 
@@ -205,6 +212,7 @@ def backtest_metrics(returnsframe, rfr):
     ret_12m, std_12m = returns_risk(returnsframe, 12 )
     ret_36m, std_36m = returns_risk(returnsframe, 36)
     ret_60m, std_60m = returns_risk(returnsframe, 60)
+    ret_120m, std_120m = returns_risk(returnsframe, 120)
 
     #Sharpe Ratio with 2.5% annualized RFR
     AnnSharpe = (AnnReturns - RFR_AnnRet.iloc[0]) / AnnRisk
@@ -235,13 +243,13 @@ def backtest_metrics(returnsframe, rfr):
     # Annualisec return over average annual DD
     sterling_ratio = abs(AnnReturns / [mdd[0][i] for i in range(len(mdd[0]))])
 
-    metric_df = pd.DataFrame(AnnReturns.values.tolist(), index = ['AnnRet(%)','AnnRisk(%)','AnnSharpe(2.5%)','Avg_DD(%)','MaxDD(%)','WinRate(%)','Gain_to_Loss','RoMDD','Sortino(5%)',
+    metric_df = pd.DataFrame(AnnReturns.values.tolist(), index = ['AnnRet(%)','AnnRisk(%)','AnnSharpe','Avg_DD(%)','MaxDD(%)','WinRate(%)','Gain_to_Loss','RoMDD','Sortino(5%)',
                                                                   'Sterling_Ratio(over MDD)','beta','ann_alpha','R_squared','p_value', 'tvalue',
-                                                                  '1YrReturns', '1YrRisk','3YrReturns', '3YrRisk', '5YrReturns', '5YrRisk'],
+                                                                  '1YrReturns', '1YrRisk','3YrReturns', '3YrRisk', '5YrReturns', '5YrRisk','10YrReturns','10YrRisk'],
                                                                     columns = ['Average','bmSPY' ])
     metric_df.loc['AnnRet(%)'] = round(metric_df.loc['AnnRet(%)'], 3)*100
     metric_df.loc['AnnRisk(%)'] = [100*i for i in AnnRisk]
-    metric_df.loc['AnnSharpe(2.5%)'] = AnnSharpe.values.tolist()[0]
+    metric_df.loc['AnnSharpe'] = AnnSharpe.values.tolist()[0]
     metric_df.loc['Avg_DD(%)'] =  [round(float(i), 3) for i in [abs(i) * 100 for i in dd[0]]]
     metric_df.loc['MaxDD(%)'] = [round(float(i), 3) for i in [abs(i) * 100 for i in mdd[0]]]
     metric_df.loc['WinRate(%)'] = [100* round(float(i), 3) for i in up.values.tolist()]
@@ -255,6 +263,8 @@ def backtest_metrics(returnsframe, rfr):
     metric_df.loc['3YrRisk'] = [100 * i for i in std_36m.values.tolist()]
     metric_df.loc['5YrReturns'] = [i*100.00 for i in ret_60m[0]]
     metric_df.loc['5YrRisk'] = [100 * i for i in std_60m.values.tolist()]
+    metric_df.loc['10YrReturns'] = [i*100.00 for i in ret_120m[0]]
+    metric_df.loc['10YrRisk'] = [100 * i for i in std_120m.values.tolist()]
     metric_df.loc['Total Return'] = returnsframe.cumsum()[-1:].values[0].tolist()
     return metric_df
 
@@ -274,107 +284,120 @@ if __name__ == "__main__":
     # read_price_file('BM')
     n1 = 0.0
     n2 = 0.0
-    n3 = 0.2
-    n4 = 0.8
-    model, wts = model_portfolios(cut_off=-1.5, wList=[n1,n2,n3,n4])
-
-    #Try with BIL and GYLD, w/o BIL and GYLD and combinations
-    #best persistence set is 0.1, 0.9 - Long/Short
-    #Best sets are  [0.1,0,0.8,0.1], [0.0,0,0.9,.1], [0.0,0,0.8,0.2] an combinations
-
-    # print(model.tail())
-    # print(wts.tail())
-    # print(buy_wts[-1:])
-    #
-    #
-    # #DataFrame for all the portfolios and benchmarks
-    # portfolio_returns = pd.DataFrame({'eq_wt' : eq_wt_portfolio, 'risk_wt' : risk_wt_portfolio, 'S&P500' : bm_ret['IVV'], 'Avg_Universe' : bm_ret[trading_universe].mean(axis=1),
-    #                                   'risk_wt_bm' :risk_wt_benchmark, 'bm_6040' : bm_6040_index, 'qo_momo' : momo_df['qo_rebal'],
-    #                                   'q_momo': momo_df['q_rebal'], 'momo_6040' : momo_6040, 'momo_index' : momo_6040_index}, index = risk_wt_portfolio.index)
-    #
-    # # Remove the first row with NaN's
-    # portfolio_returns = portfolio_returns[1:]
-    #
-    # #BackTest Statistics for all the portfolios and indexes
-    stats_df = backtest_metrics(model[['Average','bmSPY']], rfr = modBiL)
-    portfolio_returns = model[['Average','bmSPY']]
-    portfolio_returns.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/returns.csv")
-    stats_df.loc['Best_Month', :] = [100 * float(i) for i in portfolio_returns.max().values.tolist()]
-    stats_df.loc['Worst_Month', :] = [100 * float(i) for i in portfolio_returns.min().values.tolist()]
-    stats_df.loc['Best_Year', :] = [100 * float(i) for i in portfolio_returns.groupby(portfolio_returns.index.year).sum().max()]
-    stats_df.loc['Worst_Year', :] = [100 * float(i) for i in portfolio_returns.groupby(portfolio_returns.index.year).sum().min()]
-       #
-    #Regression stats for all portfolios and indices
-    for c in stats_df.columns:
-
-        stats_df[c].loc[['beta','ann_alpha','R_squared','p_value','tvalue']] = regression_fit(portfolio_returns[c], model.bmSPY.fillna(0), model.bmBIL.fillna(0))
-    # cutt_off=0.2
-    # stats_df.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/"+str(n1)+"_"+str(n2)+"_"+str(n3)+"_"+str(n4)+"_"+str(cutt_off)+".csv")
-    print(stats_df)
-    # # print("Trade Recommendation: ", buy_list)
-    # trade_reco = pd.DataFrame([v for i, v in buy_list], index=[i for i, v in buy_list], columns=['Weights'])
-    print(wts[-1:])
-
-    #Plot the rolling weights
-    # y = np.vstack([wts[c].fillna(0) for c in wts.columns])
-    # plt.stackplot(wts.index, y, labels = ['SHY'])
-    # wts[['GLD','SHY','AGG']].fillna(0).rolling(6).mean().plot()
-    # plt.legend()
-    #  plt.grid()
-    # plt.show()
-
-    # # #Portfolio Return Plot
-    # portfolio_returns = portfolio_returns[['Average','bmSPY']]
-    # print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
-    # portfolio_returns.cumsum().plot()
-    # plt.legend()
-    # plt.grid()
-    # plt.show()
-
-    # #Returns grouped by year
-    # portfolio_returns.rename(columns = {'eq_wt':'EW_GTAA', 'risk_wt':'RiskWt_GTAA', 'Avg_Universe':'EW_GTAA_Universe', 'risk_wt_bm':'RiskWt_GTAA_Universe',
-    #                                     'bm_6040':'60/40_ACWI/AGG', 'qo_momo':'MomoPortfoli_QO', 'q_momo':'MomoPortfolio_Q',
-    #                                     'momo_6040':'70/30_QO_MP/RW_GTAA','momo_index':'70/30_QQQE/RW_GTAA_bm'}, inplace = True)
-    #
-    # portfolio_returns = portfolio_returns[['EW_GTAA', 'EW_GTAA_Universe', 'RiskWt_GTAA', 'RiskWt_GTAA_Universe',
-    #                                        'MomoPortfoli_QO', 'MomoPortfolio_Q', '70/30_QO_MP/RW_GTAA',
-    #                                        '70/30_QQQE/RW_GTAA_bm', '60/40_ACWI/AGG', 'S&P500']]
-    print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
-    # # print(100 * np.sqrt(12) * portfolio_returns.groupby(portfolio_returns.index.year).std())
-    # # portfolio_returns.cumsum().plot()
-    # # plt.legend()
-    # # plt.grid()
-    # # plt.show()
-    #
-    # #correaltion Plot
-    # plt.matshow(portfolio_returns.corr())
-    # plt.xticks(range(len(portfolio_returns.columns)), portfolio_returns.columns)
-    # plt.yticks(range(len(portfolio_returns.columns)), portfolio_returns.columns)
-    # plt.colorbar()
-    # plt.show()
-    # stats_df.rename(columns={'eq_wt': 'EW_GTAA', 'risk_wt': 'RiskWt_GTAA', 'Avg_Universe': 'EW_GTAA_Universe',
-    #                                   'risk_wt_bm': 'RiskWt_GTAA_Universe',
-    #                                   'bm_6040': '60/40_ACWI/AGG', 'qo_momo': 'MomoPortfoli_QO',
-    #                                   'q_momo': 'MomoPortfolio_Q',
-    #                                   'momo_6040': '70/30_QO_MP/RW_GTAA', 'momo_index': '70/30_QQQE/RW_GTAA_bm'},
-    #                          inplace=True)
-    #
-    # stats_df = stats_df[['EW_GTAA', 'EW_GTAA_Universe', 'RiskWt_GTAA', 'RiskWt_GTAA_Universe',
-    #                                        'MomoPortfoli_QO', 'MomoPortfolio_Q', '70/30_QO_MP/RW_GTAA',
-    #                                        '70/30_QQQE/RW_GTAA_bm', '60/40_ACWI/AGG', 'S&P500']]
-    # # print(stats_df)
-    # tcor = pd.rolling_corr(portfolio_returns['Average'],portfolio_returns['bmSPY'],6)
-    # tcor.plot()
-    # plt.show()
-    # ts1 = 100 * portfolio_returns.groupby(portfolio_returns.index.year).sum()
-    # ts2 = 100 * np.sqrt(12) * portfolio_returns.groupby(portfolio_returns.index.year).std()
-    # print(ts1)
-    # print(ts2)
-    # # stats_df.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/Summary_Statistics.csv")
-    # # ts1.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/Return_Summary.csv")
-    # # ts2.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/Risk_Summary.csv")
-    # print(wts.tail(10))
+    n3 = 0.3
+    n4 = 0.7
 
 
+    def test_por(w):
+        # model, wts = model_portfolios(cut_off=0.2, wList=[n1,n2,n3,n4])
+        model, wts = model_portfolios(cut_off=0.2, wList=w)
 
+        #Try with BIL and GYLD, w/o BIL and GYLD and combinations
+        #best persistence set is 0.1, 0.9 - Long/Short
+        #Best sets are  [0.1,0,0.8,0.1], [0.0,0,0.9,.1], [0.0,0,0.8,0.2] an combinations
+
+        # print(model.tail())
+        # print(wts.tail())
+        # print(buy_wts[-1:])
+        #
+        #
+        # #DataFrame for all the portfolios and benchmarks
+        # portfolio_returns = pd.DataFrame({'eq_wt' : eq_wt_portfolio, 'risk_wt' : risk_wt_portfolio, 'S&P500' : bm_ret['IVV'], 'Avg_Universe' : bm_ret[trading_universe].mean(axis=1),
+        #                                   'risk_wt_bm' :risk_wt_benchmark, 'bm_6040' : bm_6040_index, 'qo_momo' : momo_df['qo_rebal'],
+        #                                   'q_momo': momo_df['q_rebal'], 'momo_6040' : momo_6040, 'momo_index' : momo_6040_index}, index = risk_wt_portfolio.index)
+        #
+        # # Remove the first row with NaN's
+        # portfolio_returns = portfolio_returns[1:]
+        #
+        # #BackTest Statistics for all the portfolios and indexes
+        stats_df = backtest_metrics(model[['Average','bmSPY']], rfr = modBiL)
+        portfolio_returns = model[['Average','bmSPY']]
+        portfolio_returns.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/returns.csv")
+        stats_df.loc['Best_Month', :] = [100 * float(i) for i in portfolio_returns.max().values.tolist()]
+        stats_df.loc['Worst_Month', :] = [100 * float(i) for i in portfolio_returns.min().values.tolist()]
+        stats_df.loc['Best_Year', :] = [100 * float(i) for i in portfolio_returns.groupby(portfolio_returns.index.year).sum().max()]
+        stats_df.loc['Worst_Year', :] = [100 * float(i) for i in portfolio_returns.groupby(portfolio_returns.index.year).sum().min()]
+           #
+        #Regression stats for all portfolios and indices
+        for c in stats_df.columns:
+
+            stats_df[c].loc[['beta','ann_alpha','R_squared','p_value','tvalue']] = regression_fit(portfolio_returns[c], model.bmSPY.fillna(0), model.bmBIL.fillna(0))
+
+        return stats_df
+        # cutt_off=0.2
+        # stats_df.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/"+str(n1)+"_"+str(n2)+"_"+str(n3)+"_"+str(n4)+"_"+str(cutt_off)+".csv")
+        # print(stats_df)
+        # print(wts[-1:])
+
+        #Plot the rolling weights
+        # y = np.vstack([wts[c].fillna(0) for c in wts.columns])
+        # plt.stackplot(wts.index, y, labels = ['SHY'])
+        # wts[['GLD','SHY','AGG']].fillna(0).rolling(6).mean().plot()
+        # plt.legend()
+        #  plt.grid()
+        # plt.show()
+
+        # # #Portfolio Return Plot
+        # portfolio_returns = portfolio_returns[['Average','bmSPY']]
+        # print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
+        # portfolio_returns.cumsum().plot()
+        # plt.legend()
+        # plt.grid()
+        # plt.show()
+
+        # #Returns grouped by year
+        # portfolio_returns.rename(columns = {'eq_wt':'EW_GTAA', 'risk_wt':'RiskWt_GTAA', 'Avg_Universe':'EW_GTAA_Universe', 'risk_wt_bm':'RiskWt_GTAA_Universe',
+        #                                     'bm_6040':'60/40_ACWI/AGG', 'qo_momo':'MomoPortfoli_QO', 'q_momo':'MomoPortfolio_Q',
+        #                                     'momo_6040':'70/30_QO_MP/RW_GTAA','momo_index':'70/30_QQQE/RW_GTAA_bm'}, inplace = True)
+        #
+        # portfolio_returns = portfolio_returns[['EW_GTAA', 'EW_GTAA_Universe', 'RiskWt_GTAA', 'RiskWt_GTAA_Universe',
+        #                                        'MomoPortfoli_QO', 'MomoPortfolio_Q', '70/30_QO_MP/RW_GTAA',
+        #                                        '70/30_QQQE/RW_GTAA_bm', '60/40_ACWI/AGG', 'S&P500']]
+        # print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
+        # # print(100 * np.sqrt(12) * portfolio_returns.groupby(portfolio_returns.index.year).std())
+        # # portfolio_returns.cumsum().plot()
+        # # plt.legend()
+        # # plt.grid()
+        # # plt.show()
+        #
+        # #correaltion Plot
+        # plt.matshow(portfolio_returns.corr())
+        # plt.xticks(range(len(portfolio_returns.columns)), portfolio_returns.columns)
+        # plt.yticks(range(len(portfolio_returns.columns)), portfolio_returns.columns)
+        # plt.colorbar()
+        # plt.show()
+        # stats_df.rename(columns={'eq_wt': 'EW_GTAA', 'risk_wt': 'RiskWt_GTAA', 'Avg_Universe': 'EW_GTAA_Universe',
+        #                                   'risk_wt_bm': 'RiskWt_GTAA_Universe',
+        #                                   'bm_6040': '60/40_ACWI/AGG', 'qo_momo': 'MomoPortfoli_QO',
+        #                                   'q_momo': 'MomoPortfolio_Q',
+        #                                   'momo_6040': '70/30_QO_MP/RW_GTAA', 'momo_index': '70/30_QQQE/RW_GTAA_bm'},
+        #                          inplace=True)
+        #
+        # stats_df = stats_df[['EW_GTAA', 'EW_GTAA_Universe', 'RiskWt_GTAA', 'RiskWt_GTAA_Universe',
+        #                                        'MomoPortfoli_QO', 'MomoPortfolio_Q', '70/30_QO_MP/RW_GTAA',
+        #                                        '70/30_QQQE/RW_GTAA_bm', '60/40_ACWI/AGG', 'S&P500']]
+        # # print(stats_df)
+        # tcor = pd.rolling_corr(portfolio_returns['Average'],portfolio_returns['bmSPY'],6)
+        # tcor.plot()
+        # plt.show()
+        # ts1 = 100 * portfolio_returns.groupby(portfolio_returns.index.year).sum()
+        # ts2 = 100 * np.sqrt(12) * portfolio_returns.groupby(portfolio_returns.index.year).std()
+        # print(ts1)
+        # print(ts2)
+        # # stats_df.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/Summary_Statistics.csv")
+        # # ts1.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/Return_Summary.csv")
+        # # ts2.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/Risk_Summary.csv")
+        # print(wts.tail(10))
+
+    wlist = [[.25, .25, .25, .25], [0.5,0.5,0.0,0.0], [0.0, 0.5, 0.25, 0.25], [0.0, 0.0, 0.5, 0.5], [0.0, 0.0, 0.8, 0.2], [0.0, 0.0, 0.2, 0.8],
+             [0.0, 0.0, 0.7, 0.3], [0.0, 0.0, 0.3, 0.7], [0.0, 0.5, 0.0, 0.5], [0.0, 0.5, 0.5, 0.0],[0.0,0.0,0.9,0.1],[0.0,0.0,0.1,0.9],[0.3,0.0,0.7,0.0]]
+
+
+    t1 = pd.DataFrame()
+    for w in wlist:
+        df_test = pd.DataFrame(test_por(w))
+        df_test.loc['model', :] = str(w)
+        t1 = pd.concat([t1, df_test], axis=1)
+
+    t1.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/mod_comp.csv")
 
