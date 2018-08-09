@@ -73,9 +73,9 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     df_1m = clean_universe(df, rs='BM', cutoff=0.5, per=1)
 
     #Drop the benchmark from the return frame. Add symbols to the list to eliminate from teh return frame
-    rframe.drop(['SPY','BIL'], inplace=True, axis=1)
+    rframe.drop(['SPY','BIL','SHY'], inplace=True, axis=1)
 
-    df_1m.drop(['SPY','BIL'], inplace=True, axis=1)
+    df_1m.drop(['SPY','BIL','SHY'], inplace=True, axis=1)
 
     # df.drop(['SPY','BIL'], inplace=True, axis=1)
 
@@ -88,10 +88,10 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     # 12 month risk adjusted  frame
     df_12m = clean_universe(df, rs='BM', cutoff=0.5, per=12)
     #delete these
-    df.drop(['SPY', 'BIL'], inplace=True, axis=1)
-    df_3m.drop(['SPY', 'BIL'], inplace=True, axis=1)
-    df_6m.drop(['SPY', 'BIL'], inplace=True, axis=1)
-    df_12m.drop(['SPY', 'BIL'], inplace=True, axis=1)
+    df.drop(['SPY', 'BIL','SHY'], inplace=True, axis=1)
+    df_3m.drop(['SPY', 'BIL','SHY'], inplace=True, axis=1)
+    df_6m.drop(['SPY', 'BIL','SHY'], inplace=True, axis=1)
+    df_12m.drop(['SPY', 'BIL','SHY'], inplace=True, axis=1)
 
 
     #Zscore the risk adjusted return frames
@@ -137,7 +137,7 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     df_portfolio = df_portfolio.shift(1)
 
     #calculate the portfolio return series and benchmark. Annual expense of 35bps is deducted monthly from the portfolio
-    df_portfolio['Average'] = df_portfolio.sum(axis=1) - .00042  #50bp of fees and transaction cost
+    df_portfolio['Average'] = df_portfolio.sum(axis=1) - .00083  #50bp of fees and transaction cost
     df_portfolio['bmSPY'] = bmSPY
     df_portfolio['bmBIL'] = bmbil
 
@@ -165,9 +165,6 @@ def drawdown(s):
     return Daily_Drawdown.mean(), Max_Daily_Drawdown.min()
 
 def regression_fit(port, bm, rfr):
-    # risk free rate
-    # rfr = rfr['01-2007':].fillna(0)
-    # port = port['01-2007':]
 
     excess_return = port - rfr
         # excess returns
@@ -181,7 +178,7 @@ def regression_fit(port, bm, rfr):
     # result.params[0], result.params.loc['const'], result.rsquared_adj, result.pvalues, result.tvalues.loc['const']
     # intercept = (1+intercept)**12 - 1
 
-    return [result.params[0], result.params.loc['const'], result.rsquared_adj, result.pvalues.loc['const'], result.tvalues.loc['const']]
+    return [result.params[0], 100*((1+result.params.loc['const'])**12-1), result.rsquared_adj, result.pvalues.loc['const'], result.tvalues.loc['const']]
 
 
 def backtest_metrics(returnsframe, rfr):
@@ -202,14 +199,20 @@ def backtest_metrics(returnsframe, rfr):
     def returns_risk(retFrame, per):
 
         #1Yr Return
-        returnsframe_N = retFrame[-per:]
-        N = len(returnsframe_N) / 12
-        cpr_N = (1 + returnsframe_N).cumprod()
-        annRet_N = (cpr_N[-1:].pow(1/N) - 1)
-        std_N = np.sqrt(12) * returnsframe_N.std()
-        return annRet_N.values.tolist(), std_N
+        if per<=len(retFrame):
 
-    ret_12m, std_12m = returns_risk(returnsframe, 12 )
+            returnsframe_N = retFrame[-per:]
+            N = len(returnsframe_N) / 12
+            cpr_N = (1 + returnsframe_N).cumprod()
+            annRet_N = (cpr_N[-1:].pow(1/N) - 1)
+            std_N = np.sqrt(12) * returnsframe_N.std()
+            return annRet_N.values.tolist(), std_N
+        else:
+            none_ret = [[0.0,0.0,0.0]]
+            none_std = pd.Series([0.0,0.0,0.0], index = retFrame.columns)
+            return none_ret, none_std
+
+    ret_12m, std_12m = returns_risk(returnsframe, 12)
     ret_36m, std_36m = returns_risk(returnsframe, 36)
     ret_60m, std_60m = returns_risk(returnsframe, 60)
     ret_120m, std_120m = returns_risk(returnsframe, 120)
@@ -243,8 +246,13 @@ def backtest_metrics(returnsframe, rfr):
     # Annualisec return over average annual DD
     sterling_ratio = abs(AnnReturns / [mdd[0][i] for i in range(len(mdd[0]))])
 
+    #Information ratio
+    IR_df = pd.DataFrame({c: returnsframe[c] - returnsframe.bmSPY for c in returnsframe.columns})
+    IR_df = IR_df[['Average', 'bmSPY', 'EW']]
+    info_ratio = (IR_df.mean() / IR_df.std()).fillna(0)
+
     metric_df = pd.DataFrame(AnnReturns.values.tolist(), index = ['AnnRet(%)','AnnRisk(%)','AnnSharpe','Avg_DD(%)','MaxDD(%)','WinRate(%)','Gain_to_Loss','RoMDD','Sortino(5%)',
-                                                                  'Sterling_Ratio(over MDD)','beta','ann_alpha','R_squared','p_value', 'tvalue',
+                                                                  'Sterling_Ratio(over MDD)','beta','ann_alpha','R_squared','p_value', 'tvalue','info_ratio',
                                                                   '1YrReturns', '1YrRisk','3YrReturns', '3YrRisk', '5YrReturns', '5YrRisk','10YrReturns','10YrRisk'],
                                                                     columns = ['Average','bmSPY','EW' ])
     metric_df.loc['AnnRet(%)'] = round(metric_df.loc['AnnRet(%)'], 3)*100
@@ -257,6 +265,7 @@ def backtest_metrics(returnsframe, rfr):
     metric_df.loc['RoMDD'] = [round(abs(i),3) for i in mar_ratio.values.tolist()[0]]
     metric_df.loc['Sortino(5%)'] = sortino_ratio.values.tolist()[0]
     metric_df.loc['Sterling_Ratio(over MDD)'] = [round(abs(i),3) for i in sterling_ratio.values.tolist()[0]]
+    metric_df.loc['info_ratio'] = [i for i in info_ratio.values.tolist()]
     metric_df.loc['1YrReturns'] = [i*100.00 for i in ret_12m[0]]
     metric_df.loc['1YrRisk'] = [100 * i for i in std_12m.values.tolist()]
     metric_df.loc['3YrReturns'] = [i*100.00 for i in ret_36m[0]]
@@ -282,17 +291,16 @@ if __name__ == "__main__":
     modBiL = adjusted_price.BIL.pct_change()
 
     # read_price_file('BM')
-    n1 = 0.0
-    n2 = 0.0
-    n3 = 0.3
-    n4 = 0.7
-
+    n1 = 0.5
+    n2 = 0.5
+    n3 = 0.0
+    n4 = 0.0
 
     def test_por(w):
         # model, wts = model_portfolios(cut_off=0.2, wList=[n1,n2,n3,n4])
         model, wts,eqPort = model_portfolios(cut_off=0.2, wList=w)
         model['EW'] = eqPort.mean(axis=1)
-
+        # model = model['2014':]
 
         # # Remove the first row with NaN's
         # portfolio_returns = portfolio_returns[1:]
@@ -307,6 +315,7 @@ if __name__ == "__main__":
         stats_df.loc['Worst_Year', :] = [100 * float(i) for i in portfolio_returns.groupby(portfolio_returns.index.year).sum().min()]
            #
         #Regression stats for all portfolios and indices
+
         for c in stats_df.columns:
 
             stats_df[c].loc[['beta','ann_alpha','R_squared','p_value','tvalue']] = regression_fit(portfolio_returns[c], model.bmSPY.fillna(0), model.bmBIL.fillna(0))
@@ -318,24 +327,24 @@ if __name__ == "__main__":
         # print(wts[-1:])
 
         #Plot the rolling weights
-        wts = wts['2014':]
-        labels= wts.columns
-        y = np.vstack([wts[c].fillna(0) for c in wts.columns])
-        plt.stackplot(wts.index, y, labels = labels)
-        # wts.fillna(0).rolling(12).mean().plot()
-        plt.legend()
-        plt.grid()
-        plt.show()
+        # wts = wts['2011-11':]
+        # labels= wts.columns
+        # y = np.vstack([wts[c].fillna(0) for c in wts.columns])
+        # plt.stackplot(wts.index, y, labels = labels)
+        # # wts.fillna(0).rolling(12).mean().plot()
+        # plt.legend()
+        # plt.grid()
+
 
         # #Portfolio Return Plot
         # portfolio_returns = portfolio_returns[['Average','bmSPY','EW']]
         # print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
         # # tcor = pd.rolling_corr(portfolio_returns['Average'], portfolio_returns['bmSPY'], 6)
-        # portfolio_returns.cumsum().plot()
+        portfolio_returns.cumsum().plot()
         # # portfolio_returns.cumsum(), tcor].plot()
-        # plt.legend()
-        # plt.grid()
-        # plt.show()
+        plt.legend()
+        plt.grid()
+
 
         # print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
         # # print(100 * np.sqrt(12) * portfolio_returns.groupby(portfolio_returns.index.year).std())
@@ -380,6 +389,7 @@ if __name__ == "__main__":
 
 
         return stats_df
-
-    df_test = pd.DataFrame(test_por([0.0,0.0,0.3,0.7]))
+    # for no shy best weights is [0.0,0.0,0.7,0.3] and with shy best is [0.0,0.0,0.3,0.7]
+    df_test = pd.DataFrame(test_por([0.0,0.0,0.7,0.3]))
     print(df_test)
+    plt.show()
