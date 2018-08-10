@@ -73,9 +73,9 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     df_1m = clean_universe(df, rs='BM', cutoff=0.5, per=1)
 
     #Drop the benchmark from the return frame. Add symbols to the list to eliminate from teh return frame
-    rframe.drop(['SPY','BIL','SHY'], inplace=True, axis=1)
+    rframe.drop(['SPY','BIL'], inplace=True, axis=1)
 
-    df_1m.drop(['SPY','BIL','SHY'], inplace=True, axis=1)
+    df_1m.drop(['SPY','BIL'], inplace=True, axis=1)
 
     # df.drop(['SPY','BIL'], inplace=True, axis=1)
 
@@ -88,10 +88,10 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     # 12 month risk adjusted  frame
     df_12m = clean_universe(df, rs='BM', cutoff=0.5, per=12)
     #delete these
-    df.drop(['SPY', 'BIL','SHY'], inplace=True, axis=1)
-    df_3m.drop(['SPY', 'BIL','SHY'], inplace=True, axis=1)
-    df_6m.drop(['SPY', 'BIL','SHY'], inplace=True, axis=1)
-    df_12m.drop(['SPY', 'BIL','SHY'], inplace=True, axis=1)
+    df.drop(['SPY', 'BIL'], inplace=True, axis=1)
+    df_3m.drop(['SPY', 'BIL'], inplace=True, axis=1)
+    df_6m.drop(['SPY', 'BIL'], inplace=True, axis=1)
+    df_12m.drop(['SPY', 'BIL'], inplace=True, axis=1)
 
 
     #Zscore the risk adjusted return frames
@@ -277,6 +277,10 @@ def backtest_metrics(returnsframe, rfr):
     metric_df.loc['Total Return'] = returnsframe.cumsum()[-1:].values[0].tolist()
     return metric_df
 
+def startegy_swicth():
+    df = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/adj_close_sectors.csv", index_col='Date', parse_dates=True)
+
+
 
 if __name__ == "__main__":
 
@@ -296,7 +300,7 @@ if __name__ == "__main__":
     n3 = 0.0
     n4 = 0.0
 
-    def test_por(w):
+    def test_por(w, strat):
         # model, wts = model_portfolios(cut_off=0.2, wList=[n1,n2,n3,n4])
         model, wts,eqPort = model_portfolios(cut_off=0.2, wList=w)
         model['EW'] = eqPort.mean(axis=1)
@@ -308,7 +312,7 @@ if __name__ == "__main__":
         # #BackTest Statistics for all the portfolios and indexes
         stats_df = backtest_metrics(model[['Average','bmSPY','EW']], rfr = modBiL)
         portfolio_returns = model[['Average','bmSPY','EW']]
-        portfolio_returns.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/returns.csv")
+        portfolio_returns.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/returns_"+strat+".csv")
         stats_df.loc['Best_Month', :] = [100 * float(i) for i in portfolio_returns.max().values.tolist()]
         stats_df.loc['Worst_Month', :] = [100 * float(i) for i in portfolio_returns.min().values.tolist()]
         stats_df.loc['Best_Year', :] = [100 * float(i) for i in portfolio_returns.groupby(portfolio_returns.index.year).sum().max()]
@@ -370,7 +374,7 @@ if __name__ == "__main__":
         # print(ts2)
 
         #saving files
-        # # stats_df.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/Summary_Statistics.csv")
+        stats_df.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/Summary_Statistics_"+strat+".csv")
         # # ts1.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/Return_Summary.csv")
         # # ts2.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/Risk_Summary.csv")
         # print(wts.tail(10))
@@ -390,6 +394,6 @@ if __name__ == "__main__":
 
         return stats_df
     # for no shy best weights is [0.0,0.0,0.7,0.3] and with shy best is [0.0,0.0,0.3,0.7]
-    df_test = pd.DataFrame(test_por([0.0,0.0,0.7,0.3]))
+    df_test = pd.DataFrame(test_por([0.0,0.0,0.3,0.7], strat = 'cash'))
     print(df_test)
     plt.show()
