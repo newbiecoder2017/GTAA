@@ -2,7 +2,7 @@
 #universe consittuents
 #DBC - DB Liquid Commoties Index etf
 #GLD - Gold
-#SPY  - U.S. Stocks (Fama French top 30% by market capitalization)
+#IVV  - U.S. Stocks (Fama French top 30% by market capitalization)
 #IEV- European Stocks (Stoxx 350 Index)
 #EWJ - Japanese Stocks (MSCI Japan)
 #EEM - Emerging Market Stocks (MSCI EM)
@@ -28,7 +28,7 @@ yf.pdr_override() # <== that's all it takes :-)
 pd.set_option('precision',4)
 pd.options.display.float_format = '{:.3f}'.format
 import seaborn as sns
-sns.set_palette(sns.color_palette("hls", 20))
+sns.set_palette(sns.color_palette("Paired"))
 
 
 
@@ -43,7 +43,7 @@ def read_price_file(frq = 'BM'):
 
 def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     df = pd.read_csv("C:/Python27/Git/SMA_GTAA/adj_close_v2.csv", index_col='Date', parse_dates=True)
-    df = df['01-2012':]
+    # df = df['01-2012':]
     #calculating the daily return for benchmarks
     rframe = df.resample('BM', closed='right').last().pct_change()
 
@@ -164,12 +164,12 @@ def drawdown(s):
 
     Max_Daily_Drawdown = Daily_Drawdown.rolling(center=False, min_periods=1, window=12).min()
 
-    return Daily_Drawdown.mean(), Max_Daily_Drawdown.min()
+    return Daily_Drawdown.mean(), Max_Daily_Drawdown.min(), Daily_Drawdown
 
 def regression_fit(port, bm, rfr):
     # risk free rate
-    rfr = rfr['01-2012':].fillna(0)
-    port = port['01-2012':]
+    # rfr = rfr['01-2012':].fillna(0)
+    # port = port['01-2012':]
 
     excess_return = port - rfr
         # excess returns
@@ -229,7 +229,10 @@ def backtest_metrics(returnsframe, rfr):
 #
 
     dd = [drawdown(cummulative_return)[0]]
+
     mdd = [drawdown(cummulative_return)[1]]
+
+    daily_dd = drawdown(cummulative_return)[2]
 
     # Calulate the win ratio and Gain to Loss ratio
     up = returnsframe[returnsframe > 0].count() / returnsframe.count()
@@ -264,7 +267,7 @@ def backtest_metrics(returnsframe, rfr):
     metric_df.loc['3YrRisk'] = [100 * i for i in std_36m.values.tolist()]
     metric_df.loc['5YrReturns'] = [i*100.00 for i in ret_60m[0]]
     metric_df.loc['5YrRisk'] = [100 * i for i in std_60m.values.tolist()]
-    return metric_df
+    return metric_df, daily_dd
 
 
 if __name__ == "__main__":
@@ -305,7 +308,7 @@ if __name__ == "__main__":
     # portfolio_returns = portfolio_returns[1:]
     #
     # #BackTest Statistics for all the portfolios and indexes
-    stats_df = backtest_metrics(model[['Average','bmGAL','bmIVV','bmACWI']], rfr = modBiL)
+    stats_df, daily_dd = backtest_metrics(model[['Average','bmGAL','bmIVV','bmACWI']], rfr = modBiL)
     portfolio_returns = model[['Average','bmGAL','bmIVV','bmACWI']]
     portfolio_returns.to_csv("C:/Python27/Git/SMA_GTAA/returns.csv")
     stats_df.loc['Best_Month', :] = [100 * float(i) for i in portfolio_returns.max().values.tolist()]
@@ -324,13 +327,48 @@ if __name__ == "__main__":
     # trade_reco = pd.DataFrame([v for i, v in buy_list], index=[i for i, v in buy_list], columns=['Weights'])
     print(wts[-1:])
 
+    #DrawDown Plot
+    daily_dd.fillna(0).rolling(3).mean().plot(color='rgbc')
+    plt.title("3m Rolling DrawDowns")
+    plt.grid()
+    plt.legend()
+    plt.ylabel("% Drawdown")
+    plt.savefig("C:/Python27/Git/SMA_GTAA/drawdowns_LTH.png")
+    plt.show()
+
+
     #Plot the rolling weights
     # y = np.vstack([wts[c].fillna(0) for c in wts.columns])
     # plt.stackplot(wts.index, y, labels = ['SHY'])
-    wts[['GLD','SHY','AGG']].fillna(0).rolling(6).mean().plot()
-    plt.legend()
-     plt.grid()
-    plt.show()
+
+    #safe assets plot
+    # wts[['GLD','SHY','AGG']].fillna(0).rolling(6).mean().plot(color = 'rgb')
+    # plt.title("Safe_Assets_Allocations")
+
+    #risky assets plot
+    # wts[['IVV', 'EWJ', 'EEM', 'IEV']].fillna(0).rolling(6).mean().plot(color = 'rgb')
+    # plt.title("Risky_Assets_Allocations")
+
+    #equity/bond allocations plot
+    # wts[['IVV', 'TLT','IEF','SHY']].fillna(0).rolling(6).mean().plot(color = 'rgbc')
+    # plt.title("US_Equity_Bonds_Allocations")
+
+    #All Equity Bond Allocations
+    # global_equity = wts[['IVV','IEV','EWJ','EEM','ACWI']]
+    # global_equity['Average'] =  global_equity.mean(axis=1)
+    # global_debt = wts[['IEF', 'TLT', 'SHY', 'AGG']]
+    # global_debt['Average'] = global_debt.mean(axis=1)
+    # new_df_plot = pd.DataFrame(columns = ['Equity', 'Bonds'])
+    # new_df_plot['Equity'] = global_equity['Average'].fillna(0)
+    # new_df_plot['Bonds'] = global_debt['Average'].fillna(0)
+    # new_df_plot.rolling(6).mean().plot(color = 'rgb')
+    # plt.title("Global_Equity_Bonds_Allocations")
+
+    # plt.ylabel("% allocation (rolling 6 months avg)")
+    # plt.legend()
+    # plt.grid()
+    # plt.savefig("C:/Python27/Git/SMA_GTAA/Global_equity_bond_LTH.png")
+    # plt.show()
 
     # # #Portfolio Return Plot
     # portfolio_returns = portfolio_returns[['Average','bmGAL','bmIVV','bmACWI']]

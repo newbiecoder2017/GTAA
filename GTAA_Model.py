@@ -333,12 +333,7 @@ if __name__ == "__main__":
     # plt.yticks(range(len(portfolio_returns.columns)), portfolio_returns.columns)
     # plt.colorbar()
     # plt.show()
-    stats_df.rename(columns={'eq_wt': 'EW_GTAA', 'risk_wt': 'RiskWt_GTAA', 'Avg_Universe': 'EW_GTAA_Universe',
-                                      'risk_wt_bm': 'RiskWt_GTAA_Universe',
-                                      'bm_6040': '60/40_ACWI/AGG', 'qo_momo': 'MomoPortfoli_QO',
-                                      'q_momo': 'MomoPortfolio_Q',
-                                      'momo_6040': '70/30_QO_MP/RW_GTAA', 'momo_index': '70/30_QQQE/RW_GTAA_bm'},
-                             inplace=True)
+    stats_df.rename(       )
 
     stats_df = stats_df[['EW_GTAA', 'EW_GTAA_Universe', 'RiskWt_GTAA', 'RiskWt_GTAA_Universe',
                                            'MomoPortfoli_QO', 'MomoPortfolio_Q', '70/30_QO_MP/RW_GTAA',
