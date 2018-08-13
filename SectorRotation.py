@@ -41,7 +41,7 @@ def read_price_file(frq = 'BM'):
     df_price = df_price.resample(frq, closed='right').last()
     return df_price
 
-def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25], mod = 'cash'):
+def model_portfolios(cut_off=0.0, wList=[0.25,0.25,0.25,0.25], mod='cash'):
     df = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/adj_close_sectors.csv", index_col='Date', parse_dates=True)
     # df = df['01-2007':]
     #calculating the daily return for benchmarks
@@ -128,7 +128,7 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25], mod = 'cash'):
     persistence_long = df_1m.rolling(6).apply(return_persistence)
     persistence_short = df_1m.rolling(3).apply(return_persistence)
 
-    #composte frame for the long and short persistence factors
+    #composte frame for the long and short persistence factors use long wts  = 0.9 and short wts = 0.1 for less drawdown
     composite_persistence = 0.1 * persistence_long  + 0.9* persistence_short
 
     #Generate the zscore of composite persistence dataframe
@@ -319,17 +319,55 @@ def startegy_switch():
     return df_combined
 
 def cash_scaling_model():
-    cs_df = pd.read_csv("C:/Python27/Git/SMA_GTAA/adj_close_v2.csv", index_col='Date', parse_dates=True)[['IVV', 'BIL']]
-    cs_df = cs_df.resample('BM', closed='right').last()
+    # cs_df = pd.read_csv("C:/Python27/Git/SMA_GTAA/adj_close_v2.csv", index_col='Date', parse_dates=True)[['IVV', 'BIL']]
+    # cs_df = cs_df.resample('BM', closed='right').last()
+    #
+    # roll_win = 7
+    #
+    # rolling_12m = cs_df / cs_df.shift(roll_win) - 1
+    #
+    # rolling_12m['avg_er'] = cs_df['IVV'] - cs_df['IVV'].rolling(roll_win).mean()
+    # rolling_12m.dropna(inplace=True)
+    #
+    # rolling_12m['ER'] = rolling_12m.IVV - rolling_12m.BIL
+    #
+    # rolling_12m['c_exc_ret'] = np.where(rolling_12m['ER'] > 0, 1, 0)
+    #
+    # rolling_12m['c_avg_ret'] = np.where(rolling_12m['avg_er'] > 0, 1, 0)
+    #
+    # rolling_12m['compp'] = rolling_12m['c_exc_ret'] + rolling_12m['c_avg_ret']
+    #
+    # c1 = rolling_12m['compp'] >= 2
+    # # c2 = rolling_12m['compp'] > 0
+    # # c3 = rolling_12m['compp'] < 2
+    #
+    # #use this to for a 3 way model, cash, nocash and BIL
+    # # rolling_12m['composite'] = np.where(c1,1,np.where(c2&c3,0.5,0))
+    #
+    # rolling_12m['composite'] = np.where(c1, 1, 0)
+    ir_df = pd.read_csv("C:/Python27/Git/SMA_GTAA/interest_rates_fred.csv", index_col='DATE', parse_dates=True)
+
+    ir_df[ir_df['DTB3'] == '.'] = np.nan
+    ir_df = ir_df.astype(float) * .01
+    ir_df.fillna(method='ffill', inplace=True)
+    ir_df['MV'] = 100.0
+    ir_df['MV2'] = ir_df['MV'].shift(1) * (1 + ir_df['DTB3'])
+
+    sp_df = pd.read_csv("C:/Python27/Git/SMA_GTAA/sp500_yahoo.csv", index_col='Date', parse_dates=True)[['Adj Close']]
+
+    sp_df['BIL'] = ir_df['MV2']
+
+    cs_df = sp_df.resample('BM', closed='right').last()
 
     roll_win = 7
 
     rolling_12m = cs_df / cs_df.shift(roll_win) - 1
 
-    rolling_12m['avg_er'] = cs_df['IVV'] - cs_df['IVV'].rolling(roll_win).mean()
+    rolling_12m['avg_er'] = cs_df['Adj Close'] - cs_df['Adj Close'].rolling(roll_win).mean()
+
     rolling_12m.dropna(inplace=True)
 
-    rolling_12m['ER'] = rolling_12m.IVV - rolling_12m.BIL
+    rolling_12m['ER'] = rolling_12m['Adj Close'] - rolling_12m.BIL
 
     rolling_12m['c_exc_ret'] = np.where(rolling_12m['ER'] > 0, 1, 0)
 
@@ -338,15 +376,10 @@ def cash_scaling_model():
     rolling_12m['compp'] = rolling_12m['c_exc_ret'] + rolling_12m['c_avg_ret']
 
     c1 = rolling_12m['compp'] >= 2
-    # c2 = rolling_12m['compp'] > 0
-    # c3 = rolling_12m['compp'] < 2
-
-    #use this to for a 3 way model, cash, nocash and BIL
-    # rolling_12m['composite'] = np.where(c1,1,np.where(c2&c3,0.5,0))
-
     rolling_12m['composite'] = np.where(c1, 1, 0)
-    x = rolling_12m['composite'][-1:][0]
 
+    x = rolling_12m['composite'][-1:][0]
+    print(rolling_12m['composite'].head(10))
 
     rolling_12m.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/cashscaler_"+today+".csv")
 
@@ -400,7 +433,7 @@ if __name__ == "__main__":
 
         # for no shy best weights is [0.0,0.0,0.7,0.3] and with shy best is [0.0,0.0,0.3,0.7]
     nocash_df = pd.DataFrame(test_por([0.0, 0.0, 0.7, 0.3], mod='nocash'))
-    cash_df = pd.DataFrame(test_por([0.0, 0.0, 0.7, 0.3], mod='cash'))
+    cash_df = pd.DataFrame(test_por([0.0, 0.0, 0.3, 0.7], mod='cash'))
     cs_model = cash_scaling_model()
 
     if cs_model == 1:
