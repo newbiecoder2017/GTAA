@@ -25,10 +25,12 @@ import statsmodels.api as sm
 yf.pdr_override() # <== that's all it takes :-)
 pd.set_option('precision',4)
 pd.options.display.float_format = '{:.3f}'.format
+import time
+import datetime
 import seaborn as sns
 # sns.set_palette(sns.color_palette("hls", 20))
 
-
+today = datetime.datetime.today().strftime('%m%d%y')
 
 #Function to pull data from yahoo
 def pull_data(s):
@@ -39,7 +41,7 @@ def read_price_file(frq = 'BM'):
     df_price = df_price.resample(frq, closed='right').last()
     return df_price
 
-def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
+def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25], mod = 'cash'):
     df = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/adj_close_sectors.csv", index_col='Date', parse_dates=True)
     # df = df['01-2007':]
     #calculating the daily return for benchmarks
@@ -73,9 +75,15 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     df_1m = clean_universe(df, rs='BM', cutoff=0.5, per=1)
 
     #Drop the benchmark from the return frame. Add symbols to the list to eliminate from teh return frame
-    rframe.drop(['SPY','BIL'], inplace=True, axis=1)
+    if mod == 'nocash':
 
-    df_1m.drop(['SPY','BIL'], inplace=True, axis=1)
+        rframe.drop(['SPY','BIL','SHY'], inplace=True, axis=1)
+
+        df_1m.drop(['SPY','BIL','SHY'], inplace=True, axis=1)
+    else:
+        rframe.drop(['SPY', 'BIL'], inplace=True, axis=1)
+
+        df_1m.drop(['SPY', 'BIL'], inplace=True, axis=1)
 
     # df.drop(['SPY','BIL'], inplace=True, axis=1)
 
@@ -88,10 +96,17 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     # 12 month risk adjusted  frame
     df_12m = clean_universe(df, rs='BM', cutoff=0.5, per=12)
     #delete these
-    df.drop(['SPY', 'BIL'], inplace=True, axis=1)
-    df_3m.drop(['SPY', 'BIL'], inplace=True, axis=1)
-    df_6m.drop(['SPY', 'BIL'], inplace=True, axis=1)
-    df_12m.drop(['SPY', 'BIL'], inplace=True, axis=1)
+    if mod == 'nocash':
+
+        df.drop(['SPY', 'BIL','SHY'], inplace=True, axis=1)
+        df_3m.drop(['SPY', 'BIL','SHY'], inplace=True, axis=1)
+        df_6m.drop(['SPY', 'BIL','SHY'], inplace=True, axis=1)
+        df_12m.drop(['SPY', 'BIL','SHY'], inplace=True, axis=1)
+    else:
+        df.drop(['SPY', 'BIL'], inplace=True, axis=1)
+        df_3m.drop(['SPY', 'BIL'], inplace=True, axis=1)
+        df_6m.drop(['SPY', 'BIL'], inplace=True, axis=1)
+        df_12m.drop(['SPY', 'BIL'], inplace=True, axis=1)
 
 
     #Zscore the risk adjusted return frames
@@ -137,7 +152,7 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     df_portfolio = df_portfolio.shift(1)
 
     #calculate the portfolio return series and benchmark. Annual expense of 35bps is deducted monthly from the portfolio
-    df_portfolio['Average'] = df_portfolio.sum(axis=1) - .00083  #50bp of fees and transaction cost
+    df_portfolio['Average'] = df_portfolio.sum(axis=1) - .00083  #100bp of fees and transaction cost
     df_portfolio['bmSPY'] = bmSPY
     df_portfolio['bmBIL'] = bmbil
 
@@ -248,13 +263,13 @@ def backtest_metrics(returnsframe, rfr):
 
     #Information ratio
     IR_df = pd.DataFrame({c: returnsframe[c] - returnsframe.bmSPY for c in returnsframe.columns})
-    IR_df = IR_df[['Average', 'bmSPY', 'EW']]
+    IR_df = IR_df[['cashModel','noCashModel','portfolio','bmSPY','EW']]
     info_ratio = (IR_df.mean() / IR_df.std()).fillna(0)
 
     metric_df = pd.DataFrame(AnnReturns.values.tolist(), index = ['AnnRet(%)','AnnRisk(%)','AnnSharpe','Avg_DD(%)','MaxDD(%)','WinRate(%)','Gain_to_Loss','RoMDD','Sortino(5%)',
                                                                   'Sterling_Ratio(over MDD)','beta','ann_alpha','R_squared','p_value', 'tvalue','info_ratio',
                                                                   '1YrReturns', '1YrRisk','3YrReturns', '3YrRisk', '5YrReturns', '5YrRisk','10YrReturns','10YrRisk'],
-                                                                    columns = ['Average','bmSPY','EW' ])
+                                                                    columns = ['cashModel','noCashModel','portfolio','bmSPY','EW'])
     metric_df.loc['AnnRet(%)'] = round(metric_df.loc['AnnRet(%)'], 3)*100
     metric_df.loc['AnnRisk(%)'] = [100*i for i in AnnRisk]
     metric_df.loc['AnnSharpe'] = AnnSharpe.values.tolist()[0]
@@ -277,9 +292,76 @@ def backtest_metrics(returnsframe, rfr):
     metric_df.loc['Total Return'] = returnsframe.cumsum()[-1:].values[0].tolist()
     return metric_df
 
-def startegy_swicth():
-    df = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/adj_close_sectors.csv", index_col='Date', parse_dates=True)
+def startegy_switch():
 
+    df_cash = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/returns_cash_"+today+".csv", index_col=[0], parse_dates=True)
+
+    df_cash = df_cash.rename(columns={'Average': 'cashModel'})
+
+    df_nocash = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/returns_nocash_"+today+".csv", index_col=[0], parse_dates=True)
+
+    df_nocash = df_nocash.rename(columns={'Average': 'noCashModel'})
+
+    df_cashscaler = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/cashscaler_"+today+".csv", index_col=[0], parse_dates=True)
+
+    df_combined = pd.concat([df_cash, df_nocash['noCashModel']], axis=1)
+
+    df_combined = pd.concat([df_combined, df_cashscaler['composite']], axis=1)
+
+    df_combined.dropna(inplace=True)
+
+    df_combined['newComp'] = df_combined['composite'].shift(1)
+
+    df_combined['portfolio'] = (df_combined['noCashModel'] * df_combined['newComp']) + ((1 - df_combined['newComp']) * df_combined['cashModel'])
+
+    df_combined = df_combined[['cashModel', 'noCashModel', 'portfolio', 'bmSPY', 'EW', ]]
+
+    return df_combined
+
+def cash_scaling_model():
+    cs_df = pd.read_csv("C:/Python27/Git/SMA_GTAA/adj_close_v2.csv", index_col='Date', parse_dates=True)[['IVV', 'BIL']]
+    cs_df = cs_df.resample('BM', closed='right').last()
+
+    roll_win = 7
+
+    rolling_12m = cs_df / cs_df.shift(roll_win) - 1
+
+    rolling_12m['avg_er'] = cs_df['IVV'] - cs_df['IVV'].rolling(roll_win).mean()
+    rolling_12m.dropna(inplace=True)
+
+    rolling_12m['ER'] = rolling_12m.IVV - rolling_12m.BIL
+
+    rolling_12m['c_exc_ret'] = np.where(rolling_12m['ER'] > 0, 1, 0)
+
+    rolling_12m['c_avg_ret'] = np.where(rolling_12m['avg_er'] > 0, 1, 0)
+
+    rolling_12m['compp'] = rolling_12m['c_exc_ret'] + rolling_12m['c_avg_ret']
+
+    c1 = rolling_12m['compp'] >= 2
+    # c2 = rolling_12m['compp'] > 0
+    # c3 = rolling_12m['compp'] < 2
+
+    #use this to for a 3 way model, cash, nocash and BIL
+    # rolling_12m['composite'] = np.where(c1,1,np.where(c2&c3,0.5,0))
+
+    rolling_12m['composite'] = np.where(c1, 1, 0)
+    x = rolling_12m['composite'][-1:][0]
+
+
+    rolling_12m.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/cashscaler_"+today+".csv")
+
+    return x
+
+    # rolling_12m['change'] = cs_df.IVV.pct_change()
+    #
+    # X = rolling_12m['change'].shift(-1)
+    # Y = rolling_12m['composite']
+    #
+    # print(X.corr(Y))
+    #
+    # X.rolling(roll_win).corr(Y.rolling(roll_win)).plot()
+    # plt.grid()
+    # plt.show()
 
 
 if __name__ == "__main__":
@@ -300,100 +382,125 @@ if __name__ == "__main__":
     n3 = 0.0
     n4 = 0.0
 
-    def test_por(w, strat):
+    def test_por(w, mod):
+
+        print("*****************Strategy with %s*************************" %mod)
         # model, wts = model_portfolios(cut_off=0.2, wList=[n1,n2,n3,n4])
-        model, wts,eqPort = model_portfolios(cut_off=0.2, wList=w)
+        model, wts,eqPort = model_portfolios(cut_off=0.2, wList=w, mod=mod)
         model['EW'] = eqPort.mean(axis=1)
+
         # model = model['2014':]
 
         # # Remove the first row with NaN's
         # portfolio_returns = portfolio_returns[1:]
-        #
-        # #BackTest Statistics for all the portfolios and indexes
-        stats_df = backtest_metrics(model[['Average','bmSPY','EW']], rfr = modBiL)
+
         portfolio_returns = model[['Average','bmSPY','EW']]
-        portfolio_returns.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/returns_"+strat+".csv")
-        stats_df.loc['Best_Month', :] = [100 * float(i) for i in portfolio_returns.max().values.tolist()]
-        stats_df.loc['Worst_Month', :] = [100 * float(i) for i in portfolio_returns.min().values.tolist()]
-        stats_df.loc['Best_Year', :] = [100 * float(i) for i in portfolio_returns.groupby(portfolio_returns.index.year).sum().max()]
-        stats_df.loc['Worst_Year', :] = [100 * float(i) for i in portfolio_returns.groupby(portfolio_returns.index.year).sum().min()]
-           #
-        #Regression stats for all portfolios and indices
+        portfolio_returns.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/returns_"+mod+"_"+today+".csv")
+        return wts
 
-        for c in stats_df.columns:
+        # for no shy best weights is [0.0,0.0,0.7,0.3] and with shy best is [0.0,0.0,0.3,0.7]
+    nocash_df = pd.DataFrame(test_por([0.0, 0.0, 0.7, 0.3], mod='nocash'))
+    cash_df = pd.DataFrame(test_por([0.0, 0.0, 0.7, 0.3], mod='cash'))
+    cs_model = cash_scaling_model()
 
-            stats_df[c].loc[['beta','ann_alpha','R_squared','p_value','tvalue']] = regression_fit(portfolio_returns[c], model.bmSPY.fillna(0), model.bmBIL.fillna(0))
+    if cs_model == 1:
+         print("Market Pulse : RISK ON")
+         print("Recommended Trades ",nocash_df.iloc[-1].dropna())
+    else:
+         print("Market Pulse : RISK OFF")
+         print("Recommended Trades ", cash_df.iloc[-1].dropna())
 
+    all_portfolios = startegy_switch()
+    #BackTest Statistics for all the portfolios and indexes
+    # stats_df = backtest_metrics(model[['Average', 'bmSPY', 'EW']], rfr=modBiL)
+    stats_df = backtest_metrics(all_portfolios, rfr=modBiL)
+    # all_portfolios.drop(['RFR'], inplace= True, axis = 1)
 
-        # cutt_off=0.2
-        # stats_df.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/"+str(n1)+"_"+str(n2)+"_"+str(n3)+"_"+str(n4)+"_"+str(cutt_off)+".csv")
-        # print(stats_df)
-        # print(wts[-1:])
+    #Regression stats for all portfolios and indices
 
-        #Plot the rolling weights
-        # wts = wts['2011-11':]
-        # labels= wts.columns
-        # y = np.vstack([wts[c].fillna(0) for c in wts.columns])
-        # plt.stackplot(wts.index, y, labels = labels)
-        # # wts.fillna(0).rolling(12).mean().plot()
-        # plt.legend()
-        # plt.grid()
+    for c in stats_df.columns:
 
+        stats_df[c].loc[['beta','ann_alpha','R_squared','p_value','tvalue']] = regression_fit(all_portfolios[c], all_portfolios.bmSPY.fillna(0), all_portfolios.RFR.fillna(0))
 
-        # #Portfolio Return Plot
-        # portfolio_returns = portfolio_returns[['Average','bmSPY','EW']]
-        # print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
-        # # tcor = pd.rolling_corr(portfolio_returns['Average'], portfolio_returns['bmSPY'], 6)
-        portfolio_returns.cumsum().plot()
-        # # portfolio_returns.cumsum(), tcor].plot()
-        plt.legend()
-        plt.grid()
+    all_portfolios.drop(['RFR'], inplace= True, axis = 1)
+    stats_df.loc['Best_Month', :] = [100 * float(i) for i in all_portfolios.max().values.tolist()]
+    stats_df.loc['Worst_Month', :] = [100 * float(i) for i in all_portfolios.min().values.tolist()]
+    stats_df.loc['Best_Year', :] = [100 * float(i) for i in all_portfolios.groupby(all_portfolios.index.year).sum().max()]
+    stats_df.loc['Worst_Year', :] = [100 * float(i) for i in all_portfolios.groupby(all_portfolios.index.year).sum().min()]
 
+# cutt_off=0.2
+    # stats_df.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/"+str(n1)+"_"+str(n2)+"_"+str(n3)+"_"+str(n4)+"_"+str(cutt_off)+".csv")
+    # print(stats_df)
+    # print(wts[-1:])
 
-        # print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
-        # # print(100 * np.sqrt(12) * portfolio_returns.groupby(portfolio_returns.index.year).std())
-
-
-        # #correaltion Plot
-        # plt.matshow(portfolio_returns.corr())
-        # plt.xticks(range(len(portfolio_returns.columns)), portfolio_returns.columns)
-        # plt.yticks(range(len(portfolio_returns.columns)), portfolio_returns.columns)
-        # plt.colorbar()
-        # plt.show()
+    #Plot the rolling weights
+    # wts = wts['2011-11':]
+    # labels= wts.columns
+    # y = np.vstack([wts[c].fillna(0) for c in wts.columns])
+    # plt.stackplot(wts.index, y, labels = labels)
+    # # wts.fillna(0).rolling(12).mean().plot()
+    # plt.legend()
+    # plt.grid()
 
 
+    # #Portfolio Return Plot
+    # portfolio_returns = portfolio_returns[['Average','bmSPY','EW']]
+    # print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
+    # tcor = pd.rolling_corr(portfolio_returns['Average'], portfolio_returns['bmSPY'], 6)
 
-        # tcor = pd.rolling_corr(portfolio_returns['Average'],portfolio_returns['bmSPY'],6)
-        # tcor.plot()
-        # plt.show()
-
-
-        # ts1 = 100 * portfolio_returns.groupby(portfolio_returns.index.year).sum()
-        # ts2 = 100 * np.sqrt(12) * portfolio_returns.groupby(portfolio_returns.index.year).std()
-        # print(ts1)
-        # print(ts2)
-
-        #saving files
-        stats_df.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/Summary_Statistics_"+strat+".csv")
-        # # ts1.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/Return_Summary.csv")
-        # # ts2.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/Risk_Summary.csv")
-        # print(wts.tail(10))
-
-    # wlist = [[.25, .25, .25, .25], [0.5,0.5,0.0,0.0], [0.0, 0.5, 0.25, 0.25], [0.0, 0.0, 0.5, 0.5], [0.0, 0.0, 0.8, 0.2], [0.0, 0.0, 0.2, 0.8],
-    #          [0.0, 0.0, 0.7, 0.3], [0.0, 0.0, 0.3, 0.7], [0.0, 0.5, 0.0, 0.5], [0.0, 0.5, 0.5, 0.0],[0.0,0.0,0.9,0.1],[0.0,0.0,0.1,0.9],[0.3,0.0,0.7,0.0]]
+    # portfolio_returns.cumsum().plot()
+    # # # portfolio_returns.cumsum(), tcor].plot()
+    # plt.legend()
+    # plt.grid()
 
 
-    # t1 = pd.DataFrame()
-    # for w in wlist:
-    #     df_test = pd.DataFrame(test_por(w))
-    #     df_test.loc['model', :] = str(w)
-    #     t1 = pd.concat([t1, df_test], axis=1)
-    #
-    # t1.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/mod_comp.csv")
+    # print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
+    # # print(100 * np.sqrt(12) * portfolio_returns.groupby(portfolio_returns.index.year).std())
 
 
-        return stats_df
-    # for no shy best weights is [0.0,0.0,0.7,0.3] and with shy best is [0.0,0.0,0.3,0.7]
-    df_test = pd.DataFrame(test_por([0.0,0.0,0.3,0.7], strat = 'cash'))
-    print(df_test)
-    plt.show()
+    # #correaltion Plot
+    # plt.matshow(portfolio_returns.corr())
+    # plt.xticks(range(len(portfolio_returns.columns)), portfolio_returns.columns)
+    # plt.yticks(range(len(portfolio_returns.columns)), portfolio_returns.columns)
+    # plt.colorbar()
+    # plt.show()
+
+
+
+    # tcor = pd.rolling_corr(portfolio_returns['Average'],portfolio_returns['bmSPY'],6)
+    # tcor.plot()
+    # plt.show()
+
+
+    # ts1 = 100 * portfolio_returns.groupby(portfolio_returns.index.year).sum()
+    # ts2 = 100 * np.sqrt(12) * portfolio_returns.groupby(portfolio_returns.index.year).std()
+    # print(ts1)
+    # print(ts2)
+
+    #saving files
+    stats_df.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/Summary_Statistics.csv")
+    # # ts1.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/Return_Summary.csv")
+    # # ts2.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/Risk_Summary.csv")
+    # print(wts.tail(10))
+
+# wlist = [[.25, .25, .25, .25], [0.5,0.5,0.0,0.0], [0.0, 0.5, 0.25, 0.25], [0.0, 0.0, 0.5, 0.5], [0.0, 0.0, 0.8, 0.2], [0.0, 0.0, 0.2, 0.8],
+#          [0.0, 0.0, 0.7, 0.3], [0.0, 0.0, 0.3, 0.7], [0.0, 0.5, 0.0, 0.5], [0.0, 0.5, 0.5, 0.0],[0.0,0.0,0.9,0.1],[0.0,0.0,0.1,0.9],[0.3,0.0,0.7,0.0]]
+
+
+# t1 = pd.DataFrame()
+# for w in wlist:
+#     df_test = pd.DataFrame(test_por(w))
+#     df_test.loc['model', :] = str(w)
+#     t1 = pd.concat([t1, df_test], axis=1)
+#
+# t1.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/mod_comp.csv")
+
+
+    print(stats_df)
+
+
+
+# print(df_test)
+# plt.show()
+
+
