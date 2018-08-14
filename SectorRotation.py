@@ -292,32 +292,6 @@ def backtest_metrics(returnsframe, rfr):
     metric_df.loc['Total Return'] = returnsframe.cumsum()[-1:].values[0].tolist()
     return metric_df
 
-def startegy_switch():
-
-    df_cash = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/returns_cash_"+today+".csv", index_col=[0], parse_dates=True)
-
-    df_cash = df_cash.rename(columns={'Average': 'cashModel'})
-
-    df_nocash = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/returns_nocash_"+today+".csv", index_col=[0], parse_dates=True)
-
-    df_nocash = df_nocash.rename(columns={'Average': 'noCashModel'})
-
-    df_cashscaler = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/cashscaler_"+today+".csv", index_col=[0], parse_dates=True)
-
-    df_combined = pd.concat([df_cash, df_nocash['noCashModel']], axis=1)
-
-    df_combined = pd.concat([df_combined, df_cashscaler['composite']], axis=1)
-
-    df_combined.dropna(inplace=True)
-
-    df_combined['newComp'] = df_combined['composite'].shift(1)
-
-    df_combined['portfolio'] = (df_combined['noCashModel'] * df_combined['newComp']) + ((1 - df_combined['newComp']) * df_combined['cashModel'])
-
-    df_combined = df_combined[['cashModel', 'noCashModel', 'portfolio', 'bmSPY', 'EW', ]]
-
-    return df_combined
-
 def cash_scaling_model():
     # cs_df = pd.read_csv("C:/Python27/Git/SMA_GTAA/adj_close_v2.csv", index_col='Date', parse_dates=True)[['IVV', 'BIL']]
     # cs_df = cs_df.resample('BM', closed='right').last()
@@ -350,7 +324,9 @@ def cash_scaling_model():
     ir_df[ir_df['DTB3'] == '.'] = np.nan
     ir_df = ir_df.astype(float) * .01
     ir_df.fillna(method='ffill', inplace=True)
+
     ir_df['MV'] = 100.0
+
     ir_df['MV2'] = ir_df['MV'].shift(1) * (1 + ir_df['DTB3'])
 
     sp_df = pd.read_csv("C:/Python27/Git/SMA_GTAA/sp500_yahoo.csv", index_col='Date', parse_dates=True)[['Adj Close']]
@@ -359,8 +335,7 @@ def cash_scaling_model():
 
     cs_df = sp_df.resample('BM', closed='right').last()
 
-    roll_win = 7
-
+    roll_win = 6
     rolling_12m = cs_df / cs_df.shift(roll_win) - 1
 
     rolling_12m['avg_er'] = cs_df['Adj Close'] - cs_df['Adj Close'].rolling(roll_win).mean()
@@ -378,12 +353,12 @@ def cash_scaling_model():
     c1 = rolling_12m['compp'] >= 2
     rolling_12m['composite'] = np.where(c1, 1, 0)
 
-    x = rolling_12m['composite'][-1:][0]
-    print(rolling_12m['composite'].head(10))
+    # x = rolling_12m['composite'][-1:][0]
+    # print(rolling_12m['composite'].tail(10))
 
     rolling_12m.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/cashscaler_"+today+".csv")
 
-    return x
+    return rolling_12m
 
     # rolling_12m['change'] = cs_df.IVV.pct_change()
     #
@@ -395,6 +370,35 @@ def cash_scaling_model():
     # X.rolling(roll_win).corr(Y.rolling(roll_win)).plot()
     # plt.grid()
     # plt.show()
+
+
+def startegy_switch():
+
+    df_cash = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/returns_cash_"+today+".csv", index_col=[0], parse_dates=True)
+
+    df_cash = df_cash.rename(columns={'Average': 'cashModel'})
+
+    df_nocash = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/returns_nocash_"+today+".csv", index_col=[0], parse_dates=True)
+
+    df_nocash = df_nocash.rename(columns={'Average': 'noCashModel'})
+
+    df_cashscaler = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/cashscaler_"+today+".csv", index_col=[0], parse_dates=True)
+
+    df_combined = pd.concat([df_cash, df_nocash['noCashModel']], axis=1)
+
+    df_combined = pd.concat([df_combined, df_cashscaler['composite']], axis=1)
+
+    df_combined.dropna(inplace=True)
+
+    df_combined['newComp'] = df_combined['composite'].shift(1)
+
+    df_combined['portfolio'] = (df_combined['noCashModel'] * df_combined['newComp']) + ((1 - df_combined['newComp']) * df_combined['cashModel'])
+
+    df_combined = df_combined[['cashModel', 'noCashModel', 'portfolio', 'bmSPY', 'EW', ]]
+
+    return df_combined
+
+
 
 
 if __name__ == "__main__":
@@ -436,7 +440,7 @@ if __name__ == "__main__":
     cash_df = pd.DataFrame(test_por([0.0, 0.0, 0.3, 0.7], mod='cash'))
     cs_model = cash_scaling_model()
 
-    if cs_model == 1:
+    if cs_model['composite'][-1:][0] == 1:
          print("Market Pulse : RISK ON")
          print("Recommended Trades ",nocash_df.iloc[-1].dropna())
     else:
@@ -476,36 +480,48 @@ if __name__ == "__main__":
     # plt.grid()
 
 
-    # #Portfolio Return Plot
+
     # portfolio_returns = portfolio_returns[['Average','bmSPY','EW']]
-    # print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
+    print(100 * all_portfolios.groupby(all_portfolios.index.year).sum())
     # tcor = pd.rolling_corr(portfolio_returns['Average'], portfolio_returns['bmSPY'], 6)
 
-    # portfolio_returns.cumsum().plot()
-    # # # portfolio_returns.cumsum(), tcor].plot()
-    # plt.legend()
-    # plt.grid()
+    # Portfolio Return Plot
+    all_portfolios.cumsum().plot()
+    plt.legend()
+    plt.grid()
+    plt.title("Equity Curve")
+    plt.show()
+
+    all_portfolios['07-2017':].cumsum().plot()
+    plt.legend()
+    plt.grid()
+    plt.title("Equity Curve - YTD")
+    plt.show()
 
 
     # print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
-    # # print(100 * np.sqrt(12) * portfolio_returns.groupby(portfolio_returns.index.year).std())
+    # print(100 * np.sqrt(12) * portfolio_returns.groupby(portfolio_returns.index.year).std())
 
 
     # #correaltion Plot
-    # plt.matshow(portfolio_returns.corr())
-    # plt.xticks(range(len(portfolio_returns.columns)), portfolio_returns.columns)
-    # plt.yticks(range(len(portfolio_returns.columns)), portfolio_returns.columns)
-    # plt.colorbar()
-    # plt.show()
+    plt.matshow(all_portfolios.corr())
+    plt.xticks(range(len(all_portfolios.columns)), all_portfolios.columns)
+    plt.yticks(range(len(all_portfolios.columns)), all_portfolios.columns)
+    plt.colorbar()
+    plt.title("Strategy Correlation Box")
+    plt.show()
 
 
 
-    # tcor = pd.rolling_corr(portfolio_returns['Average'],portfolio_returns['bmSPY'],6)
-    # tcor.plot()
-    # plt.show()
+    # Rolling Correlation vs Benchamrk
+    tcor = pd.rolling_corr(all_portfolios['portfolio'],all_portfolios['bmSPY'],6)
+    tcor.plot()
+    plt.grid()
+    plt.title("Rolling Correlation vs Benchmark")
+    plt.show()
 
 
-    # ts1 = 100 * portfolio_returns.groupby(portfolio_returns.index.year).sum()
+
     # ts2 = 100 * np.sqrt(12) * portfolio_returns.groupby(portfolio_returns.index.year).std()
     # print(ts1)
     # print(ts2)
@@ -530,6 +546,8 @@ if __name__ == "__main__":
 
 
     print(stats_df)
+    # plt.show()
+
 
 
 
