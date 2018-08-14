@@ -352,24 +352,33 @@ def cash_scaling_model():
 
     c1 = rolling_12m['compp'] >= 2
     rolling_12m['composite'] = np.where(c1, 1, 0)
-
-    # x = rolling_12m['composite'][-1:][0]
-    # print(rolling_12m['composite'].tail(10))
-
     rolling_12m.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/cashscaler_"+today+".csv")
+
+    #Plot the risk on and risk off signals
+    dts = rolling_12m[rolling_12m['composite'] == 0].index
+    ls = [i for i in range(len(dts))]
+    for i in ls:
+        #     p = plt.axvspan(dts[i],dts[i+1], facecolor='r', alpha=0.3)
+        plt.axvline(x=dts[i])
+        plt.axis([dts[0], dts[-1], -1, 1])
+    sp_df['Adj Close'].resample('BM', closed='right').last().pct_change().cumsum().plot(color = 'r')
+    plt.legend("SP500")
+    plt.title("Risk On/Risk Off Plot")
+    plt.show()
+
+    #Rolling IC between the 1 month Sp500 fwd returns and composite signal
+    # rolling_12m['change'] = cs_df['Adj Close'].pct_change()
+    # X = rolling_12m['change'].shift(-1)
+    # Y = rolling_12m['composite']
+    # print(X.corr(Y))
+    # X.rolling(roll_win).corr(Y.rolling(roll_win)).fillna(0).plot()
+    # plt.grid()
+    # plt.title("Rolling IC - Monthly")
+    # plt.show()
 
     return rolling_12m
 
-    # rolling_12m['change'] = cs_df.IVV.pct_change()
-    #
-    # X = rolling_12m['change'].shift(-1)
-    # Y = rolling_12m['composite']
-    #
-    # print(X.corr(Y))
-    #
-    # X.rolling(roll_win).corr(Y.rolling(roll_win)).plot()
-    # plt.grid()
-    # plt.show()
+
 
 
 def startegy_switch():
@@ -435,7 +444,7 @@ if __name__ == "__main__":
         portfolio_returns.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/returns_"+mod+"_"+today+".csv")
         return wts
 
-        # for no shy best weights is [0.0,0.0,0.7,0.3] and with shy best is [0.0,0.0,0.3,0.7]
+    # for no shy best weights is [0.0,0.0,0.7,0.3] and with shy best is [0.0,0.0,0.3,0.7]
     nocash_df = pd.DataFrame(test_por([0.0, 0.0, 0.7, 0.3], mod='nocash'))
     cash_df = pd.DataFrame(test_por([0.0, 0.0, 0.3, 0.7], mod='cash'))
     cs_model = cash_scaling_model()
@@ -443,18 +452,17 @@ if __name__ == "__main__":
     if cs_model['composite'][-1:][0] == 1:
          print("Market Pulse : RISK ON")
          print("Recommended Trades ",nocash_df.iloc[-1].dropna())
+         print(nocash_df.tail())
     else:
          print("Market Pulse : RISK OFF")
          print("Recommended Trades ", cash_df.iloc[-1].dropna())
+         print(cash_df.tail())
 
     all_portfolios = startegy_switch()
     #BackTest Statistics for all the portfolios and indexes
-    # stats_df = backtest_metrics(model[['Average', 'bmSPY', 'EW']], rfr=modBiL)
     stats_df = backtest_metrics(all_portfolios, rfr=modBiL)
-    # all_portfolios.drop(['RFR'], inplace= True, axis = 1)
 
     #Regression stats for all portfolios and indices
-
     for c in stats_df.columns:
 
         stats_df[c].loc[['beta','ann_alpha','R_squared','p_value','tvalue']] = regression_fit(all_portfolios[c], all_portfolios.bmSPY.fillna(0), all_portfolios.RFR.fillna(0))
@@ -465,25 +473,9 @@ if __name__ == "__main__":
     stats_df.loc['Best_Year', :] = [100 * float(i) for i in all_portfolios.groupby(all_portfolios.index.year).sum().max()]
     stats_df.loc['Worst_Year', :] = [100 * float(i) for i in all_portfolios.groupby(all_portfolios.index.year).sum().min()]
 
-# cutt_off=0.2
-    # stats_df.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/"+str(n1)+"_"+str(n2)+"_"+str(n3)+"_"+str(n4)+"_"+str(cutt_off)+".csv")
-    # print(stats_df)
-    # print(wts[-1:])
-
-    #Plot the rolling weights
-    # wts = wts['2011-11':]
-    # labels= wts.columns
-    # y = np.vstack([wts[c].fillna(0) for c in wts.columns])
-    # plt.stackplot(wts.index, y, labels = labels)
-    # # wts.fillna(0).rolling(12).mean().plot()
-    # plt.legend()
-    # plt.grid()
-
-
-
     # portfolio_returns = portfolio_returns[['Average','bmSPY','EW']]
     print(100 * all_portfolios.groupby(all_portfolios.index.year).sum())
-    # tcor = pd.rolling_corr(portfolio_returns['Average'], portfolio_returns['bmSPY'], 6)
+    print(100 * np.sqrt(12) *all_portfolios.groupby(all_portfolios.index.year).std())
 
     # Portfolio Return Plot
     all_portfolios.cumsum().plot()
@@ -498,11 +490,6 @@ if __name__ == "__main__":
     plt.title("Equity Curve - YTD")
     plt.show()
 
-
-    # print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
-    # print(100 * np.sqrt(12) * portfolio_returns.groupby(portfolio_returns.index.year).std())
-
-
     # #correaltion Plot
     plt.matshow(all_portfolios.corr())
     plt.xticks(range(len(all_portfolios.columns)), all_portfolios.columns)
@@ -511,31 +498,39 @@ if __name__ == "__main__":
     plt.title("Strategy Correlation Box")
     plt.show()
 
-
-
     # Rolling Correlation vs Benchamrk
-    tcor = pd.rolling_corr(all_portfolios['portfolio'],all_portfolios['bmSPY'],6)
+    tcor = all_portfolios['portfolio'].rolling(window=6).corr(other=all_portfolios['bmSPY'])
     tcor.plot()
     plt.grid()
     plt.title("Rolling Correlation vs Benchmark")
     plt.show()
 
-
-
-    # ts2 = 100 * np.sqrt(12) * portfolio_returns.groupby(portfolio_returns.index.year).std()
-    # print(ts1)
-    # print(ts2)
+    #Distribution of returns
+    all_portfolios['portfolio'].hist()
+    plt.show()
 
     #saving files
     stats_df.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/Summary_Statistics.csv")
-    # # ts1.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/Return_Summary.csv")
-    # # ts2.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/Risk_Summary.csv")
-    # print(wts.tail(10))
+    print(stats_df)
+
+
+
+# # cutt_off=0.2
+#     stats_df.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/"+str(n1)+"_"+str(n2)+"_"+str(n3)+"_"+str(n4)+"_"+str(cutt_off)+".csv")
+#     print(stats_df)
+
+
+    # Plot the rolling weights
+    # wts = wts['2011-11':]
+    # labels= wts.columns
+    # y = np.vstack([wts[c].fillna(0) for c in wts.columns])
+    # plt.stackplot(wts.index, y, labels = labels)
+    # # wts.fillna(0).rolling(12).mean().plot()
+    # plt.legend()
+    # plt.grid()
 
 # wlist = [[.25, .25, .25, .25], [0.5,0.5,0.0,0.0], [0.0, 0.5, 0.25, 0.25], [0.0, 0.0, 0.5, 0.5], [0.0, 0.0, 0.8, 0.2], [0.0, 0.0, 0.2, 0.8],
 #          [0.0, 0.0, 0.7, 0.3], [0.0, 0.0, 0.3, 0.7], [0.0, 0.5, 0.0, 0.5], [0.0, 0.5, 0.5, 0.0],[0.0,0.0,0.9,0.1],[0.0,0.0,0.1,0.9],[0.3,0.0,0.7,0.0]]
-
-
 # t1 = pd.DataFrame()
 # for w in wlist:
 #     df_test = pd.DataFrame(test_por(w))
@@ -543,15 +538,4 @@ if __name__ == "__main__":
 #     t1 = pd.concat([t1, df_test], axis=1)
 #
 # t1.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/mod_comp.csv")
-
-
-    print(stats_df)
-    # plt.show()
-
-
-
-
-# print(df_test)
-# plt.show()
-
 
