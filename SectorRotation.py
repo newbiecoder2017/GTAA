@@ -43,7 +43,7 @@ def read_price_file(frq = 'BM'):
 
 def model_portfolios(cut_off=0.0, wList=[0.25,0.25,0.25,0.25], mod='cash'):
     df = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/adj_close_sectors.csv", index_col='Date', parse_dates=True)
-    # df = df['01-2007':]
+    # df = df['01-2015':]
     #calculating the daily return for benchmarks
     rframe = df.resample('BM', closed='right').last().pct_change()
 
@@ -177,7 +177,7 @@ def drawdown(s):
 
     Max_Daily_Drawdown = Daily_Drawdown.rolling(center=False, min_periods=1, window=12).min()
 
-    return Daily_Drawdown.mean(), Max_Daily_Drawdown.min()
+    return Daily_Drawdown.mean(), Max_Daily_Drawdown.min(),Daily_Drawdown
 
 def regression_fit(port, bm, rfr):
 
@@ -246,6 +246,14 @@ def backtest_metrics(returnsframe, rfr):
 
     dd = [drawdown(cummulative_return)[0]]
     mdd = [drawdown(cummulative_return)[1]]
+    dailyDD = [drawdown(cummulative_return)[2]]
+
+    dailyDD[0][['portfolio','bmSPY']].plot()
+    plt.legend()
+    plt.grid()
+    plt.title("Portfolio vs S&P 500 Rolling Drawdown - 12 Month")
+    plt.savefig("C:/Python27/Git/SMA_GTAA/Sectors/drawDown.jpg", transparent=True)
+    plt.show()
 
     # Calulate the win ratio and Gain to Loss ratio
     up = returnsframe[returnsframe > 0].count() / returnsframe.count()
@@ -351,7 +359,7 @@ def cash_scaling_model():
 
     c1 = rolling_12m['compp'] >= 2
     rolling_12m['composite'] = np.where(c1, 1, 0)
-    rolling_12m.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/cashscaler_"+today+".csv")
+    rolling_12m.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/cashscaler.csv")
 
     #Plot the risk on and risk off signals
     dts = rolling_12m[rolling_12m['composite'] == 0].index
@@ -360,9 +368,11 @@ def cash_scaling_model():
         #     p = plt.axvspan(dts[i],dts[i+1], facecolor='r', alpha=0.3)
         plt.axvline(x=dts[i])
         plt.axis([dts[0], dts[-1], -1, 1])
+
     sp_df['Adj Close'].resample('BM', closed='right').last().pct_change().cumsum().plot(color = 'r')
-    plt.legend("SP500")
-    plt.title("Risk On/Risk Off Plot")
+    plt.legend(['SP500'])
+    plt.title("Risk On / OFF Indicator vs S&P500 TR")
+    plt.savefig("C:/Python27/Git/SMA_GTAA/Sectors/cashScalingPlot.jpg", transparent=True)
     plt.show()
 
     #Rolling IC between the 1 month Sp500 fwd returns and composite signal
@@ -379,15 +389,15 @@ def cash_scaling_model():
 
 def startegy_switch():
 
-    df_cash = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/returns_cash_"+today+".csv", index_col=[0], parse_dates=True)
+    df_cash = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/returns_cash.csv", index_col=[0], parse_dates=True)
 
     df_cash = df_cash.rename(columns={'Average': 'cashModel'})
 
-    df_nocash = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/returns_nocash_"+today+".csv", index_col=[0], parse_dates=True)
+    df_nocash = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/returns_nocash.csv", index_col=[0], parse_dates=True)
 
     df_nocash = df_nocash.rename(columns={'Average': 'noCashModel'})
 
-    df_cashscaler = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/cashscaler_"+today+".csv", index_col=[0], parse_dates=True)
+    df_cashscaler = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/cashscaler.csv", index_col=[0], parse_dates=True)
 
     df_combined = pd.concat([df_cash, df_nocash['noCashModel']], axis=1)
 
@@ -422,7 +432,7 @@ if __name__ == "__main__":
     n3 = 0.0
     n4 = 0.0
 
-    def test_por(w, mod):
+    def rotation_models(w, mod):
 
         print("*****************Strategy with %s*************************" %mod)
         # model, wts = model_portfolios(cut_off=0.2, wList=[n1,n2,n3,n4])
@@ -435,13 +445,16 @@ if __name__ == "__main__":
         # portfolio_returns = portfolio_returns[1:]
 
         portfolio_returns = model[['Average','bmSPY','EW']]
-        portfolio_returns.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/returns_"+mod+"_"+today+".csv")
+        portfolio_returns.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/returns_"+mod+".csv")
+        wts.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/weights_" + mod + ".csv")
         return wts
 
     # for no shy best weights is [0.0,0.0,0.7,0.3] and with shy best is [0.0,0.0,0.3,0.7]
-    nocash_df = pd.DataFrame(test_por([0.0, 0.0, 0.7, 0.3], mod='nocash'))
-    cash_df = pd.DataFrame(test_por([0.0, 0.0, 0.3, 0.7], mod='cash'))
+    nocash_df = pd.DataFrame(rotation_models([0.0, 0.0, 0.7, 0.3], mod='nocash'))
+    cash_df = pd.DataFrame(rotation_models([0.0, 0.0, 0.3, 0.7], mod='cash'))
     cs_model = cash_scaling_model()
+
+    fig = plt.figure()
 
     if cs_model['composite'][-1:][0] == 1:
          print("Market Pulse : RISK ON")
@@ -451,7 +464,7 @@ if __name__ == "__main__":
          y = list(nocash_df[-1:].dropna(axis=1).columns)
          plt.pie(x[0], labels=y, shadow=False, startangle=90,autopct='%1.1f%%')
          plt.title("Allocations as of %s" %str(today))
-         # fig.savefig("output.pdf", facecolor=fig.get_facecolor(), transparent=True)
+         plt.savefig("C:/Python27/Git/SMA_GTAA/Sectors/pie.jpg", facecolor=fig.get_facecolor(), transparent=True)
          plt.show()
 
     else:
@@ -462,10 +475,12 @@ if __name__ == "__main__":
          y = list(cash_df[-1:].dropna(axis=1).columns)
          plt.pie(x[0], labels=y, shadow=False, startangle=90,autopct='%1.1f%%')
          plt.title("Allocations as of %s" % str(today))
-         # fig.savefig("output.pdf", facecolor=fig.get_facecolor(), transparent=True)
+         plt.savefig("C:/Python27/Git/SMA_GTAA/Sectors/allocations.jpg", facecolor=fig.get_facecolor(), transparent=True)
          plt.show()
 
     all_portfolios = startegy_switch()
+    all_portfolios.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/portfolio_returns.csv")
+
     #BackTest Statistics for all the portfolios and indexes
     stats_df = backtest_metrics(all_portfolios, rfr=modBiL)
 
@@ -482,24 +497,30 @@ if __name__ == "__main__":
 
     # portfolio_returns = portfolio_returns[['Average','bmSPY','EW']]
     # print(100 * all_portfolios.groupby(all_portfolios.index.year).sum())
-    # print(100 * all_portfolios.groupby(all_portfolios.index.month).sum())
+    all_portfolios.rename(columns = {'bmSPY': 'S&P500'}, inplace=True)
+    return_by_year = all_portfolios.groupby(all_portfolios.index.year).sum()
+    return_by_year.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/returns_by_year.csv")
+    print(100 *return_by_year)
+    # print(100 * all_portfolios['2018'].groupby(all_portfolios['2018'].index.month).sum())
     # print(100 * np.sqrt(12) *all_portfolios.groupby(all_portfolios.index.year).std())
     # print(100 * all_portfolios)
 
     # Bar plot for portfolio and SP500
-    # plot_perf = 100 * all_portfolios[['portfolio','bmSPY']]['2002':].groupby(all_portfolios[['portfolio','bmSPY']]['2002':].index.year).sum()
-    # plot_perf.plot(kind ='bar')
-    # plt.grid()
-    # plt.legend()
-    # plt.title("Portfolio Net Perfomance vs. S&P 500 TR")
-    # plt.show()
+    plot_perf = 100 * all_portfolios[['portfolio','S&P500']]['2002':].groupby(all_portfolios[['portfolio','S&P500']]['2002':].index.year).sum()
+    plot_perf.plot(kind ='bar')
+    plt.grid()
+    plt.legend()
+    plt.title("Portfolio Net Perfomance vs. S&P 500 TR")
+    plt.savefig("C:/Python27/Git/SMA_GTAA/Sectors/bar_chart.jpg", facecolor=fig.get_facecolor(), transparent=True)
+    plt.show()
 
     # # Portfolio Return Plot
-    # all_portfolios.cumsum().plot()
-    # plt.legend()
-    # plt.grid()
-    # plt.title("Equity Curve")
-    # plt.show()
+    all_portfolios[['portfolio','S&P500']].cumsum().plot()
+    plt.legend()
+    plt.grid()
+    plt.title("Equity Curve")
+    plt.savefig("C:/Python27/Git/SMA_GTAA/Sectors/equity_curve.jpg", facecolor=fig.get_facecolor(), transparent=True)
+    plt.show()
     #
     # all_portfolios['07-2017':].cumsum().plot()
     # plt.legend()
@@ -516,19 +537,20 @@ if __name__ == "__main__":
     # plt.show()
     #
     # # Rolling Correlation vs Benchamrk
-    # tcor = all_portfolios['portfolio'].rolling(window=6).corr(other=all_portfolios['bmSPY'])
-    # tcor.plot()
-    # plt.grid()
-    # plt.title("Rolling Correlation vs Benchmark")
-    # plt.show()
+    tcor = all_portfolios['portfolio'].rolling(window=6).corr(other=all_portfolios['S&P500'])
+    tcor.plot()
+    plt.grid()
+    plt.title("Rolling Correlation vs S&P 500")
+    plt.savefig("C:/Python27/Git/SMA_GTAA/Sectors/correlation.jpg", facecolor=fig.get_facecolor(), transparent=True)
+    plt.show()
     #
     # #Distribution of returns
     # all_portfolios['portfolio'].hist()
     # plt.show()
     #
     # #saving files
-    # stats_df.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/Summary_Statistics.csv")
-    # print(stats_df)
+    stats_df.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/Summary_Statistics.csv")
+    print(stats_df)
 
 
 
