@@ -195,7 +195,6 @@ def regression_fit(port, bm, rfr):
 
     return [result.params[0], 100*((1+result.params.loc['const'])**12-1), result.rsquared_adj, result.pvalues.loc['const'], result.tvalues.loc['const']]
 
-
 def backtest_metrics(returnsframe, rfr):
     returnsframe['RFR'] = rfr
     cummulative_return = (1 + returnsframe).cumprod()
@@ -378,9 +377,6 @@ def cash_scaling_model():
 
     return rolling_12m
 
-
-
-
 def startegy_switch():
 
     df_cash = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/returns_cash_"+today+".csv", index_col=[0], parse_dates=True)
@@ -408,11 +404,9 @@ def startegy_switch():
     return df_combined
 
 
-
-
 if __name__ == "__main__":
 
-     # universe list for the model
+    # universe list for the model
     universe_list = ['RWR', 'XLB', 'XLI', 'XLY', 'XLP', 'XLE', 'XLF', 'XLU', 'XLV', 'XLK', 'BIL', 'SHY','SPY']
 
     # Universe Adj.Close dataframe
@@ -453,10 +447,23 @@ if __name__ == "__main__":
          print("Market Pulse : RISK ON")
          print("Recommended Trades ",nocash_df.iloc[-1].dropna())
          print(nocash_df.tail())
+         x = nocash_df[-1:].dropna(axis=1).values
+         y = list(nocash_df[-1:].dropna(axis=1).columns)
+         plt.pie(x[0], labels=y, shadow=False, startangle=90,autopct='%1.1f%%')
+         plt.title("Allocations as of %s" %str(today))
+         # fig.savefig("output.pdf", facecolor=fig.get_facecolor(), transparent=True)
+         plt.show()
+
     else:
          print("Market Pulse : RISK OFF")
          print("Recommended Trades ", cash_df.iloc[-1].dropna())
          print(cash_df.tail())
+         x = cash_df[-1:].dropna(axis=1).values
+         y = list(cash_df[-1:].dropna(axis=1).columns)
+         plt.pie(x[0], labels=y, shadow=False, startangle=90,autopct='%1.1f%%')
+         plt.title("Allocations as of %s" % str(today))
+         # fig.savefig("output.pdf", facecolor=fig.get_facecolor(), transparent=True)
+         plt.show()
 
     all_portfolios = startegy_switch()
     #BackTest Statistics for all the portfolios and indexes
@@ -474,44 +481,54 @@ if __name__ == "__main__":
     stats_df.loc['Worst_Year', :] = [100 * float(i) for i in all_portfolios.groupby(all_portfolios.index.year).sum().min()]
 
     # portfolio_returns = portfolio_returns[['Average','bmSPY','EW']]
-    print(100 * all_portfolios.groupby(all_portfolios.index.year).sum())
-    print(100 * np.sqrt(12) *all_portfolios.groupby(all_portfolios.index.year).std())
+    # print(100 * all_portfolios.groupby(all_portfolios.index.year).sum())
+    # print(100 * all_portfolios.groupby(all_portfolios.index.month).sum())
+    # print(100 * np.sqrt(12) *all_portfolios.groupby(all_portfolios.index.year).std())
+    # print(100 * all_portfolios)
 
-    # Portfolio Return Plot
-    all_portfolios.cumsum().plot()
-    plt.legend()
-    plt.grid()
-    plt.title("Equity Curve")
-    plt.show()
+    # Bar plot for portfolio and SP500
+    # plot_perf = 100 * all_portfolios[['portfolio','bmSPY']]['2002':].groupby(all_portfolios[['portfolio','bmSPY']]['2002':].index.year).sum()
+    # plot_perf.plot(kind ='bar')
+    # plt.grid()
+    # plt.legend()
+    # plt.title("Portfolio Net Perfomance vs. S&P 500 TR")
+    # plt.show()
 
-    all_portfolios['07-2017':].cumsum().plot()
-    plt.legend()
-    plt.grid()
-    plt.title("Equity Curve - YTD")
-    plt.show()
-
-    # #correaltion Plot
-    plt.matshow(all_portfolios.corr())
-    plt.xticks(range(len(all_portfolios.columns)), all_portfolios.columns)
-    plt.yticks(range(len(all_portfolios.columns)), all_portfolios.columns)
-    plt.colorbar()
-    plt.title("Strategy Correlation Box")
-    plt.show()
-
-    # Rolling Correlation vs Benchamrk
-    tcor = all_portfolios['portfolio'].rolling(window=6).corr(other=all_portfolios['bmSPY'])
-    tcor.plot()
-    plt.grid()
-    plt.title("Rolling Correlation vs Benchmark")
-    plt.show()
-
-    #Distribution of returns
-    all_portfolios['portfolio'].hist()
-    plt.show()
-
-    #saving files
-    stats_df.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/Summary_Statistics.csv")
-    print(stats_df)
+    # # Portfolio Return Plot
+    # all_portfolios.cumsum().plot()
+    # plt.legend()
+    # plt.grid()
+    # plt.title("Equity Curve")
+    # plt.show()
+    #
+    # all_portfolios['07-2017':].cumsum().plot()
+    # plt.legend()
+    # plt.grid()
+    # plt.title("Equity Curve - YTD")
+    # plt.show()
+    #
+    # # #correaltion Plot
+    # plt.matshow(all_portfolios.corr())
+    # plt.xticks(range(len(all_portfolios.columns)), all_portfolios.columns)
+    # plt.yticks(range(len(all_portfolios.columns)), all_portfolios.columns)
+    # plt.colorbar()
+    # plt.title("Strategy Correlation Box")
+    # plt.show()
+    #
+    # # Rolling Correlation vs Benchamrk
+    # tcor = all_portfolios['portfolio'].rolling(window=6).corr(other=all_portfolios['bmSPY'])
+    # tcor.plot()
+    # plt.grid()
+    # plt.title("Rolling Correlation vs Benchmark")
+    # plt.show()
+    #
+    # #Distribution of returns
+    # all_portfolios['portfolio'].hist()
+    # plt.show()
+    #
+    # #saving files
+    # stats_df.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/Summary_Statistics.csv")
+    # print(stats_df)
 
 
 
