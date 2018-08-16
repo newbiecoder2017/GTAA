@@ -577,5 +577,5 @@ if __name__ == "__main__":
 #     t1 = pd.concat([t1, df_test], axis=1)
 #
 # t1.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/mod_comp.csv")
-    print("Done")
+
 
