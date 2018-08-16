@@ -430,6 +430,7 @@ if __name__ == "__main__":
     # # ts1.to_csv("C:/Python27/Git/SMA_GTAA/Return_Summary.csv")
     # # ts2.to_csv("C:/Python27/Git/SMA_GTAA/Risk_Summary.csv")
     # print(wts.tail(10))
+    print("Done")
 
 
 
