@@ -16,6 +16,11 @@
 #GYLD - Arrow Dow Jones Global Yield ETF
 #ACWI - iShares MSCI ACWI ETF
 #AGG - iShares Core U.S. Aggregate Bond ETF  AGG
+#IJH - iShares Core S&P Mid Cap ETF
+#IJR - iShares Core S&P Small Cap ETF
+#IXUS - ishares Core MSCI Total INTL Stock ETF
+#HDV - Ishares Core High Dividend ETF
+
 
 import pandas as pd
 import numpy as np
@@ -276,7 +281,7 @@ def backtest_metrics(returnsframe, rfr):
 if __name__ == "__main__":
 
      # universe list for the model
-    universe_list = ['DBC', 'GLD', 'IVV', 'IEV', 'EWJ', 'EEM', 'IYR', 'RWX', 'IEF', 'TLT', 'BIL', 'SHY','ACWI','AGG','GYLD','GAL']
+    universe_list = ['DBC', 'GLD', 'IVV', 'IEV', 'EWJ', 'EEM', 'IYR', 'RWX', 'IEF', 'TLT', 'BIL', 'SHY','ACWI','AGG','GYLD','GAL','IJH','IJR','IXUS','HDV']
     # trading_universe = ['DBC', 'GLD', 'IVV', 'IEV', 'EWJ', 'EEM', 'IYR', 'RWX', 'IEF', 'TLT']
 
     # Universe Adj.Close dataframe
