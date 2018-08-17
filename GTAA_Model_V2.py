@@ -42,13 +42,15 @@ def pull_data(s):
     return pdr.get_data_yahoo(s, start="2000-12-31", end="2018-07-31")['Adj Close']
 
 def read_price_file(frq = 'BM'):
-    df_price = pd.read_csv("C:/Python27/Git/SMA_GTAA/adj_close_v2.csv", index_col='Date', parse_dates=True)
+    df_price = pd.read_csv("C:/Python27/Git/SMA_GTAA/GTAA/adj_close_v2.csv", index_col='Date', parse_dates=True)
     df_price = df_price.resample(frq, closed='right').last()
+    df_price  = df_price['2011':]
     return df_price
 
 def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
-    df = pd.read_csv("C:/Python27/Git/SMA_GTAA/adj_close_v2.csv", index_col='Date', parse_dates=True)
-    # df = df['01-2012':]
+    df = pd.read_csv("C:/Python27/Git/SMA_GTAA/GTAA/adj_close_v2.csv", index_col='Date', parse_dates=True)
+
+    df = df['2011':]
     #calculating the daily return for benchmarks
     rframe = df.resample('BM', closed='right').last().pct_change()
 
@@ -59,8 +61,6 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     bmacwi =rframe.ACWI
 
     bmbil = rframe.BIL
-
-
 
     def clean_universe(df, rs='BM', per=1, cutoff=0.5):
         # resampling price frame
@@ -119,7 +119,7 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     persistence_short = df_1m.rolling(3).apply(return_persistence)
 
     #composte frame for the long and short persistence factors
-    composite_persistence = 0.1 * persistence_long  + 0.9 * persistence_short
+    composite_persistence = 0.9 * persistence_long  + 0.1 * persistence_short
 
     #Generate the zscore of composite persistence dataframe
     persistence_zscore = pd.DataFrame([(composite_persistence.iloc[i] - composite_persistence.iloc[i].mean()) / composite_persistence.iloc[i].std() for i in range(len(composite_persistence))])
@@ -286,7 +286,7 @@ if __name__ == "__main__":
 
     # Universe Adj.Close dataframe
     # df = pd.DataFrame({s:pull_data(s) for s in universe_list})
-    # df.to_csv("C:/Python27/Git/SMA_GTAA/adj_close_v2.csv")
+    # df.to_csv("C:/Python27/Git/SMA_GTAA/GTAA/adj_close_v2.csv")
 
     adjusted_price = read_price_file('BM')
     modBiL = adjusted_price.BIL.pct_change()
@@ -294,9 +294,9 @@ if __name__ == "__main__":
     # read_price_file('BM')
     n1 = 0.0
     n2 = 0.0
-    n3 = 0.9
-    n4 = 0.1
-    model, wts = model_portfolios(cut_off=0.3, wList=[n1,n2,n3,n4])
+    n3 = 0.4
+    n4 = 0.6
+    model, wts = model_portfolios(cut_off=0.0, wList=[n1,n2,n3,n4])
 
     #Try with BIL and GYLD, w/o BIL and GYLD and combinations
     #best persistence set is 0.1, 0.9 - Long/Short
@@ -318,7 +318,7 @@ if __name__ == "__main__":
     # #BackTest Statistics for all the portfolios and indexes
     stats_df, daily_dd = backtest_metrics(model[['Average','bmGAL','bmIVV','bmACWI']], rfr = modBiL)
     portfolio_returns = model[['Average','bmGAL','bmIVV','bmACWI']]
-    portfolio_returns.to_csv("C:/Python27/Git/SMA_GTAA/returns.csv")
+    portfolio_returns.to_csv("C:/Python27/Git/SMA_GTAA/GTAA/returns.csv")
     stats_df.loc['Best_Month', :] = [100 * float(i) for i in portfolio_returns.max().values.tolist()]
     stats_df.loc['Worst_Month', :] = [100 * float(i) for i in portfolio_returns.min().values.tolist()]
     stats_df.loc['Best_Year', :] = [100 * float(i) for i in portfolio_returns.groupby(portfolio_returns.index.year).sum().max()]
@@ -329,15 +329,15 @@ if __name__ == "__main__":
 
         stats_df[c].loc[['beta','ann_alpha','R_squared','p_value','tvalue']] = regression_fit(portfolio_returns[c], model.bmGAL.fillna(0), model.bmBIL.fillna(0))
     # cutt_off=1.5
-    # stats_df.to_csv("C:/Python27/Git/SMA_GTAA/"+str(n1)+"_"+str(n2)+"_"+str(n3)+"_"+str(n4)+"_"+str(cutt_off)+".csv")
+    # stats_df.to_csv("C:/Python27/Git/SMA_GTAA/GTAA/"+str(n1)+"_"+str(n2)+"_"+str(n3)+"_"+str(n4)+"_"+str(cutt_off)+".csv")
     print(stats_df)
     # # print("Trade Recommendation: ", buy_list)
     # trade_reco = pd.DataFrame([v for i, v in buy_list], index=[i for i, v in buy_list], columns=['Weights'])
     print(wts[-1:])
 
     #DrawDown Plot
-    daily_dd.fillna(0).rolling(3).mean().plot(color='rgbc')
-    plt.title("3m Rolling DrawDowns")
+    daily_dd.fillna(0).rolling(6).mean().plot(color='rgbc')
+    plt.title("6m Rolling DrawDowns")
     plt.grid()
     plt.legend()
     plt.ylabel("% Drawdown")
@@ -385,12 +385,12 @@ if __name__ == "__main__":
     # plt.show()
 
     # # #Portfolio Return Plot
-    # portfolio_returns = portfolio_returns[['Average','bmGAL','bmIVV','bmACWI']]
+    portfolio_returns = portfolio_returns[['Average','bmGAL','bmIVV','bmACWI']]
     # print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
-    # portfolio_returns.cumsum().plot()
-    # plt.legend()
-    # plt.grid()
-    # plt.show()
+    portfolio_returns['5-2012':].cumsum().plot()
+    plt.legend()
+    plt.grid()
+    plt.show()
 
     # #Returns grouped by year
     # portfolio_returns.rename(columns = {'eq_wt':'EW_GTAA', 'risk_wt':'RiskWt_GTAA', 'Avg_Universe':'EW_GTAA_Universe', 'risk_wt_bm':'RiskWt_GTAA_Universe',
@@ -431,11 +431,11 @@ if __name__ == "__main__":
     # ts2 = 100 * np.sqrt(12) * portfolio_returns.groupby(portfolio_returns.index.year).std()
     # print(ts1)
     # print(ts2)
-    # # stats_df.to_csv("C:/Python27/Git/SMA_GTAA/Summary_Statistics.csv")
-    # # ts1.to_csv("C:/Python27/Git/SMA_GTAA/Return_Summary.csv")
-    # # ts2.to_csv("C:/Python27/Git/SMA_GTAA/Risk_Summary.csv")
+    # # stats_df.to_csv("C:/Python27/Git/SMA_GTAA/GTAA/Summary_Statistics.csv")
+    # # ts1.to_csv("C:/Python27/Git/SMA_GTAA/GTAA/Return_Summary.csv")
+    # # ts2.to_csv("C:/Python27/Git/SMA_GTAA/GTAA/Risk_Summary.csv")
     # print(wts.tail(10))
-    print("Done")
+
 
 
 
