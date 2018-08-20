@@ -30,7 +30,7 @@ import datetime
 import seaborn as sns
 # sns.set_palette(sns.color_palette("hls", 20))
 
-today = datetime.datetime.today().strftime('%m%d%y')
+today = datetime.datetime.today().strftime('%m/%d/%y')
 
 #Function to pull data from yahoo
 def pull_data(s):
@@ -247,10 +247,13 @@ def backtest_metrics(returnsframe, rfr):
     dd = [drawdown(cummulative_return)[0]]
     mdd = [drawdown(cummulative_return)[1]]
     dailyDD = [drawdown(cummulative_return)[2]]
-
-    dailyDD[0][['portfolio','bmSPY']].plot()
+    drawdown_df = pd.DataFrame(dailyDD[0])
+    drawdown_df = round(100.0 * drawdown_df[['portfolio','bmSPY']],2)
+    drawdown_df = drawdown_df.rename(columns= {'portfolio':'Portfolio','bmSPY':'S&P 500'})
+    drawdown_df[['Portfolio','S&P 500']].plot()
     plt.legend()
     plt.grid()
+    plt.ylabel(("percent(%)"))
     plt.title("Portfolio vs S&P 500 Rolling Drawdown - 12 Month")
     plt.savefig("C:/Python27/Git/SMA_GTAA/Sectors/drawDown.jpg", transparent=True)
     plt.show()
@@ -370,8 +373,8 @@ def cash_scaling_model():
         plt.axis([dts[0], dts[-1], -1, 1])
 
     sp_df['Adj Close'].resample('BM', closed='right').last().pct_change().cumsum().plot(color = 'r')
-    plt.legend(['SP500'])
-    plt.title("Risk On / OFF Indicator vs S&P500 TR")
+    # plt.legend(['SP500'])
+    plt.title("Risk On/OFF Indicator vs S&P500 TR", color='crimson',fontweight='heavy')
     plt.savefig("C:/Python27/Git/SMA_GTAA/Sectors/cashScalingPlot.jpg", transparent=True)
     plt.show()
 
@@ -413,6 +416,17 @@ def startegy_switch():
 
     return df_combined
 
+def dollar_retuns(data):
+    data['Portfolio'] = 10000
+    data['S&P 500'] = 10000
+    for i in range(len(data)):
+        if i == 0:
+            data['Portfolio'].iloc[i] = 10000
+            data['S&P 500'].iloc[i] = 10000
+        else:
+            data['Portfolio'].iloc[i] = (1 + data['portfolio'].iloc[i]) * data['Portfolio'].iloc[i - 1]
+            data['S&P 500'].iloc[i] = (1 + data['S&P500'].iloc[i]) * data['S&P 500'].iloc[i - 1]
+    return data[['Portfolio','S&P 500']]
 
 if __name__ == "__main__":
 
@@ -427,10 +441,10 @@ if __name__ == "__main__":
     modBiL = adjusted_price.BIL.pct_change()
 
     # read_price_file('BM')
-    n1 = 0.5
-    n2 = 0.5
-    n3 = 0.0
-    n4 = 0.0
+    # n1 = 0.5
+    # n2 = 0.5
+    # n3 = 0.0
+    # n4 = 0.0
 
     def rotation_models(w, mod):
 
@@ -463,7 +477,8 @@ if __name__ == "__main__":
          x = nocash_df[-1:].dropna(axis=1).values
          y = list(nocash_df[-1:].dropna(axis=1).columns)
          plt.pie(x[0], labels=y, shadow=False, startangle=90,autopct='%1.1f%%')
-         plt.title("Allocations as of %s" %str(today))
+         # plt.legend(loc='best')
+         plt.title("Allocations as of %s" %str(today),fontweight = 'heavy',color='darkblue')
          plt.savefig("C:/Python27/Git/SMA_GTAA/Sectors/pie.jpg", facecolor=fig.get_facecolor(), transparent=True)
          plt.show()
 
@@ -474,8 +489,9 @@ if __name__ == "__main__":
          x = cash_df[-1:].dropna(axis=1).values
          y = list(cash_df[-1:].dropna(axis=1).columns)
          plt.pie(x[0], labels=y, shadow=False, startangle=90,autopct='%1.1f%%')
-         plt.title("Allocations as of %s" % str(today))
-         plt.savefig("C:/Python27/Git/SMA_GTAA/Sectors/allocations.jpg", facecolor=fig.get_facecolor(), transparent=True)
+         # plt.legend(loc='best')
+         plt.title("Allocations as of %s" %str(today),fontweight = 'heavy')
+         plt.savefig("C:/Python27/Git/SMA_GTAA/Sectors/allocations.jpg", facecolor=fig.get_facecolor(), transparent=True,color='darkblue')
          plt.show()
 
     all_portfolios = startegy_switch()
@@ -510,15 +526,18 @@ if __name__ == "__main__":
     plot_perf.plot(kind ='bar')
     plt.grid()
     plt.legend()
-    plt.title("Portfolio Net Perfomance vs. S&P 500 TR")
+    plt.ylabel("in percentage(%)")
+    plt.title("Portfolio Net Perfomance vs. S&P 500",color='blue',fontweight='heavy')
     plt.savefig("C:/Python27/Git/SMA_GTAA/Sectors/bar_chart.jpg", facecolor=fig.get_facecolor(), transparent=True)
     plt.show()
 
     # # Portfolio Return Plot
-    all_portfolios[['portfolio','S&P500']].cumsum().plot()
+    dollar_returns = dollar_retuns(all_portfolios[['portfolio','S&P500']])
+    dollar_returns.plot(linewidth = 2.0)
     plt.legend()
     plt.grid()
-    plt.title("Equity Curve")
+    plt.ylabel("in dollars($)")
+    plt.title("Growth of a $10000 Portfolio ",color='blue',fontweight='heavy')
     plt.savefig("C:/Python27/Git/SMA_GTAA/Sectors/equity_curve.jpg", facecolor=fig.get_facecolor(), transparent=True)
     plt.show()
     #
@@ -538,9 +557,9 @@ if __name__ == "__main__":
     #
     # # Rolling Correlation vs Benchamrk
     tcor = all_portfolios['portfolio'].rolling(window=6).corr(other=all_portfolios['S&P500'])
-    tcor.plot()
+    tcor.plot(linewidth=1.5,color='red')
     plt.grid()
-    plt.title("Rolling Correlation vs S&P 500")
+    plt.title("Rolling Correlation vs S&P 500",color='blue',fontweight='heavy')
     plt.savefig("C:/Python27/Git/SMA_GTAA/Sectors/correlation.jpg", facecolor=fig.get_facecolor(), transparent=True)
     plt.show()
     #

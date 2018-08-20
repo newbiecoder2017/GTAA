@@ -1,25 +1,25 @@
-#This model trades based on the 10 Month SMA rule rotating through different asset classes.
-#universe consittuents
-#DBC - DB Liquid Commoties Index etf
-#GLD - Gold
-#IVV  - U.S. Stocks (Fama French top 30% by market capitalization)
-#IEV- European Stocks (Stoxx 350 Index)
-#EWJ - Japanese Stocks (MSCI Japan)
-#EEM - Emerging Market Stocks (MSCI EM)
-#IYR - U.S. REITs (Dow Jones U.S. Real Estate Index)
-#RWX - International REITs (Dow Jones Int’l Real Estate Index)
-#IEF - Intermediate Treasuries (Barclays 7-10 Year Treasury Index)
-#TLT - Long Treasuries (Barclays 20+ Year Treasury Index)
-#BIL - 1-3 Month T Bill
-#SHY - Barclays Capital U.S. 1-3 Year Treasury Bond Index
-#PGAIX - PIMCO Global Multi-Asset Fund Institutional Class
-#GYLD - Arrow Dow Jones Global Yield ETF
-#ACWI - iShares MSCI ACWI ETF
-#AGG - iShares Core U.S. Aggregate Bond ETF  AGG
-#IJH - iShares Core S&P Mid Cap ETF
-#IJR - iShares Core S&P Small Cap ETF
-#IXUS - ishares Core MSCI Total INTL Stock ETF
-#HDV - Ishares Core High Dividend ETF
+# This model trades based on the 10 Month SMA rule rotating through different asset classes.
+# universe consittuents
+# DBC - DB Liquid Commoties Index etf
+# GLD - Gold
+# IVV  - U.S. Stocks (Fama French top 30% by market capitalization)
+# IEV- European Stocks (Stoxx 350 Index)
+# EWJ - Japanese Stocks (MSCI Japan)
+# EEM - Emerging Market Stocks (MSCI EM)
+# IYR - U.S. REITs (Dow Jones U.S. Real Estate Index)
+# RWX - International REITs (Dow Jones Int’l Real Estate Index)
+# IEF - Intermediate Treasuries (Barclays 7-10 Year Treasury Index)
+# TLT - Long Treasuries (Barclays 20+ Year Treasury Index)
+# BIL - 1-3 Month T Bill
+# SHY - Barclays Capital U.S. 1-3 Year Treasury Bond Index
+# PGAIX - PIMCO Global Multi-Asset Fund Institutional Class
+# GYLD - Arrow Dow Jones Global Yield ETF
+# ACWI - iShares MSCI ACWI ETF
+# AGG - iShares Core U.S. Aggregate Bond ETF  AGG
+# IJH - iShares Core S&P Mid Cap ETF
+# IJR - iShares Core S&P Small Cap ETF
+# IXUS - ishares Core MSCI Total INTL Stock ETF
+# HDV - Ishares Core High Dividend ETF
 
 
 import pandas as pd
@@ -27,38 +27,39 @@ import numpy as np
 import matplotlib.pyplot as plt
 import fix_yahoo_finance as yf
 from pandas_datareader import data as pdr
-from scipy import stats
-import statsmodels.api as sm
-yf.pdr_override() # <== that's all it takes :-)
-pd.set_option('precision',4)
-pd.options.display.float_format = '{:.3f}'.format
 import seaborn as sns
+# from scipy import stats
+import statsmodels.api as sm
+yf.pdr_override()  # <== that's all it takes :-)
+pd.set_option('precision', 4)
+pd.options.display.float_format = '{:.3f}'.format
 sns.set_palette(sns.color_palette("Paired"))
 
 
-
-#Function to pull data from yahoo
+# Function to pull data from yahoo
 def pull_data(s):
     return pdr.get_data_yahoo(s, start="2000-12-31", end="2018-07-31")['Adj Close']
 
-def read_price_file(frq = 'BM'):
+
+def read_price_file(frq='BM'):
     df_price = pd.read_csv("C:/Python27/Git/SMA_GTAA/GTAA/adj_close_v2.csv", index_col='Date', parse_dates=True)
     df_price = df_price.resample(frq, closed='right').last()
-    df_price  = df_price['2011':]
+    df_price = df_price['2011':]
     return df_price
+
 
 def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     df = pd.read_csv("C:/Python27/Git/SMA_GTAA/GTAA/adj_close_v2.csv", index_col='Date', parse_dates=True)
 
     df = df['2011':]
-    #calculating the daily return for benchmarks
+    # calculating the daily return for benchmarks
     rframe = df.resample('BM', closed='right').last().pct_change()
 
     bmivv = rframe.IVV
 
-    bmgal= rframe.GAL
+    bmgal = rframe.GAL
 
-    bmacwi =rframe.ACWI
+    bmacwi = rframe.ACWI
 
     bmbil = rframe.BIL
 
@@ -79,10 +80,10 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
         return ret_frame / risk_df
 
 
-    #1 month risk adjusted  frame
+    # 1 month risk adjusted  frame
     df_1m = clean_universe(df, rs='BM', cutoff=0.5, per=1)
 
-    #Drop the benchmark from the return frame. Add symbols to the list to eliminate from teh return frame
+    # Drop the benchmark from the return frame. Add symbols to the list to eliminate from teh return frame
     rframe.drop(['GAL','BIL','GYLD'], inplace=True, axis=1)
 
     df_1m.drop(['GAL','BIL','GYLD'], inplace=True, axis=1)
@@ -99,7 +100,7 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     df_12m = clean_universe(df, rs='BM', cutoff=0.5, per=12)
 
 
-    #Zscore the risk adjusted return frames
+    # Zscore the risk adjusted return frames
 
     zs_1m = pd.DataFrame([(df_1m.iloc[i] - df_1m.iloc[i].mean())/df_1m.iloc[i].std() for i in range(len(df_1m))])
     zs_3m = pd.DataFrame([(df_3m.iloc[i] - df_3m.iloc[i].mean())/df_3m.iloc[i].std() for i in range(len(df_3m))])
@@ -118,27 +119,27 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     persistence_long = df_1m.rolling(6).apply(return_persistence)
     persistence_short = df_1m.rolling(3).apply(return_persistence)
 
-    #composte frame for the long and short persistence factors
-    composite_persistence = 0.9 * persistence_long  + 0.1 * persistence_short
+    # composte frame for the long and short persistence factors
+    composite_persistence = 0.5 * persistence_long  + 0.5 * persistence_short
 
-    #Generate the zscore of composite persistence dataframe
+    # Generate the zscore of composite persistence dataframe
     persistence_zscore = pd.DataFrame([(composite_persistence.iloc[i] - composite_persistence.iloc[i].mean()) / composite_persistence.iloc[i].std() for i in range(len(composite_persistence))])
 
     persistence_zscore = persistence_zscore.clip(lower=-3.0, upper=3.0, axis=1)
-    #Genrate the composite zscore of return frames for different period returns frame
+    # Genrate the composite zscore of return frames for different period returns frame
     rank_comp = wList[0] * zs_1m + wList[1] * zs_3m + wList[2] * zs_6m + wList[3] * zs_12m
 
-    #Generate 1 month forward return based on the filtered composite zscore retrun dataframe
+    # Generate 1 month forward return based on the filtered composite zscore retrun dataframe
     df_portfolio = rframe.shift(-1)[rank_comp >= cut_off]
 
-    #Using the persistence zscore dataframe to generate the position weights
+    # Using the persistence zscore dataframe to generate the position weights
     persistence_zscore = persistence_zscore[rank_comp >= cut_off]
     df_weights = pd.DataFrame([persistence_zscore.iloc[i] / abs(persistence_zscore.iloc[i]).sum() for i in range(len(persistence_zscore))]).abs()
 
-    #Generate the weighted portfolio returns
+    # Generate the weighted portfolio returns
     df_portfolio = df_weights * df_portfolio
 
-    #Realigining the index of the portfolio
+    # Realigining the index of the portfolio
     df_portfolio = df_portfolio.shift(1)
 
     #calculate the portfolio return series and benchmark. Annual expense of 35bps is deducted monthly from the portfolio
@@ -197,18 +198,18 @@ def backtest_metrics(returnsframe, rfr):
     cpr = cummulative_return[-1:]
     N = len(returnsframe) / 12
 
-    #Annualized returns
+    # Annualized returns
     AnnReturns = (cpr.pow(1 / N) - 1)
     RFR_AnnRet = AnnReturns.RFR
     AnnReturns = AnnReturns.drop(['RFR'], axis = 1)
     returnsframe = returnsframe.drop(['RFR'], axis = 1)
     cummulative_return = cummulative_return.drop(['RFR'], axis = 1)
-    #Annualized Risk
+    # Annualized Risk
     AnnRisk = (np.sqrt(12) * returnsframe.std())
 
     def returns_risk(retFrame, per):
 
-        #1Yr Return
+        # 1Yr Return
         returnsframe_N = retFrame[-per:]
         N = len(returnsframe_N) / 12
         cpr_N = (1 + returnsframe_N).cumprod()
@@ -220,10 +221,10 @@ def backtest_metrics(returnsframe, rfr):
     ret_36m, std_36m = returns_risk(returnsframe, 36)
     ret_60m, std_60m = returns_risk(returnsframe, 60)
 
-    #Sharpe Ratio with 2.5% annualized RFR
+    # Sharpe Ratio with 2.5% annualized RFR
     AnnSharpe = (AnnReturns - RFR_AnnRet.iloc[0]) / AnnRisk
 
-    #The Sortino ratio takes the asset's return and subtracts the risk-free rate, and then divides that amount by the asset's downside deviation. MAR is 5%
+    # The Sortino ratio takes the asset's return and subtracts the risk-free rate, and then divides that amount by the asset's downside deviation. MAR is 5%
     df_thres = returnsframe - 0.05
     df_thres[df_thres > 0] = 0
     downward_risk = (np.sqrt(12) * df_thres.std())
@@ -246,7 +247,7 @@ def backtest_metrics(returnsframe, rfr):
     average_down = returnsframe[returnsframe < 0].mean()
     gain_to_loss = (average_up) / (-1 * average_down)
 
-    #MAR ratio, annualised return over MDD. Higher the better
+    # MAR ratio, annualised return over MDD. Higher the better
     mar_ratio = abs(AnnReturns / [mdd[0][i] for i in range(len(mdd[0]))])
 
     # Annualisec return over average annual DD
@@ -274,13 +275,13 @@ def backtest_metrics(returnsframe, rfr):
     metric_df.loc['5YrRisk'] = [100 * i for i in std_60m.values.tolist()]
 
     return metric_df, daily_dd
-    #df.loc['Total Return'] = returnsframe.cumsum()[-1:].values[0].tolist()
+    # df.loc['Total Return'] = returnsframe.cumsum()[-1:].values[0].tolist()
     # return metric_df
 
 
 if __name__ == "__main__":
 
-     # universe list for the model
+    # universe list for the model
     universe_list = ['DBC', 'GLD', 'IVV', 'IEV', 'EWJ', 'EEM', 'IYR', 'RWX', 'IEF', 'TLT', 'BIL', 'SHY','ACWI','AGG','GYLD','GAL','IJH','IJR','IXUS','HDV']
     # trading_universe = ['DBC', 'GLD', 'IVV', 'IEV', 'EWJ', 'EEM', 'IYR', 'RWX', 'IEF', 'TLT']
 
@@ -298,9 +299,9 @@ if __name__ == "__main__":
     n4 = 0.6
     model, wts = model_portfolios(cut_off=0.0, wList=[n1,n2,n3,n4])
 
-    #Try with BIL and GYLD, w/o BIL and GYLD and combinations
-    #best persistence set is 0.1, 0.9 - Long/Short
-    #Best sets are  [0.1,0,0.8,0.1], [0.0,0,0.9,.1], [0.0,0,0.8,0.2] an combinations
+    # Try with BIL and GYLD, w/o BIL and GYLD and combinations
+    # best persistence set is 0.1, 0.9 - Long/Short
+    # Best sets are  [0.1,0,0.8,0.1], [0.0,0,0.9,.1], [0.0,0,0.8,0.2] an combinations
 
     # print(model.tail())
     # print(wts.tail())
@@ -323,7 +324,7 @@ if __name__ == "__main__":
     stats_df.loc['Worst_Month', :] = [100 * float(i) for i in portfolio_returns.min().values.tolist()]
     stats_df.loc['Best_Year', :] = [100 * float(i) for i in portfolio_returns.groupby(portfolio_returns.index.year).sum().max()]
     stats_df.loc['Worst_Year', :] = [100 * float(i) for i in portfolio_returns.groupby(portfolio_returns.index.year).sum().min()]
-       #
+
     #Regression stats for all portfolios and indices
     for c in stats_df.columns:
 
@@ -335,7 +336,7 @@ if __name__ == "__main__":
     # trade_reco = pd.DataFrame([v for i, v in buy_list], index=[i for i, v in buy_list], columns=['Weights'])
     print(wts[-1:])
 
-    #DrawDown Plot
+    # DrawDown Plot
     daily_dd.fillna(0).rolling(6).mean().plot(color='rgbc')
     plt.title("6m Rolling DrawDowns")
     plt.grid()
@@ -345,24 +346,24 @@ if __name__ == "__main__":
     plt.show()
 
 
-    #Plot the rolling weights
+    # Plot the rolling weights
     # y = np.vstack([wts[c].fillna(0) for c in wts.columns])
     # plt.stackplot(wts.index, y, labels = ['SHY'])
 
 
-    #safe assets plot
+    # safe assets plot
     # wts[['GLD','SHY','AGG']].fillna(0).rolling(6).mean().plot(color = 'rgb')
     # plt.title("Safe_Assets_Allocations")
 
-    #risky assets plot
+    # risky assets plot
     # wts[['IVV', 'EWJ', 'EEM', 'IEV']].fillna(0).rolling(6).mean().plot(color = 'rgb')
     # plt.title("Risky_Assets_Allocations")
 
-    #equity/bond allocations plot
+    # equity/bond allocations plot
     # wts[['IVV', 'TLT','IEF','SHY']].fillna(0).rolling(6).mean().plot(color = 'rgbc')
     # plt.title("US_Equity_Bonds_Allocations")
 
-    #All Equity Bond Allocations
+    # All Equity Bond Allocations
     # global_equity = wts[['IVV','IEV','EWJ','EEM','ACWI']]
     # global_equity['Average'] =  global_equity.mean(axis=1)
     # global_debt = wts[['IEF', 'TLT', 'SHY', 'AGG']]
