@@ -33,7 +33,7 @@ import statsmodels.api as sm
 yf.pdr_override()  # <== that's all it takes :-)
 pd.set_option('precision', 4)
 pd.options.display.float_format = '{:.3f}'.format
-sns.set_palette(sns.color_palette("Paired"))
+# sns.set_palette(sns.color_palette("Paired"))
 
 
 # Function to pull data from yahoo
@@ -44,7 +44,7 @@ def pull_data(s):
 def read_price_file(frq='BM'):
     df_price = pd.read_csv("C:/Python27/Git/SMA_GTAA/GTAA/adj_close_v2.csv", index_col='Date', parse_dates=True)
     df_price = df_price.resample(frq, closed='right').last()
-    df_price = df_price['2011':]
+    # df_price = df_price['2011':]
     return df_price
 
 
@@ -117,10 +117,8 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     # Generate the dataframe for Persistence return Factor from 1 month data frame
     persistence_long = df_1m.rolling(6).apply(return_persistence)
     persistence_short = df_1m.rolling(3).apply(return_persistence)
-
     # composte frame for the long and short persistence factors
     composite_persistence = 0.1 * persistence_long + 0.9 * persistence_short
-
     # Generate the zscore of composite persistence dataframe
     persistence_zscore = pd.DataFrame([(composite_persistence.iloc[i] - composite_persistence.iloc[i].mean()) / composite_persistence.iloc[i].std() for i in range(len(composite_persistence))])
 
@@ -142,7 +140,7 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     df_portfolio = df_portfolio.shift(1)
 
     # calculate the portfolio return series and benchmark. Annual expense of 35bps is deducted monthly from the portfolio
-    df_portfolio['Average'] = df_portfolio.sum(axis=1) - 0.00042  # 50bp of fees and transaction cost
+    df_portfolio['Average'] = df_portfolio.sum(axis=1) - 0.000625  # 50bp of fees and transaction cost
     df_portfolio['bmIVV'] = bmivv
     df_portfolio['bmACWI'] = bmacwi
     df_portfolio['bmGAL'] = bmgal
@@ -298,9 +296,9 @@ if __name__ == "__main__":
     # read_price_file('BM')
     n1 = 0.0
     n2 = 0.0
-    n3 = 0.4
-    n4 = 0.6
-    model, wts = model_portfolios(cut_off=0.0, wList=[n1,n2,n3,n4])
+    n3 = 0.9
+    n4 = 0.1
+    model, wts = model_portfolios(cut_off=0.1, wList=[n1,n2,n3,n4])
 
     # Try with BIL and GYLD, w/o BIL and GYLD and combinations
     # best persistence set is 0.1, 0.9 - Long/Short
@@ -331,7 +329,7 @@ if __name__ == "__main__":
     #Regression stats for all portfolios and indices
     for c in stats_df.columns:
 
-        stats_df[c].loc[['beta','ann_alpha','R_squared','p_value','tvalue']] = regression_fit(portfolio_returns[c], model.bmGal.fillna(0), model.bmBIL.fillna(0))
+        stats_df[c].loc[['beta','ann_alpha','R_squared','p_value','tvalue']] = regression_fit(portfolio_returns[c], model.bmGAL.fillna(0), model.bmBIL.fillna(0))
     # cutt_off=1.5
     # stats_df.to_csv("C:/Python27/Git/SMA_GTAA/GTAA/"+str(n1)+"_"+str(n2)+"_"+str(n3)+"_"+str(n4)+"_"+str(cutt_off)+".csv")
     print(stats_df)
@@ -340,13 +338,13 @@ if __name__ == "__main__":
     print(wts[-1:])
 
     # DrawDown Plot
-    daily_dd.fillna(0).rolling(6).mean().plot(color='rgbc')
-    plt.title("6m Rolling DrawDowns")
-    plt.grid()
-    plt.legend()
-    plt.ylabel("% Drawdown")
-    plt.savefig("C:/Python27/Git/SMA_GTAA/drawdowns_LTH.png")
-    plt.show()
+    # daily_dd.fillna(0).rolling(6).mean().plot(color='rgbc')
+    # plt.title("6m Rolling DrawDowns")
+    # plt.grid()
+    # plt.legend()
+    # plt.ylabel("% Drawdown")
+    # plt.savefig("C:/Python27/Git/SMA_GTAA/drawdowns_LTH.png")
+    # plt.show()
 
 
     # Plot the rolling weights
@@ -355,9 +353,9 @@ if __name__ == "__main__":
 
 
     # safe assets plot
-    t = wts[['TLT', 'SHY', 'AGG', 'IEF']].sum(axis=1)
-    t.fillna(0).rolling(6).mean().plot()
-    plt.title("Safe_Assets_Allocations")
+    # t = wts[['TLT', 'SHY', 'AGG', 'IEF']].sum(axis=1)
+    # t.fillna(0).rolling(6).mean().plot()
+    # plt.title("Safe_Assets_Allocations")
 
     # risky assets plot
     # wts[['IVV', 'EWJ', 'EEM', 'IEV']].fillna(0).rolling(6).mean().plot(color = 'rgb')
@@ -390,12 +388,12 @@ if __name__ == "__main__":
     # plt.show()
 
     # # #Portfolio Return Plot
-    portfolio_returns = portfolio_returns[['Average','bmGAL','bmIVV','bmACWI','bm_60_40']]
-    # print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
-    portfolio_returns['5-2012':].cumsum().plot()
-    plt.legend()
-    plt.grid()
-    plt.show()
+    # portfolio_returns = portfolio_returns[['Average','bmGAL','bmIVV','bmACWI','bm_60_40']]
+    # # print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
+    # portfolio_returns['5-2012':].cumsum().plot()
+    # plt.legend()
+    # plt.grid()
+    # plt.show()
 
     # #Returns grouped by year
     # portfolio_returns.rename(columns = {'eq_wt':'EW_GTAA', 'risk_wt':'RiskWt_GTAA', 'Avg_Universe':'EW_GTAA_Universe', 'risk_wt_bm':'RiskWt_GTAA_Universe',
