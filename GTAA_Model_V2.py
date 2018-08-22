@@ -28,6 +28,8 @@ import matplotlib.pyplot as plt
 import fix_yahoo_finance as yf
 from pandas_datareader import data as pdr
 import seaborn as sns
+import time
+import datetime
 # from scipy import stats
 import statsmodels.api as sm
 yf.pdr_override()  # <== that's all it takes :-)
@@ -51,7 +53,7 @@ def read_price_file(frq='BM'):
 def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     df = pd.read_csv("C:/Python27/Git/SMA_GTAA/GTAA/adj_close_v2.csv", index_col='Date', parse_dates=True)
 
-    df = df['12-2011':]
+    # df = df['12-2011':]
     # calculating the daily return for benchmarks
     rframe = df.resample('BM', closed='right').last().pct_change()
 
@@ -85,7 +87,7 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     df_1m = clean_universe(df, rs='BM', cutoff=0.5, per=1)
 
     # Drop the benchmark from the return frame. Add symbols to the list to eliminate from teh return frame
-    rframe.drop(['GAL', 'BIL', 'GYLD','ACWI'], inplace=True, axis=1)
+    rframe.drop(['GAL', 'BIL', 'GYLD','ACWI','AGG','IEF'], inplace=True, axis=1)
 
     df_1m.drop(['GAL', 'BIL', 'GYLD', 'ACWI'], inplace=True, axis=1)
 
@@ -140,7 +142,7 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     df_portfolio = df_portfolio.shift(1)
 
     # calculate the portfolio return series and benchmark. Annual expense of 35bps is deducted monthly from the portfolio
-    df_portfolio['Average'] = df_portfolio.sum(axis=1) - 0.000625  # 50bp of fees and transaction cost
+    df_portfolio['Average'] = df_portfolio.sum(axis=1) - .000625   # 50bp of fees and transaction cost
     df_portfolio['bmIVV'] = bmivv
     df_portfolio['bmACWI'] = bmacwi
     df_portfolio['bmGAL'] = bmgal
@@ -278,7 +280,26 @@ def backtest_metrics(returnsframe, rfr):
     return metric_df, daily_dd
     # df.loc['Total Return'] = returnsframe.cumsum()[-1:].values[0].tolist()
     # return metric_df
+def dollar_retuns(data):
+    data['Portfolio'] = 10000
+    data['GAL'] = 10000
+    data['S&P 500'] = 10000
+    data['60/40 Allocation'] = 10000
+    idx = data.index.tolist()
+    for i in range(len(data)):
+        data = data.fillna(0)
+        if i == 0:
+            data.loc[idx[i],'Portfolio'] = 10000
+            data.loc[idx[i], 'S&P 500'] = 10000
+            data.loc[idx[i], 'GAL'] = 10000
+            data.loc[idx[i], '60/40 Allocation'] = 10000
+        else:
+            data.loc[idx[i], 'Portfolio'] = (1 + data.loc[idx[i], 'Average']) * data.loc[idx[i-1], 'Portfolio']
+            data.loc[idx[i], 'S&P 500'] = (1 + data.loc[idx[i], 'bmIVV']) * data.loc[idx[i-1], 'S&P 500']
+            data.loc[idx[i], 'GAL'] = (1 + data.loc[idx[i], 'bmGAL']) * data.loc[idx[i-1], 'GAL']
+            data.loc[idx[i], '60/40 Allocation'] = (1 + data.loc[idx[i], 'bm_60_40']) * data.loc[idx[i-1], '60/40 Allocation']
 
+    return data[['Portfolio','S&P 500','GAL','60/40 Allocation']]
 
 if __name__ == "__main__":
 
@@ -295,7 +316,7 @@ if __name__ == "__main__":
 
     # read_price_file('BM')
     n1 = 0.0
-    n2 = 0.0
+    n2 = 0.2
     n3 = 0.9
     n4 = 0.1
     model, wts = model_portfolios(cut_off=0.1, wList=[n1,n2,n3,n4])
@@ -335,6 +356,22 @@ if __name__ == "__main__":
     print(stats_df)
     # # print("Trade Recommendation: ", buy_list)
     # trade_reco = pd.DataFrame([v for i, v in buy_list], index=[i for i, v in buy_list], columns=['Weights'])
+
+    # safe_assests = wts[['SHY', 'TLT', 'GLD']].fillna(0).sum(axis=1).rolling(6).mean()
+    # risky_assests = wts[['IVV', 'IEV', 'EWJ', 'EEM', 'IJH', 'IYR', 'IXUS']].fillna(0).sum(axis=1).rolling(6).mean()
+    # portfolio_returns[['bmIVV','bmACWI']].cumsum().plot()
+    # safe_assests.plot(kind='area')
+    # risky_assests.plot(kind='area')
+    # plt.grid()
+    # plt.title("Safe Asset Exposure vs S&P 500")
+    # plt.show()
+
+    # Allocations Plot
+    # x = wts[-1:].dropna(axis=1).values
+    # y = wts[-1:].dropna(axis=1).columns
+    # plt.pie(x[0], labels=y, shadow=False, startangle=90, autopct='%1.1f%%')
+    # plt.title("Allocations as of %s" %(portfolio_returns.index[-1:][0].strftime('%m/%d/%Y')))
+    # plt.show()
     print(wts[-1:])
 
     # DrawDown Plot
@@ -366,15 +403,19 @@ if __name__ == "__main__":
     # plt.title("US_Equity_Bonds_Allocations")
 
     # All Equity Bond Allocations
-    # global_equity = wts[['IVV','IEV','EWJ','EEM','ACWI']]
-    # global_equity['Average'] =  global_equity.mean(axis=1)
-    # global_debt = wts[['IEF', 'TLT', 'SHY', 'AGG']]
-    # global_debt['Average'] = global_debt.mean(axis=1)
-    # new_df_plot = pd.DataFrame(columns = ['Equity', 'Bonds'])
-    # new_df_plot['Equity'] = global_equity['Average'].fillna(0)
-    # new_df_plot['Bonds'] = global_debt['Average'].fillna(0)
+    # global_equity = wts[['IVV','IEV','EWJ','EEM','IJH','IJR', 'IXUS']]
+    # global_equity.loc[:,'Average'] =  global_equity.sum(axis=1)
+    # global_debt = wts[['IEF', 'TLT', 'SHY', 'AGG','IEF']]
+    # global_debt.loc[:, 'Average'] = global_debt.sum(axis=1)
+    # new_df_plot = pd.DataFrame(columns = ['Global_Equity', 'Global_Bonds'])
+    # new_df_plot.loc[:, 'Global_Equity'] = global_equity['Average'].fillna(0)
+    # new_df_plot.loc[:,'Global_Bonds'] = global_debt['Average'].fillna(0)
     # new_df_plot.rolling(6).mean().plot(color = 'rgb')
     # plt.title("Global_Equity_Bonds_Allocations")
+    # plt.legend()
+    # plt.grid()
+    # plt.show()
+
 
     # plt.ylabel("% allocation (rolling 6 months avg)")
     # plt.legend()
@@ -387,10 +428,11 @@ if __name__ == "__main__":
 
     # plt.show()
 
-    # # #Portfolio Return Plot
-    # portfolio_returns = portfolio_returns[['Average','bmGAL','bmIVV','bmACWI','bm_60_40']]
-    # # print(100 * portfolio_returns.groupby(portfolio_returns.index.year).sum())
-    # portfolio_returns['5-2012':].cumsum().plot()
+    # Portfolio Return Plot
+    # portfolio_returns = portfolio_returns[['Average','bmGAL', 'bm_60_40']]
+    # perf_yr = 100 * portfolio_returns.groupby(portfolio_returns.index.year).sum()
+    # perf_yr.plot(kind='bar')
+    # plt.title("Historical Performance - Portfolio vs Benchmark")
     # plt.legend()
     # plt.grid()
     # plt.show()
@@ -427,8 +469,11 @@ if __name__ == "__main__":
     #                                        'MomoPortfoli_QO', 'MomoPortfolio_Q', '70/30_QO_MP/RW_GTAA',
     #                                        '70/30_QQQE/RW_GTAA_bm', '60/40_ACWI/AGG', 'S&P500']]
     # # print(stats_df)
+    # Correlation Plot
     # tcor = pd.rolling_corr(portfolio_returns['Average'],portfolio_returns['bmGAL'],6)
-    # tcor.plot()
+    # tcor.plot(color = 'r')
+    # plt.title("Rolling Correlation Plot - Portfolio vs SPDR Global Asset Allocation Fund (GAL)", color='blue',fontweight='heavy')
+    # plt.grid()
     # plt.show()
     # ts1 = 100 * portfolio_returns.groupby(portfolio_returns.index.year).sum()
     # ts2 = 100 * np.sqrt(12) * portfolio_returns.groupby(portfolio_returns.index.year).std()
@@ -439,7 +484,15 @@ if __name__ == "__main__":
     # # ts2.to_csv("C:/Python27/Git/SMA_GTAA/GTAA/Risk_Summary.csv")
     # print(wts.tail(10))
 
-
+    # ollar Growth of a Portfolio
+    dollar_returns = dollar_retuns(portfolio_returns)
+    dollar_returns.plot(linewidth = 2.0)
+    plt.legend()
+    plt.grid()
+    plt.ylabel("in dollars($)")
+    plt.title("Growth of a $10000 Portfolio ",color='blue',fontweight='heavy')
+    # plt.savefig("C:/Python27/Git/SMA_GTAA/Sectors/equity_curve.jpg", facecolor=fig.get_facecolor(), transparent=True)
+    plt.show()
 
 
 
