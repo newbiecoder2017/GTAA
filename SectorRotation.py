@@ -374,7 +374,7 @@ def cash_scaling_model():
 
     sp_df['Adj Close'].resample('BM', closed='right').last().pct_change().cumsum().plot(color = 'r')
     # plt.legend(['SP500'])
-    plt.title("Risk On/OFF Indicator vs S&P500 TR", color='crimson',fontweight='heavy')
+    plt.title("Risk On/OFF Indicator vs S&P500 PR", color='crimson',fontweight='heavy')
     plt.savefig("C:/Python27/Git/SMA_GTAA/Sectors/cashScalingPlot.jpg", transparent=True)
     plt.show()
 
@@ -527,7 +527,7 @@ if __name__ == "__main__":
     plt.grid()
     plt.legend()
     plt.ylabel("in percentage(%)")
-    plt.title("Portfolio Net Perfomance vs. S&P 500",color='blue',fontweight='heavy')
+    plt.title("Portfolio Net Perfomance vs. S&P 500 PR",color='blue',fontweight='heavy')
     plt.savefig("C:/Python27/Git/SMA_GTAA/Sectors/bar_chart.jpg", facecolor=fig.get_facecolor(), transparent=True)
     plt.show()
 

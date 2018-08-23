@@ -20,7 +20,8 @@
 # IJR - iShares Core S&P Small Cap ETF
 # IXUS - ishares Core MSCI Total INTL Stock ETF
 # HDV - Ishares Core High Dividend ETF
-
+# EMB - iShares J P Morgan USD Emerging Mkt Bonds ETF
+# HYG - iShares iBoxx$ High Yield Corporate Bond ETF
 
 import pandas as pd
 import numpy as np
@@ -53,7 +54,7 @@ def read_price_file(frq='BM'):
 def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     df = pd.read_csv("C:/Python27/Git/SMA_GTAA/GTAA/adj_close_v2.csv", index_col='Date', parse_dates=True)
 
-    # df = df['12-2011':]
+    df = df['12-2012':]
     # calculating the daily return for benchmarks
     rframe = df.resample('BM', closed='right').last().pct_change()
 
@@ -64,6 +65,10 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     bmacwi = rframe.ACWI
 
     bmbil = rframe.BIL
+
+    bmmstar = rframe.Mstar_MultAsset_HI
+
+    bmiyld = rframe.IYLD
 
     bm_60_40 = 0.6 * bmacwi + 0.4 * rframe.AGG
 
@@ -86,12 +91,12 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     # 1 month risk adjusted  frame
     df_1m = clean_universe(df, rs='BM', cutoff=0.5, per=1)
 
-    # Drop the benchmark from the return frame. Add symbols to the list to eliminate from teh return frame
-    rframe.drop(['GAL', 'BIL', 'GYLD','ACWI','AGG','IEF'], inplace=True, axis=1)
+    # Drop the benchmark from the return frame. Add symbols to the list to eliminate from thereturn frame
+    rframe.drop(['GAL', 'BIL', 'GYLD','ACWI','AGG','IYLD', 'Mstar_MultAsset_HI','IXUS'], inplace=True, axis=1)
 
-    df_1m.drop(['GAL', 'BIL', 'GYLD', 'ACWI'], inplace=True, axis=1)
+    df_1m.drop(['GAL', 'BIL', 'GYLD', 'ACWI','AGG', 'IYLD', 'Mstar_MultAsset_HI','IXUS'], inplace=True, axis=1)
 
-    df.drop(['GAL', 'BIL', 'GYLD','ACWI'], inplace=True, axis=1)
+    df.drop(['GAL', 'BIL', 'GYLD','ACWI','AGG', 'IYLD', 'Mstar_MultAsset_HI','IXUS'], inplace=True, axis=1)
 
     # 3 month risk adjusted frame
     df_3m = clean_universe(df, rs='BM', cutoff=0.5, per=3)
@@ -120,7 +125,7 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     persistence_long = df_1m.rolling(6).apply(return_persistence)
     persistence_short = df_1m.rolling(3).apply(return_persistence)
     # composte frame for the long and short persistence factors
-    composite_persistence = 0.1 * persistence_long + 0.9 * persistence_short
+    composite_persistence = 0.9 * persistence_long + 0.1 * persistence_short
     # Generate the zscore of composite persistence dataframe
     persistence_zscore = pd.DataFrame([(composite_persistence.iloc[i] - composite_persistence.iloc[i].mean()) / composite_persistence.iloc[i].std() for i in range(len(composite_persistence))])
 
@@ -148,6 +153,8 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     df_portfolio['bmGAL'] = bmgal
     df_portfolio['bmBIL'] = bmbil
     df_portfolio['bm_60_40'] = bm_60_40
+    df_portfolio['bmIYLD'] = bmiyld
+    df_portfolio['bmMStar_AAHI'] = bmmstar
     return df_portfolio, df_weights
 
 
@@ -195,7 +202,7 @@ def regression_fit(port, bm, rfr):
 
 
 def backtest_metrics(returnsframe, rfr):
-    returnsframe['RFR'] = rfr
+    returnsframe.loc[:,'RFR'] = rfr
     cummulative_return = (1 + returnsframe).cumprod()
     cpr = cummulative_return[-1:]
     N = len(returnsframe) / 12
@@ -258,7 +265,7 @@ def backtest_metrics(returnsframe, rfr):
     metric_df = pd.DataFrame(AnnReturns.values.tolist(), index = ['AnnRet(%)','AnnRisk(%)','AnnSharpe(2.5%)','Avg_DD(%)','MaxDD(%)','WinRate(%)','Gain_to_Loss','RoMDD','Sortino(5%)',
                                                                   'Sterling_Ratio(over MDD)','beta','ann_alpha','R_squared','p_value', 'tvalue',
                                                                   '1YrReturns', '1YrRisk','3YrReturns', '3YrRisk', '5YrReturns', '5YrRisk'],
-                                                                    columns = ['Average', 'bmGAL','bmIVV','bmACWI','bm_60_40' ])
+                                                                    columns = ['Average', 'bmGAL','bmIVV','bmACWI','bm_60_40', 'bmIYLD', 'bmMStar_AAHI' ])
     metric_df.loc['AnnRet(%)'] = round(metric_df.loc['AnnRet(%)'], 3)*100
     metric_df.loc['AnnRisk(%)'] = [100*i for i in AnnRisk]
     metric_df.loc['AnnSharpe(2.5%)'] = AnnSharpe.values.tolist()[0]
@@ -281,10 +288,8 @@ def backtest_metrics(returnsframe, rfr):
     # df.loc['Total Return'] = returnsframe.cumsum()[-1:].values[0].tolist()
     # return metric_df
 def dollar_retuns(data):
-    data['Portfolio'] = 10000
-    data['GAL'] = 10000
-    data['S&P 500'] = 10000
-    data['60/40 Allocation'] = 10000
+
+
     idx = data.index.tolist()
     for i in range(len(data)):
         data = data.fillna(0)
@@ -293,18 +298,24 @@ def dollar_retuns(data):
             data.loc[idx[i], 'S&P 500'] = 10000
             data.loc[idx[i], 'GAL'] = 10000
             data.loc[idx[i], '60/40 Allocation'] = 10000
+            data.loc[idx[i], 'IYLD'] = 10000
+            data.loc[idx[i], 'MStar_AAHI'] = 10000
         else:
             data.loc[idx[i], 'Portfolio'] = (1 + data.loc[idx[i], 'Average']) * data.loc[idx[i-1], 'Portfolio']
             data.loc[idx[i], 'S&P 500'] = (1 + data.loc[idx[i], 'bmIVV']) * data.loc[idx[i-1], 'S&P 500']
             data.loc[idx[i], 'GAL'] = (1 + data.loc[idx[i], 'bmGAL']) * data.loc[idx[i-1], 'GAL']
             data.loc[idx[i], '60/40 Allocation'] = (1 + data.loc[idx[i], 'bm_60_40']) * data.loc[idx[i-1], '60/40 Allocation']
+            data.loc[idx[i], 'IYLD'] = (1 + data.loc[idx[i], 'bmIYLD']) * data.loc[idx[i - 1], 'IYLD']
+            data.loc[idx[i], 'MStar_AAHI'] = (1 + data.loc[idx[i], 'bmMStar_AAHI']) * data.loc[idx[i - 1], 'MStar_AAHI']
 
-    return data[['Portfolio','S&P 500','GAL','60/40 Allocation']]
+
+    # return data[['Portfolio','S&P 500','GAL','60/40 Allocation','IYLD','MStar_AAHI']]
+    return data[['Portfolio', 'GAL', 'IYLD','MStar_AAHI']]
 
 if __name__ == "__main__":
 
     # universe list for the model
-    universe_list = ['DBC', 'GLD', 'IVV', 'IEV', 'EWJ', 'EEM', 'IYR', 'RWX', 'IEF', 'TLT', 'BIL', 'SHY','ACWI','AGG','GYLD','GAL','IJH','IJR','IXUS','HDV']
+    universe_list = ['DBC', 'GLD', 'IVV', 'IEV', 'EWJ', 'EEM', 'IYR', 'RWX', 'IEF', 'TLT', 'BIL', 'SHY','ACWI','AGG','GYLD','GAL','IJH','IJR','IXUS','HDV','IYLD','EMB', 'HYG']
     # trading_universe = ['DBC', 'GLD', 'IVV', 'IEV', 'EWJ', 'EEM', 'IYR', 'RWX', 'IEF', 'TLT']
 
     # Universe Adj.Close dataframe
@@ -316,10 +327,10 @@ if __name__ == "__main__":
 
     # read_price_file('BM')
     n1 = 0.0
-    n2 = 0.2
-    n3 = 0.9
-    n4 = 0.1
-    model, wts = model_portfolios(cut_off=0.1, wList=[n1,n2,n3,n4])
+    n2 = 0.0
+    n3 = 1.0
+    n4 = 0.0
+    model, wts = model_portfolios(cut_off=0.0, wList=[n1,n2,n3,n4])
 
     # Try with BIL and GYLD, w/o BIL and GYLD and combinations
     # best persistence set is 0.1, 0.9 - Long/Short
@@ -339,8 +350,8 @@ if __name__ == "__main__":
     # portfolio_returns = portfolio_returns[1:]
     #
     # #BackTest Statistics for all the portfolios and indexes
-    stats_df, daily_dd = backtest_metrics(model[['Average','bmGAL','bmIVV','bmACWI','bm_60_40']], rfr = modBiL)
-    portfolio_returns = model[['Average','bmGAL','bmIVV','bmACWI', 'bm_60_40']]
+    stats_df, daily_dd = backtest_metrics(model[['Average','bmGAL','bmIVV','bmACWI','bm_60_40', 'bmIYLD','bmMStar_AAHI']], rfr = modBiL)
+    portfolio_returns = model[['Average','bmGAL','bmIVV','bmACWI', 'bm_60_40','bmIYLD','bmMStar_AAHI']]
     portfolio_returns.to_csv("C:/Python27/Git/SMA_GTAA/GTAA/returns.csv")
     stats_df.loc['Best_Month', :] = [100 * float(i) for i in portfolio_returns.max().values.tolist()]
     stats_df.loc['Worst_Month', :] = [100 * float(i) for i in portfolio_returns.min().values.tolist()]
@@ -350,7 +361,7 @@ if __name__ == "__main__":
     #Regression stats for all portfolios and indices
     for c in stats_df.columns:
 
-        stats_df[c].loc[['beta','ann_alpha','R_squared','p_value','tvalue']] = regression_fit(portfolio_returns[c], model.bmGAL.fillna(0), model.bmBIL.fillna(0))
+        stats_df[c].loc[['beta','ann_alpha','R_squared','p_value','tvalue']] = regression_fit(portfolio_returns[c][-36:], model.bmMStar_AAHI[-36:].fillna(0), model.bmBIL[-36:].fillna(0))
     # cutt_off=1.5
     # stats_df.to_csv("C:/Python27/Git/SMA_GTAA/GTAA/"+str(n1)+"_"+str(n2)+"_"+str(n3)+"_"+str(n4)+"_"+str(cutt_off)+".csv")
     print(stats_df)
