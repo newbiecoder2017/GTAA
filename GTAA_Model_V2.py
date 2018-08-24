@@ -54,7 +54,7 @@ def read_price_file(frq='BM'):
 def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     df = pd.read_csv("C:/Python27/Git/SMA_GTAA/GTAA/adj_close_v2.csv", index_col='Date', parse_dates=True)
 
-    df = df['12-2012':]
+    # df = df['12-2012':]
     # calculating the daily return for benchmarks
     rframe = df.resample('BM', closed='right').last().pct_change()
 
@@ -330,7 +330,7 @@ if __name__ == "__main__":
     n2 = 0.0
     n3 = 1.0
     n4 = 0.0
-    model, wts = model_portfolios(cut_off=0.0, wList=[n1,n2,n3,n4])
+    model, wts = model_portfolios(cut_off=0.1, wList=[n1,n2,n3,n4])
 
     # Try with BIL and GYLD, w/o BIL and GYLD and combinations
     # best persistence set is 0.1, 0.9 - Long/Short
