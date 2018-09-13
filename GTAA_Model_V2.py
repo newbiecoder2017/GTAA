@@ -41,7 +41,7 @@ pd.options.display.float_format = '{:.3f}'.format
 
 # Function to pull data from yahoo
 def pull_data(s):
-    return pdr.get_data_yahoo(s, start="2000-12-31", end="2018-07-31")['Adj Close']
+    return pdr.get_data_yahoo(s, start="2000-12-31", end="2018-08-31")['Adj Close']
 
 
 def read_price_file(frq='BM'):
@@ -66,7 +66,7 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
 
     bmbil = rframe.BIL
 
-    bmmstar = rframe.Mstar_MultAsset_HI
+    bmmstar = rframe.MAHIP
 
     bmiyld = rframe.IYLD
 
@@ -92,11 +92,11 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     df_1m = clean_universe(df, rs='BM', cutoff=0.5, per=1)
 
     # Drop the benchmark from the return frame. Add symbols to the list to eliminate from thereturn frame
-    rframe.drop(['GAL', 'BIL', 'GYLD','ACWI','AGG','IYLD', 'Mstar_MultAsset_HI','IXUS'], inplace=True, axis=1)
+    rframe.drop(['GAL', 'BIL', 'GYLD','ACWI','AGG','IYLD', 'MAHIP','IXUS'], inplace=True, axis=1)
 
-    df_1m.drop(['GAL', 'BIL', 'GYLD', 'ACWI','AGG', 'IYLD', 'Mstar_MultAsset_HI','IXUS'], inplace=True, axis=1)
+    df_1m.drop(['GAL', 'BIL', 'GYLD', 'ACWI','AGG', 'IYLD', 'MAHIP','IXUS'], inplace=True, axis=1)
 
-    df.drop(['GAL', 'BIL', 'GYLD','ACWI','AGG', 'IYLD', 'Mstar_MultAsset_HI','IXUS'], inplace=True, axis=1)
+    df.drop(['GAL', 'BIL', 'GYLD','ACWI','AGG', 'IYLD', 'MAHIP','IXUS'], inplace=True, axis=1)
 
     # 3 month risk adjusted frame
     df_3m = clean_universe(df, rs='BM', cutoff=0.5, per=3)
