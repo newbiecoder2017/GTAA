@@ -66,7 +66,7 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
 
     bmbil = rframe.BIL
 
-    bmmstar = rframe.Mstar_MultAsset_HI
+    bmmstar = rframe.MAHIP
 
     bmiyld = rframe.IYLD
 
@@ -92,11 +92,11 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     df_1m = clean_universe(df, rs='BM', cutoff=0.5, per=1)
 
     # Drop the benchmark from the return frame. Add symbols to the list to eliminate from thereturn frame
-    rframe.drop(['GAL', 'BIL', 'GYLD','ACWI','AGG','IYLD', 'Mstar_MultAsset_HI','IXUS'], inplace=True, axis=1)
+    rframe.drop(['GAL', 'BIL', 'GYLD','ACWI','AGG','IYLD', 'MAHIP','IXUS'], inplace=True, axis=1)
 
-    df_1m.drop(['GAL', 'BIL', 'GYLD', 'ACWI','AGG', 'IYLD', 'Mstar_MultAsset_HI','IXUS'], inplace=True, axis=1)
+    df_1m.drop(['GAL', 'BIL', 'GYLD', 'ACWI','AGG', 'IYLD', 'MAHIP','IXUS'], inplace=True, axis=1)
 
-    df.drop(['GAL', 'BIL', 'GYLD','ACWI','AGG', 'IYLD', 'Mstar_MultAsset_HI','IXUS'], inplace=True, axis=1)
+    df.drop(['GAL', 'BIL', 'GYLD','ACWI','AGG', 'IYLD', 'MAHIP','IXUS'], inplace=True, axis=1)
 
     # 3 month risk adjusted frame
     df_3m = clean_universe(df, rs='BM', cutoff=0.5, per=3)

@@ -34,7 +34,6 @@ today = datetime.datetime.today().strftime('%m/%d/%y')
 
 #Function to pull data from yahoo
 def pull_data(s):
-    print(s)
 
     return pdr.get_data_yahoo(s, start="2000-12-31", end="2018-08-31")['Adj Close']
 
@@ -51,7 +50,6 @@ def model_portfolios(cut_off=0.0, wList=[0.25,0.25,0.25,0.25], mod='cash'):
 
     bmSPY = rframe.SPY
     bmbil = rframe.BIL
-
 
 
     def clean_universe(df, rs='BM', per=1, cutoff=0.5):
@@ -146,6 +144,7 @@ def model_portfolios(cut_off=0.0, wList=[0.25,0.25,0.25,0.25], mod='cash'):
     #Using the persistence zscore dataframe to generate the position weights
     persistence_zscore = persistence_zscore[rank_comp >= cut_off]
     df_weights = pd.DataFrame([persistence_zscore.iloc[i] / abs(persistence_zscore.iloc[i]).sum() for i in range(len(persistence_zscore))]).abs()
+    print(df_weights.sum(axis=1))
 
     #Generate the weighted portfolio returns
     df_portfolio = df_weights * df_portfolio
