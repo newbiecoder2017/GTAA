@@ -41,7 +41,7 @@ pd.options.display.float_format = '{:.3f}'.format
 
 # Function to pull data from yahoo
 def pull_data(s):
-    return pdr.get_data_yahoo(s, start="2000-12-31", end="2018-07-31")['Adj Close']
+    return pdr.get_data_yahoo(s, start="2000-12-31", end="2018-08-31")['Adj Close']
 
 
 def read_price_file(frq='BM'):
@@ -383,7 +383,10 @@ if __name__ == "__main__":
     # plt.pie(x[0], labels=y, shadow=False, startangle=90, autopct='%1.1f%%')
     # plt.title("Allocations as of %s" %(portfolio_returns.index[-1:][0].strftime('%m/%d/%Y')))
     # plt.show()
-    print(wts[-1:])
+    print(wts[-10:])
+    portfolio_returns['Average']['2008':'2012'].hist().plot()
+    print(portfolio_returns.tail(30))
+
 
     # DrawDown Plot
     # daily_dd.fillna(0).rolling(6).mean().plot(color='rgbc')
