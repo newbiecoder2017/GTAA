@@ -54,7 +54,7 @@ def read_price_file(frq='BM'):
 def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     df = pd.read_csv("C:/Python27/Git/SMA_GTAA/GTAA/adj_close_v2.csv", index_col='Date', parse_dates=True)
 
-    # df = df['12-2012':]
+    df = df['12-2012':]
     # calculating the daily return for benchmarks
     rframe = df.resample('BM', closed='right').last().pct_change()
 
@@ -361,7 +361,7 @@ if __name__ == "__main__":
     #Regression stats for all portfolios and indices
     for c in stats_df.columns:
 
-        stats_df[c].loc[['beta','ann_alpha','R_squared','p_value','tvalue']] = regression_fit(portfolio_returns[c][-36:], model.bmMStar_AAHI[-36:].fillna(0), model.bmBIL[-36:].fillna(0))
+        stats_df[c].loc[['beta','ann_alpha','R_squared','p_value','tvalue']] = regression_fit(portfolio_returns[c][-36:], model.bmIYLD[-36:].fillna(0), model.bmBIL[-36:].fillna(0))
     # cutt_off=1.5
     # stats_df.to_csv("C:/Python27/Git/SMA_GTAA/GTAA/"+str(n1)+"_"+str(n2)+"_"+str(n3)+"_"+str(n4)+"_"+str(cutt_off)+".csv")
     print(stats_df)
@@ -383,10 +383,7 @@ if __name__ == "__main__":
     # plt.pie(x[0], labels=y, shadow=False, startangle=90, autopct='%1.1f%%')
     # plt.title("Allocations as of %s" %(portfolio_returns.index[-1:][0].strftime('%m/%d/%Y')))
     # plt.show()
-    print(wts[-10:])
-    portfolio_returns['Average']['2008':'2012'].hist().plot()
-    print(portfolio_returns.tail(30))
-
+    print(wts[-1:])
 
     # DrawDown Plot
     # daily_dd.fillna(0).rolling(6).mean().plot(color='rgbc')
