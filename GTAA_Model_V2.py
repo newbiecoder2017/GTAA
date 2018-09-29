@@ -79,6 +79,7 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
         # calculating the resampled price returns
         ret_frame = resamp_df.pct_change(per)
 
+
         # calculating the daily returns
         riskChg = df.pct_change()
 

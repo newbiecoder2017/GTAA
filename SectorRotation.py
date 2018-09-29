@@ -56,7 +56,7 @@ def model_portfolios(cut_off=0.0, wList=[0.25,0.25,0.25,0.25], mod='cash'):
         # resampling price frame
         resamp_df = df.resample(rs, closed='right').last()
 
-        # calculating the resampled price returns
+        # calculating the resampled price returns in excess of the benchmark
         ret_frame = resamp_df.pct_change(per)
         ret_frame = pd.DataFrame({s: ret_frame[s] - ret_frame.SPY for s in ret_frame.columns}, index=ret_frame.index)
 
