@@ -79,7 +79,6 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
         # calculating the resampled price returns
         ret_frame = resamp_df.pct_change(per)
 
-
         # calculating the daily returns
         riskChg = df.pct_change()
 
@@ -97,7 +96,7 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
 
     df_1m.drop(['GAL', 'BIL', 'GYLD', 'ACWI','AGG', 'IYLD', 'MAHIP','IXUS'], inplace=True, axis=1)
 
-    df.drop(['GAL', 'BIL', 'GYLD','ACWI','AGG', 'IYLD', 'MAHIP','IXUS'], inplace=True, axis=1)
+    df.drop(['GAL', 'BIL', 'GYLD','AGG','IYLD', 'ACWI','MAHIP','IXUS'], inplace=True, axis=1)
 
     # 3 month risk adjusted frame
     df_3m = clean_universe(df, rs='BM', cutoff=0.5, per=3)
