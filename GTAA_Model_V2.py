@@ -41,7 +41,7 @@ pd.options.display.float_format = '{:.3f}'.format
 
 # Function to pull data from yahoo
 def pull_data(s):
-    return pdr.get_data_yahoo(s, start="2000-12-31", end="2018-08-31")['Adj Close']
+    return pdr.get_data_yahoo(s, start="2000-12-31", end="2018-09-28")['Adj Close']
 
 
 def read_price_file(frq='BM'):

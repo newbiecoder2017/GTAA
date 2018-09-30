@@ -1,6 +1,8 @@
 #This model trades based on the 10 Month SMA rule rotating through different asset classes.
 #universe consittuents
 #RWR - SPDR REITs
+#XLRE - SPDR Real Estate
+#XLC - SPDR Communication Services
 #XLB - SPDR Materials
 #XLI - SPDR Industrials
 #XLY - Consumer Discretionary
@@ -35,7 +37,7 @@ today = datetime.datetime.today().strftime('%m/%d/%y')
 #Function to pull data from yahoo
 def pull_data(s):
 
-    return pdr.get_data_yahoo(s, start="2000-12-31", end="2018-08-31")['Adj Close']
+    return pdr.get_data_yahoo(s, start="2000-12-31", end="2018-09-28")['Adj Close']
 
 def read_price_file(frq = 'BM'):
     df_price = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/adj_close_sectors.csv", index_col='Date', parse_dates=True)
@@ -144,7 +146,7 @@ def model_portfolios(cut_off=0.0, wList=[0.25,0.25,0.25,0.25], mod='cash'):
     #Using the persistence zscore dataframe to generate the position weights
     persistence_zscore = persistence_zscore[rank_comp >= cut_off]
     df_weights = pd.DataFrame([persistence_zscore.iloc[i] / abs(persistence_zscore.iloc[i]).sum() for i in range(len(persistence_zscore))]).abs()
-    print(df_weights.sum(axis=1))
+    print(df_weights.sum(axis=1).tail())
 
     #Generate the weighted portfolio returns
     df_portfolio = df_weights * df_portfolio
@@ -347,6 +349,7 @@ def cash_scaling_model():
     cs_df = sp_df.resample('BM', closed='right').last()
 
     roll_win = 6
+
     rolling_12m = cs_df / cs_df.shift(roll_win) - 1
 
     rolling_12m['avg_er'] = cs_df['Adj Close'] - cs_df['Adj Close'].rolling(roll_win).mean()
@@ -362,11 +365,14 @@ def cash_scaling_model():
     rolling_12m['compp'] = rolling_12m['c_exc_ret'] + rolling_12m['c_avg_ret']
 
     c1 = rolling_12m['compp'] >= 2
+
     rolling_12m['composite'] = np.where(c1, 1, 0)
+
     rolling_12m.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/cashscaler.csv")
 
     #Plot the risk on and risk off signals
     dts = rolling_12m[rolling_12m['composite'] == 0].index
+
     ls = [i for i in range(len(dts))]
     for i in ls:
         #     p = plt.axvspan(dts[i],dts[i+1], facecolor='r', alpha=0.3)
@@ -432,7 +438,7 @@ def dollar_retuns(data):
 if __name__ == "__main__":
 
     # universe list for the model
-    universe_list = ['RWR', 'XLB', 'XLI', 'XLY', 'XLP', 'XLE', 'XLF', 'XLU', 'XLV', 'XLK', 'BIL', 'SHY','SPY']
+    universe_list = ['XLRE', 'XLB', 'XLI', 'XLY', 'XLP', 'XLE', 'XLF', 'XLU', 'XLV', 'XLK', 'XLC', 'BIL', 'SHY','SPY']
 
     # Universe Adj.Close dataframe
     # df = pd.DataFrame({s:pull_data(s) for s in universe_list})
