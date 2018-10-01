@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../All_Country_ETF/.idea/All_Country_ETF.iml" filepath="$PROJECT_DIR$/../All_Country_ETF/.idea/All_Country_ETF.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/SMA_GTAA.iml" filepath="$PROJECT_DIR$/.idea/SMA_GTAA.iml" />
     </modules>
   </component>

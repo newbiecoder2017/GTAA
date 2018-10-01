@@ -41,7 +41,7 @@ pd.options.display.float_format = '{:.3f}'.format
 
 # Function to pull data from yahoo
 def pull_data(s):
-    return pdr.get_data_yahoo(s, start="2000-12-31", end="2018-08-31")['Adj Close']
+    return pdr.get_data_yahoo(s, start="2000-12-31", end="2018-09-28")['Adj Close']
 
 
 def read_price_file(frq='BM'):
@@ -54,7 +54,7 @@ def read_price_file(frq='BM'):
 def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
     df = pd.read_csv("C:/Python27/Git/SMA_GTAA/GTAA/adj_close_v2.csv", index_col='Date', parse_dates=True)
 
-    # df = df['12-2012':]
+    df = df['12-2012':]
     # calculating the daily return for benchmarks
     rframe = df.resample('BM', closed='right').last().pct_change()
 
@@ -361,7 +361,7 @@ if __name__ == "__main__":
     #Regression stats for all portfolios and indices
     for c in stats_df.columns:
 
-        stats_df[c].loc[['beta','ann_alpha','R_squared','p_value','tvalue']] = regression_fit(portfolio_returns[c][-36:], model.bmMStar_AAHI[-36:].fillna(0), model.bmBIL[-36:].fillna(0))
+        stats_df[c].loc[['beta','ann_alpha','R_squared','p_value','tvalue']] = regression_fit(portfolio_returns[c][-36:], model.bmIYLD[-36:].fillna(0), model.bmBIL[-36:].fillna(0))
     # cutt_off=1.5
     # stats_df.to_csv("C:/Python27/Git/SMA_GTAA/GTAA/"+str(n1)+"_"+str(n2)+"_"+str(n3)+"_"+str(n4)+"_"+str(cutt_off)+".csv")
     print(stats_df)

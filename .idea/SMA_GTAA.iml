@@ -4,6 +4,7 @@
     <content url="file://$MODULE_DIR$" />
     <orderEntry type="jdk" jdkName="Python 3.6.1 (C:\Users\Yogesh\Anaconda3\python.exe)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="All_Country_ETF" />
   </component>
   <component name="TestRunnerService">
     <option name="projectConfiguration" value="py.test" />
