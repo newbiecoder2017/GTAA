@@ -41,7 +41,7 @@ pd.options.display.float_format = '{:.3f}'.format
 
 # Function to pull data from yahoo
 def pull_data(s):
-    return pdr.get_data_yahoo(s, start="2000-12-31", end="2018-10-31")['Adj Close']
+    return pdr.get_data_yahoo(s, start="2000-12-31", end="2018-11-30")['Adj Close']
 
 
 def read_price_file(frq='BM'):
@@ -322,6 +322,7 @@ if __name__ == "__main__":
     # df = pd.DataFrame({s:pull_data(s) for s in universe_list})
     # df.to_csv("C:/Python27/Git/SMA_GTAA/GTAA/adj_close_v2.csv")
 
+
     adjusted_price = read_price_file('BM')
     modBiL = adjusted_price.BIL.pct_change()
 
@@ -383,7 +384,8 @@ if __name__ == "__main__":
     # plt.pie(x[0], labels=y, shadow=False, startangle=90, autopct='%1.1f%%')
     # plt.title("Allocations as of %s" %(portfolio_returns.index[-1:][0].strftime('%m/%d/%Y')))
     # plt.show()
-    print(wts[-1:])
+    wts.to_csv("C:/Python27/Git/SMA_GTAA/GTAA/weights.csv")
+    print(wts.tail())
 
     # DrawDown Plot
     # daily_dd.fillna(0).rolling(6).mean().plot(color='rgbc')
@@ -504,6 +506,5 @@ if __name__ == "__main__":
     plt.title("Growth of a $10000 Portfolio ",color='blue',fontweight='heavy')
     # plt.savefig("C:/Python27/Git/SMA_GTAA/Sectors/equity_curve.jpg", facecolor=fig.get_facecolor(), transparent=True)
     plt.show()
-
 
 

@@ -37,7 +37,7 @@ today = datetime.datetime.today().strftime('%m/%d/%y')
 #Function to pull data from yahoo
 def pull_data(s):
 
-    return pdr.get_data_yahoo(s, start="2000-12-31", end="2018-10-31")['Adj Close']
+    return pdr.get_data_yahoo(s, start="2000-12-31", end="2018-11-30")['Adj Close']
 
 def read_price_file(frq = 'BM'):
     df_price = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/adj_close_sectors.csv", index_col='Date', parse_dates=True)
@@ -441,8 +441,8 @@ if __name__ == "__main__":
     universe_list = ['XLRE', 'XLB', 'XLI', 'XLY', 'XLP', 'XLE', 'XLF', 'XLU', 'XLV', 'XLK', 'XLC', 'BIL', 'SHY','SPY']
 
     # Universe Adj.Close dataframe
-    # df = pd.DataFrame({s:pull_data(s) for s in universe_list})
-    # df.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/adj_close_sectors.csv")
+    df = pd.DataFrame({s:pull_data(s) for s in universe_list})
+    df.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/adj_close_sectors.csv")
 
     adjusted_price = read_price_file('BM')
     modBiL = adjusted_price.BIL.pct_change()
