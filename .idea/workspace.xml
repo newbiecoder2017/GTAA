@@ -10,27 +10,7 @@
       <change beforePath="$PROJECT_DIR$/../All_Country_ETF/open.csv" beforeDir="false" afterPath="$PROJECT_DIR$/../All_Country_ETF/open.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../All_Country_ETF/volume.csv" beforeDir="false" afterPath="$PROJECT_DIR$/../All_Country_ETF/volume.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/GTAA/adj_close_v2.csv" beforeDir="false" afterPath="$PROJECT_DIR$/GTAA/adj_close_v2.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/GTAA/returns.csv" beforeDir="false" afterPath="$PROJECT_DIR$/GTAA/returns.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/GTAA_Model_V2.py" beforeDir="false" afterPath="$PROJECT_DIR$/GTAA_Model_V2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SectorRotation.py" beforeDir="false" afterPath="$PROJECT_DIR$/SectorRotation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sectors/Summary_Statistics.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Sectors/Summary_Statistics.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sectors/adj_close_sectors.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Sectors/adj_close_sectors.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sectors/bar_chart.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/Sectors/bar_chart.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sectors/cashScalingPlot.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/Sectors/cashScalingPlot.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sectors/cashscaler.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Sectors/cashscaler.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sectors/correlation.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/Sectors/correlation.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sectors/drawDown.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/Sectors/drawDown.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sectors/equity_curve.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/Sectors/equity_curve.jpg" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Sectors/pie.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/Sectors/pie.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sectors/portfolio_returns.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Sectors/portfolio_returns.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sectors/returns_by_year.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Sectors/returns_by_year.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sectors/returns_cash.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Sectors/returns_cash.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sectors/returns_noCash.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Sectors/returns_noCash.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sectors/weights_cash.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Sectors/weights_cash.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sectors/weights_nocash.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Sectors/weights_nocash.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/interest_rates_fred.csv" beforeDir="false" afterPath="$PROJECT_DIR$/interest_rates_fred.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sp500_yahoo.csv" beforeDir="false" afterPath="$PROJECT_DIR$/sp500_yahoo.csv" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -68,15 +48,12 @@
       <file leaf-file-name="SectorRotation.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/SectorRotation.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="21">
-              <caret line="73" lean-forward="true" selection-start-line="73" selection-end-line="73" />
+            <state relative-caret-position="12">
+              <caret line="334" column="23" selection-start-line="334" selection-start-column="20" selection-end-line="334" selection-end-column="23" />
               <folding>
+                <element signature="e#1417#6516#0" expanded="true" />
                 <element signature="e#1783#2432#0" expanded="true" />
                 <element signature="e#7983#13474#0" expanded="true" />
-                <element signature="e#13506#16743#0" expanded="true" />
-                <element signature="e#16773#17765#0" expanded="true" />
-                <element signature="e#17796#18245#0" expanded="true" />
-                <element signature="e#18820#19463#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -122,12 +99,12 @@
       <find>spy</find>
       <find>ivv</find>
       <find>SMA_GTAA</find>
-      <find>csv</find>
       <find>bmACWI</find>
       <find>dolla</find>
       <find>dollar</find>
       <find>mahip</find>
       <find>PRINT</find>
+      <find>csv</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -145,9 +122,9 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="7">
-    <option name="x" value="-315" />
-    <option name="y" value="75" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="-1949" />
+    <option name="y" value="241" />
     <option name="width" value="1936" />
     <option name="height" value="1056" />
   </component>
@@ -157,6 +134,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -168,7 +146,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -297,17 +274,16 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1864" height="1096" extended-state="6" />
-    <editor active="true" />
+    <frame x="-1608" y="-8" width="1616" height="916" extended-state="6" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49947864" visible="true" weight="0.12650603" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49947864" visible="true" weight="0.15209125" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32960895" />
       <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.5010917" side_tool="true" weight="0.62878" />
       <window_info anchor="bottom" id="Version Control" order="8" weight="0.32963374" />
       <window_info anchor="bottom" id="Python Console" order="9" weight="0.32960895" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.4989083" visible="true" weight="0.8540146" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4989083" weight="1.0" />
       <window_info id="Structure" order="1" sideWeight="0.50052136" side_tool="true" weight="0.12295082" />
-      <window_info anchor="bottom" id="Terminal" order="10" sideWeight="0.49945414" weight="0.6485923" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="10" sideWeight="0.49945414" visible="true" weight="0.64826703" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.8925965" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -745,15 +721,12 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/SectorRotation.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="21">
-          <caret line="73" lean-forward="true" selection-start-line="73" selection-end-line="73" />
+        <state relative-caret-position="12">
+          <caret line="334" column="23" selection-start-line="334" selection-start-column="20" selection-end-line="334" selection-end-column="23" />
           <folding>
+            <element signature="e#1417#6516#0" expanded="true" />
             <element signature="e#1783#2432#0" expanded="true" />
             <element signature="e#7983#13474#0" expanded="true" />
-            <element signature="e#13506#16743#0" expanded="true" />
-            <element signature="e#16773#17765#0" expanded="true" />
-            <element signature="e#17796#18245#0" expanded="true" />
-            <element signature="e#18820#19463#0" expanded="true" />
           </folding>
         </state>
       </provider>
