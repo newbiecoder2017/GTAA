@@ -33,13 +33,12 @@
       <file leaf-file-name="GTAA_Model_V2.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/GTAA_Model_V2.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2508">
-              <caret line="287" column="30" selection-start-line="287" selection-start-column="30" selection-end-line="287" selection-end-column="30" />
+            <state relative-caret-position="5786">
+              <caret line="286" column="30" selection-start-line="286" selection-start-column="30" selection-end-line="286" selection-end-column="30" />
               <folding>
                 <element signature="n#!!doc" />
                 <element signature="e#1138#1157#0" expanded="true" />
                 <element signature="e#1622#1701#0" expanded="true" />
-                <element signature="e#1739#1963#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -52,7 +51,6 @@
               <caret line="334" column="23" selection-start-line="334" selection-start-column="20" selection-end-line="334" selection-end-column="23" />
               <folding>
                 <element signature="e#1417#6516#0" expanded="true" />
-                <element signature="e#1783#2432#0" expanded="true" />
                 <element signature="e#7983#13474#0" expanded="true" />
               </folding>
             </state>
@@ -367,7 +365,6 @@
             <element signature="n#!!doc" />
             <element signature="e#1138#1157#0" expanded="true" />
             <element signature="e#1622#1701#0" expanded="true" />
-            <element signature="e#1739#1963#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -406,7 +403,6 @@
             <element signature="n#!!doc" />
             <element signature="e#1138#1157#0" expanded="true" />
             <element signature="e#1622#1701#0" expanded="true" />
-            <element signature="e#1739#1963#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -440,7 +436,6 @@
             <element signature="n#!!doc" />
             <element signature="e#1138#1157#0" expanded="true" />
             <element signature="e#1622#1701#0" expanded="true" />
-            <element signature="e#1739#1963#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -467,7 +462,6 @@
             <element signature="n#!!doc" />
             <element signature="e#1138#1157#0" expanded="true" />
             <element signature="e#1622#1701#0" expanded="true" />
-            <element signature="e#1739#1963#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -494,7 +488,6 @@
             <element signature="n#!!doc" />
             <element signature="e#1138#1157#0" expanded="true" />
             <element signature="e#1622#1701#0" expanded="true" />
-            <element signature="e#1739#1963#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -514,7 +507,6 @@
             <element signature="n#!!doc" />
             <element signature="e#1138#1157#0" expanded="true" />
             <element signature="e#1622#1701#0" expanded="true" />
-            <element signature="e#1739#1963#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -548,7 +540,6 @@
             <element signature="n#!!doc" />
             <element signature="e#1138#1157#0" expanded="true" />
             <element signature="e#1622#1701#0" expanded="true" />
-            <element signature="e#1739#1963#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -689,13 +680,12 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/GTAA_Model_V2.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2508">
-          <caret line="287" column="30" selection-start-line="287" selection-start-column="30" selection-end-line="287" selection-end-column="30" />
+        <state relative-caret-position="5786">
+          <caret line="286" column="30" selection-start-line="286" selection-start-column="30" selection-end-line="286" selection-end-column="30" />
           <folding>
             <element signature="n#!!doc" />
             <element signature="e#1138#1157#0" expanded="true" />
             <element signature="e#1622#1701#0" expanded="true" />
-            <element signature="e#1739#1963#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -725,7 +715,6 @@
           <caret line="334" column="23" selection-start-line="334" selection-start-column="20" selection-end-line="334" selection-end-column="23" />
           <folding>
             <element signature="e#1417#6516#0" expanded="true" />
-            <element signature="e#1783#2432#0" expanded="true" />
             <element signature="e#7983#13474#0" expanded="true" />
           </folding>
         </state>

@@ -41,7 +41,7 @@ pd.options.display.float_format = '{:.3f}'.format
 
 # Function to pull data from yahoo
 def pull_data(s):
-    return pdr.get_data_yahoo(s, start="2000-12-31", end="2018-09-28")['Adj Close']
+    return pdr.get_data_yahoo(s, start="2000-12-31", end="2018-10-31")['Adj Close']
 
 
 def read_price_file(frq='BM'):
@@ -79,7 +79,6 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
         # calculating the resampled price returns
         ret_frame = resamp_df.pct_change(per)
 
-
         # calculating the daily returns
         riskChg = df.pct_change()
 
@@ -97,7 +96,7 @@ def model_portfolios(cut_off=0.0, wList = [0.25,0.25,0.25,0.25]):
 
     df_1m.drop(['GAL', 'BIL', 'GYLD', 'ACWI','AGG', 'IYLD', 'MAHIP','IXUS'], inplace=True, axis=1)
 
-    df.drop(['GAL', 'BIL', 'GYLD','ACWI','AGG', 'IYLD', 'MAHIP','IXUS'], inplace=True, axis=1)
+    df.drop(['GAL', 'BIL', 'GYLD','AGG','IYLD', 'ACWI','MAHIP','IXUS'], inplace=True, axis=1)
 
     # 3 month risk adjusted frame
     df_3m = clean_universe(df, rs='BM', cutoff=0.5, per=3)
@@ -319,7 +318,7 @@ if __name__ == "__main__":
     universe_list = ['DBC', 'GLD', 'IVV', 'IEV', 'EWJ', 'EEM', 'IYR', 'RWX', 'IEF', 'TLT', 'BIL', 'SHY','ACWI','AGG','GYLD','GAL','IJH','IJR','IXUS','HDV','IYLD','EMB', 'HYG']
     # trading_universe = ['DBC', 'GLD', 'IVV', 'IEV', 'EWJ', 'EEM', 'IYR', 'RWX', 'IEF', 'TLT']
 
-    # Universe Adj.Close dataframe
+    # Universe Adj.Close dataframe - MAHIP : Copy IYLD
     # df = pd.DataFrame({s:pull_data(s) for s in universe_list})
     # df.to_csv("C:/Python27/Git/SMA_GTAA/GTAA/adj_close_v2.csv")
 
@@ -329,8 +328,8 @@ if __name__ == "__main__":
     # read_price_file('BM')
     n1 = 0.0
     n2 = 0.0
-    n3 = 1.0
-    n4 = 0.0
+    n3 = 0.9
+    n4 = 0.1
     model, wts = model_portfolios(cut_off=0.1, wList=[n1,n2,n3,n4])
 
     # Try with BIL and GYLD, w/o BIL and GYLD and combinations
