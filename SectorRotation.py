@@ -37,7 +37,7 @@ today = datetime.datetime.today().strftime('%m/%d/%y')
 #Function to pull data from yahoo
 def pull_data(s):
 
-    return pdr.get_data_yahoo(s, start="2000-12-31", end="2018-11-30")['Adj Close']
+    return pdr.get_data_yahoo(s, start="2000-12-31", end="2018-12-31")['Adj Close']
 
 def read_price_file(frq = 'BM'):
     df_price = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/adj_close_sectors.csv", index_col='Date', parse_dates=True)
@@ -441,8 +441,8 @@ if __name__ == "__main__":
     universe_list = ['XLRE', 'XLB', 'XLI', 'XLY', 'XLP', 'XLE', 'XLF', 'XLU', 'XLV', 'XLK', 'XLC', 'BIL', 'SHY','SPY']
 
     # Universe Adj.Close dataframe
-    df = pd.DataFrame({s:pull_data(s) for s in universe_list})
-    df.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/adj_close_sectors.csv")
+    # df = pd.DataFrame({s:pull_data(s) for s in universe_list})
+    # df.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/adj_close_sectors.csv")
 
     adjusted_price = read_price_file('BM')
     modBiL = adjusted_price.BIL.pct_change()
@@ -521,7 +521,7 @@ if __name__ == "__main__":
     # portfolio_returns = portfolio_returns[['Average','bmSPY','EW']]
     # print(100 * all_portfolios.groupby(all_portfolios.index.year).sum())
     all_portfolios.rename(columns = {'bmSPY': 'S&P500'}, inplace=True)
-    return_by_year = all_portfolios.groupby(all_portfolios.index.year).sum()
+    return_by_year = all_portfolios.add(1).cumprod().groupby(all_portfolios.index.year).last().pct_change()
     return_by_year.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/returns_by_year.csv")
     print(100 *return_by_year)
     # print(100 * all_portfolios['2018'].groupby(all_portfolios['2018'].index.month).sum())
@@ -529,7 +529,7 @@ if __name__ == "__main__":
     # print(100 * all_portfolios)
 
     # Bar plot for portfolio and SP500
-    plot_perf = 100 * all_portfolios[['portfolio','S&P500']]['2002':].groupby(all_portfolios[['portfolio','S&P500']]['2002':].index.year).sum()
+    plot_perf = 100 * all_portfolios[['portfolio','S&P500']]['2002':].add(1).cumprod().groupby(all_portfolios[['portfolio','S&P500']]['2002':].index.year).last().pct_change()
     plot_perf.plot(kind ='bar')
     plt.grid()
     plt.legend()
