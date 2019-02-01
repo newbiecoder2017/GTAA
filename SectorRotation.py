@@ -1,20 +1,20 @@
-#This model trades based on the 10 Month SMA rule rotating through different asset classes.
-#universe consittuents
-#RWR - SPDR REITs
-#XLRE - SPDR Real Estate
-#XLC - SPDR Communication Services
-#XLB - SPDR Materials
-#XLI - SPDR Industrials
-#XLY - Consumer Discretionary
-#XLP - Consumer Staples
-#XLE - Energy
-#XLF - Financials
-#XLU - Utilities
-#XLV - Healthcare
-#XLK - Technology
-#IYT - Transportation
-#BIL - 1-3 Month T Bill
-#SHY - Barclays Capital U.S. 1-3 Year Treasury Bond Index
+# This model trades based on the 10 Month SMA rule rotating through different asset classes.
+# universe consittuents
+# RWR - SPDR REITs
+# XLRE - SPDR Real Estate
+# XLC - SPDR Communication Services
+# XLB - SPDR Materials
+# XLI - SPDR Industrials
+# XLY - Consumer Discretionary
+# XLP - Consumer Staples
+# XLE - Energy
+# XLF - Financials
+# XLU - Utilities
+# XLV - Healthcare
+# XLK - Technology
+# IYT - Transportation
+# BIL - 1-3 Month T Bill
+# SHY - Barclays Capital U.S. 1-3 Year Treasury Bond Index
 
 
 import pandas as pd
@@ -37,7 +37,7 @@ today = datetime.datetime.today().strftime('%m/%d/%y')
 #Function to pull data from yahoo
 def pull_data(s):
 
-    return pdr.get_data_yahoo(s, start="2000-12-31", end="2018-12-31")['Adj Close']
+    return pdr.get_data_yahoo(s, start="2000-12-31", end="2019-01-31")['Adj Close']
 
 def read_price_file(frq = 'BM'):
     df_price = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/adj_close_sectors.csv", index_col='Date', parse_dates=True)
@@ -130,31 +130,31 @@ def model_portfolios(cut_off=0.0, wList=[0.25,0.25,0.25,0.25], mod='cash'):
     persistence_long = df_1m.rolling(6).apply(return_persistence)
     persistence_short = df_1m.rolling(3).apply(return_persistence)
 
-    #composte frame for the long and short persistence factors use long wts  = 0.9 and short wts = 0.1 for less drawdown
+    # composte frame for the long and short persistence factors use long wts  = 0.9 and short wts = 0.1 for less drawdown
     composite_persistence = 0.9 * persistence_long  + 0.1* persistence_short
 
-    #Generate the zscore of composite persistence dataframe
+    # Generate the zscore of composite persistence dataframe
     persistence_zscore = pd.DataFrame([(composite_persistence.iloc[i] - composite_persistence.iloc[i].mean()) / composite_persistence.iloc[i].std() for i in range(len(composite_persistence))])
 
     persistence_zscore = persistence_zscore.clip(lower=-3.0, upper=3.0, axis=1)
     #Genrate the composite zscore of return frames for different period returns frame
     rank_comp = wList[0] * zs_1m + wList[1] * zs_3m + wList[2] * zs_6m + wList[3] * zs_12m
 
-    #Generate 1 month forward return based on the filtered composite zscore retrun dataframe
+    # Generate 1 month forward return based on the filtered composite zscore retrun dataframe
     df_portfolio = rframe.shift(-1)[rank_comp >= cut_off]
 
-    #Using the persistence zscore dataframe to generate the position weights
+    # Using the persistence zscore dataframe to generate the position weights
     persistence_zscore = persistence_zscore[rank_comp >= cut_off]
     df_weights = pd.DataFrame([persistence_zscore.iloc[i] / abs(persistence_zscore.iloc[i]).sum() for i in range(len(persistence_zscore))]).abs()
     print(df_weights.sum(axis=1).tail())
 
-    #Generate the weighted portfolio returns
+    # Generate the weighted portfolio returns
     df_portfolio = df_weights * df_portfolio
 
-    #Realigining the index of the portfolio
+    # Realigining the index of the portfolio
     df_portfolio = df_portfolio.shift(1)
 
-    #calculate the portfolio return series and benchmark. Annual expense of 35bps is deducted monthly from the portfolio
+    # calculate the portfolio return series and benchmark. Annual expense of 35bps is deducted monthly from the portfolio
     df_portfolio['Average'] = df_portfolio.sum(axis=1) - .00083  #100bp of fees and transaction cost
     df_portfolio['bmSPY'] = bmSPY
     df_portfolio['bmBIL'] = bmbil
@@ -385,7 +385,7 @@ def cash_scaling_model():
     plt.savefig("C:/Python27/Git/SMA_GTAA/Sectors/cashScalingPlot.jpg", transparent=True)
     plt.show()
 
-    #Rolling IC between the 1 month Sp500 fwd returns and composite signal
+    # Rolling IC between the 1 month Sp500 fwd returns and composite signal
     # rolling_12m['change'] = cs_df['Adj Close'].pct_change()
     # X = rolling_12m['change'].shift(-1)
     # Y = rolling_12m['composite']
