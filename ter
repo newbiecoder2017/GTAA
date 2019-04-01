@@ -1,0 +1,586 @@
+[33mcommit f5fa6fef3a6eeeb888648ff6dcce4ad4d0e8f7c6[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Sun Mar 31 14:24:14 2019 -0400
+
+    rebalance 03/31/2019
+
+[33mcommit 4ebb2bd84d520a3699ec8b49669a8043e83c1ef6[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Thu Feb 28 20:40:49 2019 -0500
+
+    rebal 022819
+
+[33mcommit ea050eeb10f6f0a9e28f5cfaa7e74e6c9d08ecd3[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Thu Feb 28 19:33:41 2019 -0500
+
+    version 2
+
+[33mcommit 5632981dbf6dd022f9f255f682f8e812e231d7b5[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Thu Jan 31 21:19:59 2019 -0500
+
+    rebal 01312019
+
+[33mcommit 607477ad5fe22158c01c8132bea2e7fb8a260938[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Sat Jan 19 09:24:36 2019 -0500
+
+    01192019
+
+[33mcommit 57d69ae1d8504d993173d647b1cc70d3c553f3e2[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Tue Jan 1 18:25:35 2019 -0500
+
+    Rebalance 12/31/2018
+
+[33mcommit 4ca3f53cec377b35415886a48ea388cc7f4898da[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Sun Dec 2 17:19:40 2018 -0500
+
+    Rebalance 01/02/18
+
+[33mcommit 202290ce8bc6cb4f43be1f1dab3caa4a4785f709[m
+Merge: 8c6e5cb 0ceafcf
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Sun Dec 2 11:44:21 2018 -0500
+
+    2nd commit
+
+[33mcommit 8c6e5cb01b6326193442f54a4ffd5f1e0c2e91e2[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Sun Dec 2 11:41:05 2018 -0500
+
+    commit changes 12/2/2018
+
+[33mcommit 0ceafcf966636580ad6bb08c81874057d424c612[m
+Author: fallinlove_l@yahoo.com <fallinlove_l@yahoo.com>
+Date:   Tue Nov 20 13:13:41 2018 -0500
+
+    11202018
+
+[33mcommit ea059758cb4f21277d5dafaa2496f3232047c8c5[m
+Merge: 5c86bb9 b878efe
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Mon Oct 1 07:49:02 2018 -0400
+
+    Merge branch 'master' of https://github.com/newbiecoder2017/GTAA
+
+[33mcommit b878efea4feb88e02691f9b7e4f66ae35d0d8c21[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Sun Sep 30 18:03:56 2018 -0400
+
+    with XLRE and XLC
+
+[33mcommit b81704a59862fc51b14b06ad237e3877dfe1fca0[m
+Merge: be353c7 de4bd35
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Sat Sep 29 07:43:15 2018 -0400
+
+    Merge branch 'master' of https://github.com/newbiecoder2017/GTAA
+
+[33mcommit be353c7ba64f8684029b48d266d0976f529c37d7[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Sat Sep 29 07:43:05 2018 -0400
+
+    commit from 9/29/2018
+
+[33mcommit 5c86bb919f39bcf85c8fcb38b010e8c18b00e7cb[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Sat Sep 29 06:45:53 2018 -0400
+
+    09/29/2018
+
+[33mcommit de4bd3594a798ee0c207d538b9106ff23fb5a16c[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Thu Sep 20 16:41:23 2018 -0400
+
+    09202018
+
+[33mcommit c95266cdd06ff7be7cb73be156ff4bb905b1f63d[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Sat Sep 15 07:21:26 2018 -0400
+
+    adjclose v2
+
+[33mcommit 3d848931cb2364352acbae05bcdf11deee9997d7[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Sat Sep 15 07:09:10 2018 -0400
+
+    int rate csv file
+
+[33mcommit 583f0d0dfdb301aa895057a3c1e3b49a403d90e3[m
+Merge: 2485aca 6a0b150
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Sat Sep 15 07:08:03 2018 -0400
+
+    modified 09152018
+
+[33mcommit 2485acad4e87464013e1c6524c6adbd1d25cb079[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Sat Sep 15 07:05:29 2018 -0400
+
+    09/15/2018
+
+[33mcommit 6a0b15083f5b5dae1d330fa6417a612ea5011254[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Thu Sep 13 14:27:01 2018 -0400
+
+    Updated models 09132018
+
+[33mcommit c5bd9d8e201f85f2537e9a2724c317e97afcbcf9[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Fri Aug 24 16:07:14 2018 -0400
+
+    08242018
+
+[33mcommit b1371fc940fe3388c2e51de1e338ad2ab81a4d2f[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Thu Aug 23 12:30:20 2018 -0400
+
+    08232018
+
+[33mcommit 9bf5b1f5a37269724163279ead0869ff61abc64c[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Wed Aug 22 16:22:54 2018 -0400
+
+    08222018
+
+[33mcommit 19197158f2eb7ed3c719dadd800abdb5125964f0[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Tue Aug 21 16:54:53 2018 -0400
+
+    08212018
+
+[33mcommit 0e7fac615f4a680d4ffd500d0bb14bf49fce5da3[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Mon Aug 20 16:39:22 2018 -0400
+
+    08202018
+
+[33mcommit 915acb3a938317436aa1d94055a7322bcf951465[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Sun Aug 19 20:59:42 2018 -0400
+
+    08192018
+
+[33mcommit 5c8bdeae0cde7bc83e151ec048ff7426c55ca69c[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Fri Aug 17 16:24:15 2018 -0400
+
+    08172018
+
+[33mcommit a8da8f5076d3e359733ecf31e7fc9d2e9e7a7ad4[m
+Merge: dd2b24b 7f8e316
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Fri Aug 17 13:01:34 2018 -0400
+
+    Merge branch 'master' of https://github.com/newbiecoder2017/GTAA
+
+[33mcommit dd2b24bed97ed5d5b42d6d1cec88387c361abbb8[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Fri Aug 17 13:01:27 2018 -0400
+
+    08172018
+
+[33mcommit 7f8e31626f6d349e4b1103d36f4ae810f4590249[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Thu Aug 16 20:25:17 2018 -0400
+
+    GTAA version 2
+
+[33mcommit 987caf1342fde7114bddc3cdddc187b4d3b0a254[m
+Author: Yogesh Prasad <yprasad@northcoastam.com>
+Date:   Thu Aug 16 13:20:53 2018 -0400
+
+    08162018
+
+[33mcommit 2008e1a3780ad5856c8f9880344d78a02277ad50[m
+Author: Yogesh Prasad <yprasad@northcoastam.com>
+Date:   Thu Aug 16 13:18:24 2018 -0400
+
+    08162018 2
+
+[33mcommit d3dc51746f3eb47f7b3c18649f16c6fc3a95674b[m
+Author: Yogesh Prasad <yprasad@northcoastam.com>
+Date:   Thu Aug 16 13:16:16 2018 -0400
+
+    08162018
+
+[33mcommit 03089a434321652e838166c4b347abcb85f08aab[m
+Author: Yogesh Prasad <yprasad@northcoastam.com>
+Date:   Thu Aug 16 13:06:58 2018 -0400
+
+    08162018
+
+[33mcommit 4a3afa5fe3e6f7f5c8d5e074ed044f31fe9a65ee[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Wed Aug 15 16:19:33 2018 -0400
+
+    updated plots08152018
+
+[33mcommit 775d55247f72970470107986d4845cb50b1cd623[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Tue Aug 14 23:12:41 2018 -0400
+
+    updated plot
+
+[33mcommit c4bdf776bb3aea4b4ce6340f6207172e6bef28a5[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Tue Aug 14 16:57:18 2018 -0400
+
+    final version 08142018
+
+[33mcommit f99ff0dfd5fe9cadb848297e811bbee0421eff77[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Mon Aug 13 22:22:17 2018 -0400
+
+    final versions with charts
+
+[33mcommit 41995a77104f9b687d09e487b9a64451fe2a2b6c[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Mon Aug 13 16:52:45 2018 -0400
+
+    Final Version 08132018
+
+[33mcommit fc6baabb284fbb076ce578cd1548391e207c50ad[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Sun Aug 12 21:58:46 2018 -0400
+
+    Final stages
+
+[33mcommit e07540808ec6b8b401a86b7c657b9fb4e7ebe3f0[m
+Merge: aba85b3 df5aa61
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Fri Aug 10 20:06:53 2018 -0400
+
+    merge2
+
+[33mcommit aba85b38d9e005a9e4042efa92b462920734a123[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Fri Aug 10 20:00:36 2018 -0400
+
+    Test1
+
+[33mcommit df5aa6120d6ad338f73b6261754325051c36ada7[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Fri Aug 10 11:40:01 2018 -0400
+
+    08102018
+
+[33mcommit 108e4e3f6db10e224103c13870919f1f25aa86a3[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Thu Aug 9 16:24:27 2018 -0400
+
+    08092018 with and without shy
+
+[33mcommit 8ddd3e6434501041807c3c0dbe43079b5db41613[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Wed Aug 8 16:28:33 2018 -0400
+
+    08082018
+
+[33mcommit 6d9104158fb622f042213c82d6d54d1d7d1e1c9d[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Tue Aug 7 16:27:18 2018 -0400
+
+    Sector 08072018
+
+[33mcommit 3a2aea1b56f8e3479d0306135816446eec684265[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Tue Aug 7 08:14:55 2018 -0400
+
+    08072018
+
+[33mcommit 4ab4df166b55fc42a199667d7b50329da4d66b01[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Mon Aug 6 16:20:32 2018 -0400
+
+    Sector Rotaion Model 08062018
+
+[33mcommit c1fe3c3e556853ad24681cf77d053c737728fc46[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Mon Aug 6 10:55:26 2018 -0400
+
+    v208062018
+
+[33mcommit 8a32296ad91e62d1295809635973d612ee017d78[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Mon Aug 6 08:02:45 2018 -0400
+
+    ver2 08062018
+
+[33mcommit a9abcb9f6ddb4134c4dc4487c60bab1384c51f98[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Thu Aug 2 21:38:15 2018 -0400
+
+    Version 2
+
+[33mcommit 45199897e214a6dbbef22947086dce860d2ba176[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Thu Aug 2 16:03:46 2018 -0400
+
+    Clipped zscore
+
+[33mcommit 253b9aa121b8b3e0e47e9a7eba2d2116ee6bceab[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Thu Aug 2 14:22:34 2018 -0400
+
+    Commit 08022018
+
+[33mcommit b5b75488b934a27f681b22102cce7f816152b172[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Thu Aug 2 14:15:19 2018 -0400
+
+    Final Commit for 08022018
+
+[33mcommit ddd293434e665787a0e4b9ac5150f939e932fcff[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Wed Aug 1 23:25:55 2018 -0400
+
+    Model Test
+
+[33mcommit ed4269a27fe039d33316fbde47043b4694564729[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Wed Aug 1 16:32:34 2018 -0400
+
+    Again
+
+[33mcommit 5c9c3cd6ab1314195d4ab17dcdd05e14afd67590[m
+Merge: 32f1b3f f54d419
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Wed Aug 1 12:55:47 2018 -0400
+
+    version2
+
+[33mcommit 32f1b3f17cd58e839f377521f31ba933ac208d91[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Wed Aug 1 12:53:25 2018 -0400
+
+    Version2
+
+[33mcommit f54d41950c07655bd61a2b385ee098f42fbf0bd9[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Tue Jul 31 22:57:37 2018 -0400
+
+    Version 2
+
+[33mcommit 6c3239125038fb45a82fa4474af0a56eae583461[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Tue Jul 31 20:47:51 2018 -0400
+
+    GTAA version 2
+
+[33mcommit 166c1a4070015b51e830124b552f14d78edf66cc[m
+Merge: 33551ee 5081c22
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Sun Jul 1 16:18:24 2018 -0400
+
+    Merge branch 'master' of https://github.com/newbiecoder2017/GTAA
+
+[33mcommit 33551eeabea3cd785589fcabb80b28c9b1d247ff[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Sun Jul 1 16:18:20 2018 -0400
+
+    Status 7/1/18
+
+[33mcommit 5081c22b71372afe41acd07d7d700d85c8a909ae[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Mon Jun 4 11:28:29 2018 -0400
+
+    updated portfolio file
+
+[33mcommit 25c70cffcf6f8d2d08a78d5377c2725d6c64db2c[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Mon May 14 09:03:04 2018 -0400
+
+    updated portfolio
+
+[33mcommit e0db3fcdcb09d91a348ec63a195be78544aabbdf[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Tue May 8 08:16:35 2018 -0400
+
+    Correlation Analysis added 05082018
+
+[33mcommit 81ca8a882efe8df8f01b6931dd5b94a0c840c825[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Thu May 3 13:35:43 2018 -0400
+
+    Added new column names and orders, 1Yr,3Yr,5Yr risk and returns
+
+[33mcommit 83d2f22bb62e9870aa74501c8f281c94c16d10f7[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Wed May 2 16:29:21 2018 -0400
+
+    added daily Position information
+
+[33mcommit be7c99e26c11676c7b463e91ac144dd94e248eef[m
+Merge: 742cdb1 69540fd
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Wed May 2 09:01:26 2018 -0400
+
+    Merge branch 'master' of https://github.com/newbiecoder2017/GTAA
+
+[33mcommit 742cdb163be92ca3bf0a4e843415a1448d2beba8[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Wed May 2 09:00:45 2018 -0400
+
+    Excel Portfolio added
+
+[33mcommit 69540fdadfac076de990f3c3097d6c6876188257[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Tue May 1 22:16:29 2018 -0400
+
+    Updated with comments
+
+[33mcommit 41b397300a51be7a489e4f28e007822f9c4aa52c[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Tue May 1 15:52:29 2018 -0400
+
+    Updated with comments and formatted methods
+
+[33mcommit b82f9c41e8c1a96986dd1675adcdb83393ce24bd[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Tue May 1 15:26:46 2018 -0400
+
+    XML file update
+
+[33mcommit 79afd9164c525aa4c9479467bde7681dde79948e[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Tue May 1 15:25:55 2018 -0400
+
+    more edits with qqqe strategy
+
+[33mcommit a7331048552ea335c75572d25080964e9c732c6e[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Tue May 1 12:11:46 2018 -0400
+
+    Addede momo returns and qqqe returns and combination of benchmarks
+
+[33mcommit 75c7f9acf5b2c5eb6d6de883187bab96c5a0dc7b[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Tue May 1 07:58:08 2018 -0400
+
+    momo return file added
+
+[33mcommit 740b51401238c8ac43b3cfd48c4bf1fdc36e2564[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Mon Apr 30 22:20:26 2018 -0400
+
+    Updated with 60/40 benchmark and trade recommendations
+
+[33mcommit 1bca85084776a900f16e69b2495dd611b4f571eb[m
+Merge: df2abc0 f8d5b65
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Mon Apr 30 19:14:04 2018 -0400
+
+    Try
+
+[33mcommit df2abc0fc1db56a2ef1cfc5dd9d59dbb355b440a[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Mon Apr 30 19:10:32 2018 -0400
+
+    commit to be deleted
+
+[33mcommit f8d5b65874462e0efd25abfbda651dedceeb6df0[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Mon Apr 30 16:42:57 2018 -0400
+
+    more stats 04302018
+
+[33mcommit 69a725845d046bef5a702135f5c7eeeeb6b714d6[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Mon Apr 30 12:37:43 2018 -0400
+
+    Commit with new benchmark tickers
+
+[33mcommit bf021ad0a89480243025ba0e9a7bedce7e6d4c50[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Fri Apr 27 16:38:18 2018 -0400
+
+    042718 #3
+
+[33mcommit 74809715518f245a93caa96ba00fa59af1b7b158[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Fri Apr 27 14:57:42 2018 -0400
+
+    Commit 042709 #2
+
+[33mcommit 9470fae0a6c8e9abd421e6ff7c9473963c3c364f[m
+Merge: ebc8f66 737075e
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Fri Apr 27 14:50:11 2018 -0400
+
+    merge
+
+[33mcommit ebc8f6637dfc1af2af2aa338c51c690356d89685[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Fri Apr 27 14:36:19 2018 -0400
+
+    Commit 042718_1
+
+[33mcommit 29d71b963f805e9efd06cb2e7e612c527afd9042[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Fri Apr 27 08:38:10 2018 -0400
+
+    Commit from 04272018
+
+[33mcommit 737075e16e0519730c0d83bf3f2f2c95ef89ce4e[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Thu Apr 26 21:58:39 2018 -0400
+
+    Committ 04262018
+
+[33mcommit aaa495c960aea4381b3ef259a3decabb2dc9fee9[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Thu Apr 26 13:37:44 2018 -0400
+
+    From 04262018
+
+[33mcommit 75af31095c63263f77b62686dd188d058877fbb1[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Wed Apr 25 15:28:23 2018 -0400
+
+    Third commit to GTAA Model
+
+[33mcommit a268b001e47d1644833b22ba2ccfe646f67379f5[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Wed Apr 25 11:06:11 2018 -0400
+
+    Second Commit to GTA Model
+
+[33mcommit 1a7e7d9e32d6b6ca5cab23c1c079f28ab6cfdb82[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Wed Apr 25 10:09:59 2018 -0400
+
+    Added Portfolio Metrics
+
+[33mcommit 8581f1b8df1253c4d908f1e3f5c15099b3ec0d12[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Wed Apr 25 08:40:05 2018 -0400
+
+    Second Commit to GTAA model
+
+[33mcommit 53cc0aa0b14dcbbfbb12dd76f74cd924f52ec5f1[m
+Author: newbiecoder2017 <30665756+newbiecoder2017@users.noreply.github.com>
+Date:   Wed Apr 25 08:38:12 2018 -0400
+
+    Update README.md
+
+[33mcommit f84b805b27be2a5c48e815dd16b628d57df2a944[m
+Author: newbiecoder2017 <fallinlove_l@yahoo.com>
+Date:   Wed Apr 25 08:20:40 2018 -0400
+
+    First Commit of GTAA model
+
+[33mcommit 0be8bae097c3af5c1183aa89713f38e70386566b[m
+Author: newbiecoder2017 <30665756+newbiecoder2017@users.noreply.github.com>
+Date:   Wed Apr 25 08:12:51 2018 -0400
+
+    Update README.md
+
+[33mcommit 226a9f96cd2dca13f8772569bebfb89fd3815fdf[m
+Author: newbiecoder2017 <30665756+newbiecoder2017@users.noreply.github.com>
+Date:   Wed Apr 25 08:12:16 2018 -0400
+
+    Initial commit

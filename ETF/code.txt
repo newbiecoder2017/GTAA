@@ -1,0 +1,125 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+cols = ['XLB', 'XLC', 'XLE', 'XLF', 'XLI', 'XLK', 'XLP', 'XLRE','XLU', 'XLV', 'XLY']
+
+df_open = pd.read_csv("C:/Python27/Git/SMA_GTAA/ETF/open.csv", index_col='Date', parse_dates=True,).dropna(how ='all',axis=1)
+df_high = pd.read_csv("C:/Python27/Git/SMA_GTAA/ETF/high.csv", index_col='Date', parse_dates=True).dropna(how ='all',axis=1)
+df_low = pd.read_csv("C:/Python27/Git/SMA_GTAA/ETF/low.csv", index_col='Date', parse_dates=True).dropna(how ='all',axis=1)
+df_close = pd.read_csv("C:/Python27/Git/SMA_GTAA/ETF/close.csv", index_col='Date', parse_dates=True).dropna(how ='all',axis=1)
+
+bm = df_close.SPY.pct_change()
+
+df_open = df_open[cols]
+df_high = df_high[cols]
+df_low = df_low[cols]
+df_close = df_close[cols]
+
+ewm_short = df_close.ewm(span=9,min_periods=5,adjust=False).mean()
+ewm_inter = df_close.ewm(span=13,min_periods=6,adjust=False).mean()
+ewm_long = df_close.ewm(span=20,min_periods=10,adjust=False).mean()
+
+df_upper = (1+.01)*ewm_short
+df_lower = (1-.01)*ewm_short
+
+
+long_cond = (ewm_short > ewm_inter) & (ewm_inter > ewm_long)
+
+trend_signal = pd.DataFrame(np.where(long_cond,1,0), index = df_close.index, columns = df_close.columns)
+
+df_min = df_low.rolling(3).min()
+df_max = df_high.rolling(3).max()
+
+c1 = (df_high>=df_lower) & (df_high<=df_upper)
+c2 = (df_high>=df_upper) & (df_low<=df_upper)
+c3 = (df_high>=df_upper) & (df_low<=df_lower)
+
+band_signal = c1|c2|c3
+
+combined_signal = ((trend_signal==1)& band_signal)
+# combined_signal.to_csv("C:/Python27/Git/SMA_GTAA/ETF/signal.csv")
+
+df_limit_price = df_high.rolling(3).max().shift(1)
+
+df_limit_price = df_limit_price+0.10
+
+df_stop_price = df_low.rolling(3).min().shift(1)
+
+df_stop_price = df_limit_price- 0.10
+
+fill_price = (df_high + df_low)/2
+
+fill_price = fill_price.shift(-1)
+
+sh_open = df_open.shift(-1)
+
+sh_close = df_close.shift(-1)
+
+
+cond_fill = (sh_open>df_limit_price) & (sh_close>df_limit_price)
+
+entry_price = pd.DataFrame(np.where(cond_fill,fill_price,df_limit_price),index = df_close.index, columns = df_close.columns)
+entry_price = entry_price.shift(1)
+
+def testret(c):    
+    pos=0
+
+    trade_df = pd.DataFrame(index = combined_signal.index)
+
+    for index, rows in combined_signal[c].iteritems():
+
+        if rows==True and pos==0:
+
+            entry_px = entry_price.loc[index,c]
+            stop_px = df_stop_price.loc[index,c]
+            profit_px = 1.5*(entry_px - stop_px) + entry_px
+            trade_df.loc[index,'tradePx'] = entry_px
+            trade_df.loc[index,'Comment'] = "Buy"
+            pos=1
+
+        elif pos==1 and df_low.loc[index,c]<=stop_px:
+    #         trade_df.loc[index,'tradePrice'] = entry_price.loc[index,'SPY']
+            trade_df.loc[index,'tradePx'] = stop_px
+            trade_df.loc[index,'Comment'] = "SL"
+            pos=0
+
+        elif pos==1 and df_high.loc[index,c]>=profit_px:
+
+    #         trade_df.loc[index,'tradePrice'] = entry_price.loc[index,'SPY']
+            trade_df.loc[index,'tradePx'] = profit_px
+            trade_df.loc[index,'Comment'] = "TP"
+            pos=0
+
+        elif rows==True and pos==1:
+            trade_df.loc[index,'tradePx'] = df_close.loc[index,c]
+            pos=pos
+
+        elif rows==False and pos==1:
+            trade_df.loc[index,'tradePx'] = df_close.loc[index,c]
+            pos=pos  
+
+        else:
+            pos=pos
+   
+    t =trade_df['tradePx']
+    t = t.ffill()
+    t = t.dropna()
+    return t.pct_change()
+#     t.pct_change().cumsum().plot(figsize=(10,6))
+#     bm.cumsum().plot()
+#     plt.legend()
+#     plt.grid()
+#     plt.show()
+
+        
+        
+tdf = pd.DataFrame({s: testret(s) for s in combined_signal.columns})
+ret_df = pd.DataFrame()
+ret_df['Strategy'] = tdf.mean(axis=1).fillna(0)
+ret_df['bm'] = bm
+ret_df.cumsum().plot(figsize=(10,8))
+plt.grid()
+plt.legend()
+plt.show()
+ret_df.describe()

@@ -1,29 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="cbb7a844-cb06-4f4f-b6e7-4cc3ead753cd" name="Default" comment="Rebalance 12/31/2018">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sectors/Sector Rotation FactSheet.docx" beforeDir="false" afterPath="$PROJECT_DIR$/Sectors/Sector Rotation FactSheet.docx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sectors/SectorRotationV2.py" beforeDir="false" afterPath="$PROJECT_DIR$/Sectors/SectorRotationV2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sectors/Summary_Statistics.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Sectors/Summary_Statistics.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sectors/adj_close_sectors.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Sectors/adj_close_sectors.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sectors/allocations.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/Sectors/allocations.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sectors/bar_chart.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/Sectors/bar_chart.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sectors/cashScalingPlot.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/Sectors/cashScalingPlot.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sectors/cashscaler.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Sectors/cashscaler.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sectors/correlation.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/Sectors/correlation.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sectors/drawDown.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/Sectors/drawDown.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sectors/equity_curve.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/Sectors/equity_curve.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sectors/portfolio_returns.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Sectors/portfolio_returns.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sectors/returns_by_year.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Sectors/returns_by_year.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sectors/returns_cash.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Sectors/returns_cash.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sectors/returns_noCash.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Sectors/returns_noCash.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sectors/weights_cash.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Sectors/weights_cash.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sectors/weights_nocash.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Sectors/weights_nocash.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/interest_rates_fred.csv" beforeDir="false" afterPath="$PROJECT_DIR$/interest_rates_fred.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sp500_yahoo.csv" beforeDir="false" afterPath="$PROJECT_DIR$/sp500_yahoo.csv" afterDir="false" />
-    </list>
+    <list default="true" id="cbb7a844-cb06-4f4f-b6e7-4cc3ead753cd" name="Default" comment="Rebalance 12/31/2018" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -31,76 +11,65 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file leaf-file-name="GTAA_Model_V2.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/GTAA_Model_V2.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="4004">
-              <caret line="445" column="83" selection-start-line="445" selection-start-column="83" selection-end-line="445" selection-end-column="83" />
+            <state relative-caret-position="11421">
+              <caret line="423" column="78" selection-start-line="423" selection-start-column="78" selection-end-line="423" selection-end-column="78" />
               <folding>
                 <element signature="e#1138#1157#0" expanded="true" />
-                <element signature="e#1622#1701#0" expanded="true" />
-                <element signature="e#1739#1963#0" expanded="true" />
-                <element signature="e#2036#6656#0" expanded="true" />
-                <element signature="e#2546#3049#0" expanded="true" />
-                <element signature="e#4601#4643#0" expanded="true" />
-                <element signature="e#6682#7506#0" expanded="true" />
-                <element signature="e#7549#8150#0" expanded="true" />
-                <element signature="e#8198#12599#0" expanded="true" />
-                <element signature="e#8739#9019#0" expanded="true" />
-                <element signature="e#12631#13860#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file leaf-file-name="SectorRotation.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/SectorRotation.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2904">
-              <caret line="396" selection-start-line="396" selection-end-line="396" />
-              <folding>
-                <element signature="e#1037#1116#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="-1063">
+              <caret line="553" column="37" selection-start-line="553" selection-start-column="37" selection-end-line="553" selection-end-column="37" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/Sectors/SectorRotationV2.py">
+      <file leaf-file-name="SectorRotation_v2.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/SectorsV2/SectorRotation_v2.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="416">
-              <caret line="463" lean-forward="true" selection-start-line="463" selection-end-line="463" />
+            <state relative-caret-position="354">
+              <caret line="621" lean-forward="true" selection-start-line="621" selection-end-line="621" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="extAllocations.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/../../Examples/GWP Executables/extAllocations.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="3726">
+              <caret line="138" selection-start-line="138" selection-end-line="138" />
               <folding>
-                <element signature="e#501#520#0" expanded="true" />
-                <element signature="e#1037#1116#0" expanded="true" />
-                <element signature="e#1155#1352#0" expanded="true" />
-                <element signature="e#1434#7513#0" expanded="true" />
-                <element signature="e#1799#2623#0" expanded="true" />
-                <element signature="e#4757#4801#0" expanded="true" />
-                <element signature="e#7537#8360#0" expanded="true" />
-                <element signature="e#8402#8933#0" expanded="true" />
-                <element signature="e#8980#14471#0" expanded="true" />
-                <element signature="e#9513#10013#0" expanded="true" />
-                <element signature="e#14503#17907#0" expanded="true" />
-                <element signature="e#14503#14621#0" />
-                <element signature="e#17937#18927#0" expanded="true" />
-                <element signature="e#18958#19407#0" expanded="true" />
-                <element signature="e#19986#20629#0" expanded="true" />
+                <element signature="e#23#42#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file leaf-file-name="gwpModelTrades.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/../../Examples/GWP Executables/gwpModelTrades.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="125">
+              <caret line="9" column="13" selection-start-line="9" selection-start-column="13" selection-end-line="9" selection-end-column="13" />
+              <folding>
+                <element signature="e#0#19#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="country_etf_model.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/../All_Country_ETF/country_etf_model.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2662">
-              <caret line="368" column="41" selection-start-line="368" selection-start-column="41" selection-end-line="368" selection-end-column="41" />
-              <folding>
-                <element signature="e#1138#1157#0" expanded="true" />
-                <element signature="e#1622#1701#0" expanded="true" />
-                <element signature="e#2317#6476#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="405">
+              <caret line="18" column="29" selection-start-line="18" selection-start-column="29" selection-end-line="18" selection-end-column="29" />
             </state>
           </provider>
         </entry>
@@ -169,7 +138,9 @@
     <option name="width" value="1865" />
     <option name="height" value="1096" />
   </component>
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
@@ -186,7 +157,7 @@
             <path>
               <item name="SMA_GTAA" type="b2602c69:ProjectViewProjectNode" />
               <item name="SMA_GTAA" type="462c0819:PsiDirectoryNode" />
-              <item name="Sectors" type="462c0819:PsiDirectoryNode" />
+              <item name="SectorsV2" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -228,9 +199,6 @@
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
     </configuration>
     <configuration name="GTAA_Model_V2" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="SMA_GTAA" />
@@ -249,9 +217,6 @@
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
     </configuration>
     <configuration name="SectorRotation" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="SMA_GTAA" />
@@ -270,9 +235,6 @@
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
     </configuration>
     <configuration name="SectorRotationV2" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="SMA_GTAA" />
@@ -281,9 +243,9 @@
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="" />
+      <option name="SDK_HOME" value="C:\Users\yprasad\AppData\Local\Continuum\Anaconda3\python.exe" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Sectors" />
-      <option name="IS_MODULE_SDK" value="true" />
+      <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Sectors/SectorRotationV2.py" />
@@ -291,9 +253,6 @@
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
     </configuration>
     <configuration name="country_etf_model" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="All_Country_ETF" />
@@ -312,9 +271,6 @@
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
     </configuration>
     <list>
       <item itemvalue="Python.GTAA_Model" />
@@ -363,26 +319,35 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1865" height="1096" extended-state="7" />
-    <editor active="true" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <layout>
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49947864" visible="true" weight="0.1780822" />
+      <window_info anchor="bottom" id="TODO" order="6" sideWeight="0.49947312" weight="0.32960895" />
+      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.5015806" side_tool="true" weight="0.6994413" />
+      <window_info anchor="bottom" id="Version Control" order="8" weight="0.32960895" />
+      <window_info anchor="bottom" id="Python Console" order="9" weight="0.32849163" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49841937" weight="0.6994413" />
+      <window_info id="Structure" order="1" sideWeight="0.50052136" side_tool="true" weight="0.12295082" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="10" sideWeight="0.49945414" visible="true" weight="0.29385474" />
+      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.49944136" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4989083" weight="0.73236513" />
       <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49947864" visible="true" weight="0.1893815" />
       <window_info id="Structure" order="1" sideWeight="0.50052136" side_tool="true" weight="0.12295082" />
-      <window_info id="Favorites" order="2" side_tool="true" />
-      <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4989083" weight="0.73236513" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.3830645" />
-      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="TODO" order="6" weight="0.32883817" />
-      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.5010917" side_tool="true" weight="0.62772787" />
-      <window_info anchor="bottom" id="Version Control" order="8" weight="0.32963374" />
-      <window_info anchor="bottom" id="Python Console" order="9" weight="0.32780084" />
-      <window_info anchor="bottom" id="Terminal" order="10" sideWeight="0.49945414" weight="0.29253113" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
-      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="bottom" id="TODO" order="6" weight="0.32883817" />
+      <window_info anchor="bottom" id="Version Control" order="8" weight="0.32963374" />
+      <window_info anchor="bottom" id="Python Console" order="9" weight="0.32780084" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.3830645" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.5010917" side_tool="true" weight="0.62772787" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Find" order="1" />
+      <window_info anchor="bottom" id="Terminal" order="10" sideWeight="0.49945414" weight="0.29253113" />
+      <window_info id="Favorites" order="2" side_tool="true" />
     </layout>
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -410,20 +375,6 @@
         </entry>
       </map>
     </option>
-    <option name="RECENT_FILTERS">
-      <map>
-        <entry key="Branch">
-          <value>
-            <list />
-          </value>
-        </entry>
-        <entry key="User">
-          <value>
-            <list />
-          </value>
-        </entry>
-      </map>
-    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <option name="MAXIMUM_HISTORY_ROWS" value="2000" />
@@ -442,6 +393,92 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$USER_HOME$/Anaconda3/Lib/site-packages/pandas/core/ops.py" />
+    <entry file="file://$PROJECT_DIR$/GTAA_Model_V2.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="11448">
+          <caret line="433" column="78" selection-start-line="433" selection-start-column="78" selection-end-line="433" selection-end-column="78" />
+          <folding>
+            <element signature="e#1138#1157#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Continuum/Anaconda3/Lib/site-packages/pandas/core/internals.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="280">
+          <caret line="4279" selection-start-line="4279" selection-end-line="4279" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Continuum/Anaconda3/Lib/site-packages/pandas/core/frame.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="360">
+          <caret line="4357" selection-start-line="4357" selection-end-line="4357" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Continuum/Anaconda3/Lib/site-packages/colorama/ansitowin32.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="222">
+          <caret line="39" column="35" selection-start-line="39" selection-start-column="35" selection-end-line="39" selection-end-column="35" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ETF/Quant_Backtest.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2673">
+          <caret line="102" column="55" selection-start-line="102" selection-start-column="55" selection-end-line="102" selection-end-column="55" />
+          <folding>
+            <element signature="e#29#48#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/_pydev_bundle/pydev_ipython_console_011.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="162">
+          <caret line="89" column="56" lean-forward="true" selection-start-line="89" selection-start-column="56" selection-end-line="89" selection-end-column="56" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Continuum/Anaconda3/Lib/site-packages/pandas_datareader/fred.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../All_Country_ETF/country_etf_model.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="405">
+          <caret line="18" column="29" selection-start-line="18" selection-start-column="29" selection-end-line="18" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../Examples/GWP Executables/gwpModelTrades.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="125">
+          <caret line="9" column="13" selection-start-line="9" selection-start-column="13" selection-end-line="9" selection-end-column="13" />
+          <folding>
+            <element signature="e#0#19#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/SectorRotation.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="27">
+          <caret line="539" column="81" selection-end-line="622" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Sectors/SectorRotation_v2.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-2619">
+          <caret line="178" column="16" lean-forward="true" selection-start-line="178" selection-start-column="16" selection-end-line="178" selection-end-column="16" />
+          <folding>
+            <element signature="e#501#520#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/_pydev_imps/_pydev_execfile.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="310">
@@ -485,60 +522,14 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../All_Country_ETF/filtered_close.csv">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="242">
-          <caret line="20" column="22" selection-end-line="2939" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/Anaconda3/Lib/site-packages/statsmodels/compat/pandas.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="510">
-          <caret line="55" selection-start-line="55" selection-end-line="55" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/Anaconda3/Lib/site-packages/colorama/ansitowin32.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="137">
-          <caret line="36" selection-start-line="36" selection-end-line="36" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/Anaconda3/Lib/site-packages/pandas/core/ops.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="1194" selection-start-line="1194" selection-end-line="1194" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/../All_Country_ETF/filtered_close.csv" />
+    <entry file="file://$USER_HOME$/Anaconda3/Lib/site-packages/statsmodels/compat/pandas.py" />
     <entry file="file://$PROJECT_DIR$/GTAA_Model_V2.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="4004">
           <caret line="445" column="83" selection-start-line="445" selection-start-column="83" selection-end-line="445" selection-end-column="83" />
           <folding>
             <element signature="e#1138#1157#0" expanded="true" />
-            <element signature="e#1622#1701#0" expanded="true" />
-            <element signature="e#1739#1963#0" expanded="true" />
-            <element signature="e#2036#6656#0" expanded="true" />
-            <element signature="e#2546#3049#0" expanded="true" />
-            <element signature="e#4601#4643#0" expanded="true" />
-            <element signature="e#6682#7506#0" expanded="true" />
-            <element signature="e#7549#8150#0" expanded="true" />
-            <element signature="e#8198#12599#0" expanded="true" />
-            <element signature="e#8739#9019#0" expanded="true" />
-            <element signature="e#12631#13860#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/SectorRotation.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2904">
-          <caret line="396" selection-start-line="396" selection-end-line="396" />
-          <folding>
-            <element signature="e#1037#1116#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -547,11 +538,89 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2662">
           <caret line="368" column="41" selection-start-line="368" selection-start-column="41" selection-end-line="368" selection-end-column="41" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Anaconda3/Lib/site-packages/colorama/ansitowin32.py" />
+    <entry file="file://$USER_HOME$/Anaconda3/Lib/site-packages/pandas/core/ops.py" />
+    <entry file="file://$PROJECT_DIR$/SectorRotation.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1077">
+          <caret line="553" column="37" lean-forward="true" selection-start-line="553" selection-start-column="37" selection-end-line="553" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../Examples/GWP Executables/extAllocations.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3726">
+          <caret line="138" selection-start-line="138" selection-end-line="138" />
+          <folding>
+            <element signature="e#23#42#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/_pydev_imps/_pydev_execfile.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="310">
+          <caret line="17" selection-start-line="17" selection-end-line="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Continuum/Anaconda3/Lib/site-packages/sklearn/utils/validation.py" />
+    <entry file="file://$PROJECT_DIR$/adj_close.csv" />
+    <entry file="file://$USER_HOME$/AppData/Local/Continuum/Anaconda3/Lib/site-packages/pandas/core/indexes/datetimes.py" />
+    <entry file="file://$USER_HOME$/AppData/Local/Continuum/Anaconda3/Lib/site-packages/colorama/ansitowin32.py" />
+    <entry file="file://$USER_HOME$/AppData/Local/Continuum/Anaconda3/Lib/site-packages/pandas/core/internals.py" />
+    <entry file="file://$PROJECT_DIR$/interest_rates_fred.csv">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="503">
+          <caret line="4609" column="14" selection-start-line="4609" selection-start-column="14" selection-end-line="4609" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/GTAA/adj_close_v2.csv">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="283">
+          <caret line="6850" lean-forward="true" selection-start-line="6850" selection-end-line="6850" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../All_Country_ETF/Universe_Description.csv">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-132" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../All_Country_ETF/aclose.csv">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-97513" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/GTAA_Model.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="22">
+          <caret line="17" column="48" selection-start-line="17" selection-start-column="48" selection-end-line="17" selection-end-column="48" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../All_Country_ETF/filtered_close.csv" />
+    <entry file="file://$USER_HOME$/Anaconda3/Lib/site-packages/statsmodels/compat/pandas.py" />
+    <entry file="file://$USER_HOME$/Anaconda3/Lib/site-packages/colorama/ansitowin32.py" />
+    <entry file="file://$USER_HOME$/Anaconda3/Lib/site-packages/pandas/core/ops.py" />
+    <entry file="file://$PROJECT_DIR$/GTAA_Model_V2.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="11421">
+          <caret line="423" column="78" selection-start-line="423" selection-start-column="78" selection-end-line="423" selection-end-column="78" />
           <folding>
             <element signature="e#1138#1157#0" expanded="true" />
-            <element signature="e#1622#1701#0" expanded="true" />
-            <element signature="e#2317#6476#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../All_Country_ETF/country_etf_model.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="405">
+          <caret line="18" column="29" selection-start-line="18" selection-start-column="29" selection-end-line="18" selection-end-column="29" />
         </state>
       </provider>
     </entry>
@@ -559,23 +628,20 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="416">
           <caret line="463" lean-forward="true" selection-start-line="463" selection-end-line="463" />
-          <folding>
-            <element signature="e#501#520#0" expanded="true" />
-            <element signature="e#1037#1116#0" expanded="true" />
-            <element signature="e#1155#1352#0" expanded="true" />
-            <element signature="e#1434#7513#0" expanded="true" />
-            <element signature="e#1799#2623#0" expanded="true" />
-            <element signature="e#4757#4801#0" expanded="true" />
-            <element signature="e#7537#8360#0" expanded="true" />
-            <element signature="e#8402#8933#0" expanded="true" />
-            <element signature="e#8980#14471#0" expanded="true" />
-            <element signature="e#9513#10013#0" expanded="true" />
-            <element signature="e#14503#17907#0" expanded="true" />
-            <element signature="e#14503#14621#0" />
-            <element signature="e#17937#18927#0" expanded="true" />
-            <element signature="e#18958#19407#0" expanded="true" />
-            <element signature="e#19986#20629#0" expanded="true" />
-          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/SectorRotation.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1063">
+          <caret line="553" column="37" selection-start-line="553" selection-start-column="37" selection-end-line="553" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/SectorsV2/SectorRotation_v2.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="354">
+          <caret line="621" lean-forward="true" selection-start-line="621" selection-end-line="621" />
         </state>
       </provider>
     </entry>
