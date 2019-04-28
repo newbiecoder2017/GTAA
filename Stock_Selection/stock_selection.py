@@ -149,6 +149,28 @@ def model_portfolios(cut_off=0.0, wList=[0.25, 0.25, 0.25, 0.25]):
     wts_three = pd.DataFrame([qthree_pers.iloc[i] / abs(qthree_pers.iloc[i]).sum() for i in range(len(qthree_pers))]).abs()
     wts_four = pd.DataFrame([qfour_pers.iloc[i] / abs(qfour_pers.iloc[i]).sum() for i in range(len(qfour_pers))]).abs()
 
+    # calculate the weights from the Sector weight mode
+    cash_scaler = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/cashscaler.csv", parse_dates=True, index_col=[0])
+    sector_wts_cash = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/weights_cash.csv", parse_dates=True, index_col=[0])
+    sector_wts_nocash = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/weights_nocash.csv", parse_dates=True,
+                                    index_col=[0])
+
+    # reindex weights dataframe to align with cash_scale time period
+    df_weights = wts_one.loc[cash_scaler.index[0]:]
+    sector_wts_cash = sector_wts_cash.loc[cash_scaler.index[0]:]
+    sector_wts_nocash = sector_wts_nocash.loc[cash_scaler.index[0]:]
+
+    cash_scaled_sector_wts = pd.DataFrame(index=cash_scaler.index)
+
+    cash_scaled_sector_wts['Sector_wt'] = np.where(cash_scaler.composite == 0, sector_wts_cash.XLK,
+                                                   sector_wts_nocash.XLK)
+
+    # scaled weights
+    cash_wts_one = df_weights.multiply(cash_scaled_sector_wts['Sector_wt'], axis=0)
+    final_wts_one = cash_wts_one[cash_wts_one.applymap(lambda x: x >= 0.005)]
+    final_wts_one = pd.DataFrame([final_wts_one.iloc[i] / abs(final_wts_one.iloc[i]).sum() for i in range(len(final_wts_one))]).abs()
+
+
 
     quint_ret_1 = rframe.shift(-1)[q_one.notnull()].multiply(wts_one)
     quint_ret_2 = rframe.shift(-1)[q_two.notnull()].multiply(wts_two)
@@ -167,61 +189,62 @@ def model_portfolios(cut_off=0.0, wList=[0.25, 0.25, 0.25, 0.25]):
     plt.grid()
     plt.plot()
     plt.show()
+
     # Generate 1 month forward return based on the filtered composite zscore retrun dataframe
-    # df_portfolio = rframe.shift(-1)[rank_comp >= cut_off]
-    # alt_df_portfolio = rframe.shift(-1)[rank_comp < cut_off]
-    #
-    # # Using the persistence zscore dataframe to generate the position weights
-    # pers_score = persistence_zscore
-    # persistence_zscore = pers_score[rank_comp >= cut_off]
-    # alt_persistence_zscore = pers_score[rank_comp < cut_off]
-    #
-    # df_weights = pd.DataFrame([persistence_zscore.iloc[i] / abs(persistence_zscore.iloc[i]).sum() for i in
-    #                            range(len(persistence_zscore))]).abs()
-    #
-    # alt_df_weights = pd.DataFrame([alt_persistence_zscore.iloc[i] / abs(alt_persistence_zscore.iloc[i]).sum() for i in
-    #                                range(len(alt_persistence_zscore))]).abs()
-    #
-    # #calculate the weights from the Sector weight mode
-    # cash_scaler = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/cashscaler.csv",parse_dates=True,index_col=[0])
-    # sector_wts_cash = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/weights_cash.csv",parse_dates=True,index_col=[0])
-    # sector_wts_nocash = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/weights_nocash.csv",parse_dates=True,index_col=[0])
-    #
-    # #reindex weights dataframe to align with cash_scale time period
-    # df_weights = df_weights.loc[cash_scaler.index[0]:]
-    # sector_wts_cash = sector_wts_cash.loc[cash_scaler.index[0]:]
-    # sector_wts_nocash = sector_wts_nocash.loc[cash_scaler.index[0]:]
-    #
-    # cash_scaled_sector_wts = pd.DataFrame(index=cash_scaler.index)
-    #
-    # cash_scaled_sector_wts['Sector_wt'] = np.where(cash_scaler.composite == 0, sector_wts_cash.XLK, sector_wts_nocash.XLK)
-    #
-    #
-    # #scaled weights
-    # dff = df_weights.multiply(cash_scaled_sector_wts['Sector_wt'], axis=0)
-    # new_df = dff[dff.applymap(lambda x: x >= 0.005)]
-    # new_dff = pd.DataFrame([new_df.iloc[i] / abs(new_df.iloc[i]).sum() for i in range(len(new_df))]).abs()
-    #
-    #
-    # print(df_weights.sum(axis=1).tail())
-    # # print(alt_df_weights.sum(axis=1).tail())
-    #
-    # # Generate the weighted portfolio returns
-    # df_portfolio = df_weights * df_portfolio
-    # alt_df_portfolio = alt_df_weights * alt_df_portfolio
-    #
-    # # Realigining the index of the portfolio
-    # df_portfolio = df_portfolio.shift(1)
-    # alt_df_portfolio = alt_df_portfolio.shift(1)
-    #
-    # # calculate the portfolio return series and benchmark. Annual expense of 35bps is deducted monthly from the portfolio
-    # df_portfolio['Average'] = df_portfolio.sum(axis=1) - .00083  # 100bp of fees and transaction cost
-    # df_portfolio['alt_Average'] = alt_df_portfolio.sum(axis=1) - .00083  # 100bp of fees and transaction cost
-    # df_portfolio['bench_mark'] = bench_mark
-    # df_portfolio['bmBIL'] = bmbil
-    # # df_portfolio[['Average','alt_Average','bmSPY']].cumsum().plot()
-    # # plt.grid()
-    # return df_portfolio, df_weights, rframe
+    df_portfolio = rframe.shift(-1)[rank_comp >= cut_off]
+    alt_df_portfolio = rframe.shift(-1)[rank_comp < cut_off]
+
+    # Using the persistence zscore dataframe to generate the position weights
+    pers_score = persistence_zscore
+    persistence_zscore = pers_score[rank_comp >= cut_off]
+    alt_persistence_zscore = pers_score[rank_comp < cut_off]
+
+    df_weights = pd.DataFrame([persistence_zscore.iloc[i] / abs(persistence_zscore.iloc[i]).sum() for i in
+                               range(len(persistence_zscore))]).abs()
+
+    alt_df_weights = pd.DataFrame([alt_persistence_zscore.iloc[i] / abs(alt_persistence_zscore.iloc[i]).sum() for i in
+                                   range(len(alt_persistence_zscore))]).abs()
+
+    #calculate the weights from the Sector weight mode
+    cash_scaler = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/cashscaler.csv",parse_dates=True,index_col=[0])
+    sector_wts_cash = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/weights_cash.csv",parse_dates=True,index_col=[0])
+    sector_wts_nocash = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/weights_nocash.csv",parse_dates=True,index_col=[0])
+
+    #reindex weights dataframe to align with cash_scale time period
+    df_weights = df_weights.loc[cash_scaler.index[0]:]
+    sector_wts_cash = sector_wts_cash.loc[cash_scaler.index[0]:]
+    sector_wts_nocash = sector_wts_nocash.loc[cash_scaler.index[0]:]
+
+    cash_scaled_sector_wts = pd.DataFrame(index=cash_scaler.index)
+
+    cash_scaled_sector_wts['Sector_wt'] = np.where(cash_scaler.composite == 0, sector_wts_cash.XLK, sector_wts_nocash.XLK)
+
+
+    #scaled weights
+    dff = df_weights.multiply(cash_scaled_sector_wts['Sector_wt'], axis=0)
+    new_df = dff[dff.applymap(lambda x: x >= 0.005)]
+    new_dff = pd.DataFrame([new_df.iloc[i] / abs(new_df.iloc[i]).sum() for i in range(len(new_df))]).abs()
+
+
+    print(df_weights.sum(axis=1).tail())
+    # print(alt_df_weights.sum(axis=1).tail())
+
+    # Generate the weighted portfolio returns
+    df_portfolio = df_weights * df_portfolio
+    alt_df_portfolio = alt_df_weights * alt_df_portfolio
+
+    # Realigining the index of the portfolio
+    df_portfolio = df_portfolio.shift(1)
+    alt_df_portfolio = alt_df_portfolio.shift(1)
+
+    # calculate the portfolio return series and benchmark. Annual expense of 35bps is deducted monthly from the portfolio
+    df_portfolio['Average'] = df_portfolio.sum(axis=1) - .00083  # 100bp of fees and transaction cost
+    df_portfolio['alt_Average'] = alt_df_portfolio.sum(axis=1) - .00083  # 100bp of fees and transaction cost
+    df_portfolio['bench_mark'] = bench_mark
+    df_portfolio['bmBIL'] = bmbil
+    # df_portfolio[['Average','alt_Average','bmSPY']].cumsum().plot()
+    # plt.grid()
+    return df_portfolio, df_weights, rframe
 
 
 if __name__ == "__main__":
