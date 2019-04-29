@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
+<<<<<<< HEAD
     <list default="true" id="cbb7a844-cb06-4f4f-b6e7-4cc3ead753cd" name="Default" comment="Rebalance 12/31/2018" />
+=======
+    <list default="true" id="cbb7a844-cb06-4f4f-b6e7-4cc3ead753cd" name="Default" comment="Model Created 4/28/2019">
+      <change beforePath="$PROJECT_DIR$/Stock_Selection/stock_selection.py" beforeDir="false" afterPath="$PROJECT_DIR$/Stock_Selection/stock_selection.py" afterDir="false" />
+    </list>
+>>>>>>> 71263bb894122b925f090930798254bb8d746e6a
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -11,6 +17,7 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+<<<<<<< HEAD
       <file leaf-file-name="GTAA_Model_V2.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/GTAA_Model_V2.py">
           <provider selected="true" editor-type-id="text-editor">
@@ -60,16 +67,45 @@
               <caret line="9" column="13" selection-start-line="9" selection-start-column="13" selection-end-line="9" selection-end-column="13" />
               <folding>
                 <element signature="e#0#19#0" expanded="true" />
+=======
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Sectors/SectorRotationV2.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="286">
+              <caret line="440" selection-start-line="440" selection-end-line="440" />
+              <folding>
+                <element signature="e#501#520#0" expanded="true" />
+                <element signature="e#1037#1116#0" expanded="true" />
+                <element signature="e#1155#1352#0" expanded="true" />
+                <element signature="e#14504#17905#0" expanded="true" />
+                <element signature="e#18956#19405#0" expanded="true" />
+>>>>>>> 71263bb894122b925f090930798254bb8d746e6a
               </folding>
             </state>
           </provider>
         </entry>
       </file>
+<<<<<<< HEAD
       <file leaf-file-name="country_etf_model.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/../All_Country_ETF/country_etf_model.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="405">
               <caret line="18" column="29" selection-start-line="18" selection-start-column="29" selection-end-line="18" selection-end-column="29" />
+=======
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/Stock_Selection/stock_selection.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="515">
+              <caret line="182" column="61" lean-forward="true" selection-start-line="182" selection-start-column="61" selection-end-line="183" selection-end-column="61" />
+              <folding>
+                <element signature="e#94#113#0" expanded="true" />
+                <element signature="e#593#672#0" expanded="true" />
+                <element signature="e#710#969#0" expanded="true" />
+                <element signature="e#1421#2249#0" expanded="true" />
+                <element signature="e#4308#4352#0" expanded="true" />
+                <element signature="e#5058#5545#0" expanded="true" />
+              </folding>
+>>>>>>> 71263bb894122b925f090930798254bb8d746e6a
             </state>
           </provider>
         </entry>
@@ -85,8 +121,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>plot</find>
-      <find>drawdown</find>
       <find>rename</find>
       <find>#</find>
       <find>TR</find>
@@ -114,6 +148,9 @@
       <find>model_por</find>
       <find>to_csv</find>
       <find>portfolio_returns</find>
+      <find>10000</find>
+      <find>mod</find>
+      <find>bmXLK</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -129,24 +166,33 @@
         <option value="$PROJECT_DIR$/GTAA_Model_V2.py" />
         <option value="$PROJECT_DIR$/SectorRotation.py" />
         <option value="$PROJECT_DIR$/Sectors/SectorRotationV2.py" />
+        <option value="$PROJECT_DIR$/Stock_Selection/stock_selection.py" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="7">
-    <option name="x" value="-512" />
-    <option name="y" value="98" />
-    <option name="width" value="1865" />
-    <option name="height" value="1096" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="17" />
+    <option name="y" value="-23" />
+    <option name="width" value="1936" />
+    <option name="height" value="1056" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <ConfirmationsSetting value="2" id="Add" />
   </component>
+<<<<<<< HEAD
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+=======
+>>>>>>> 71263bb894122b925f090930798254bb8d746e6a
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="ProjectPane" />
       <pane id="Scope" />
+<<<<<<< HEAD
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -163,6 +209,8 @@
           <select />
         </subPane>
       </pane>
+=======
+>>>>>>> 71263bb894122b925f090930798254bb8d746e6a
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -181,7 +229,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.SectorRotationV2">
+  <component name="RunManager" selected="Python.stock_selection">
     <configuration name="GTAA_Model" type="PythonConfigurationType" factoryName="Python">
       <module name="SMA_GTAA" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -272,15 +320,38 @@
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
     </configuration>
+    <configuration name="stock_selection" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="SMA_GTAA" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Stock_Selection" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Stock_Selection/stock_selection.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <list>
       <item itemvalue="Python.GTAA_Model" />
       <item itemvalue="Python.SectorRotation" />
       <item itemvalue="Python.GTAA_Model_V2" />
       <item itemvalue="Python.country_etf_model" />
       <item itemvalue="Python.SectorRotationV2" />
+      <item itemvalue="Python.stock_selection" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.stock_selection" />
         <item itemvalue="Python.SectorRotationV2" />
         <item itemvalue="Python.SectorRotation" />
         <item itemvalue="Python.GTAA_Model_V2" />
@@ -306,7 +377,14 @@
       <option name="project" value="LOCAL" />
       <updated>1546385136395</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Model Created 4/28/2019">
+      <created>1556491650616</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1556491650616</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TodoView">
@@ -321,15 +399,20 @@
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <layout>
+<<<<<<< HEAD
       <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49947864" visible="true" weight="0.1780822" />
       <window_info anchor="bottom" id="TODO" order="6" sideWeight="0.49947312" weight="0.32960895" />
       <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.5015806" side_tool="true" weight="0.6994413" />
       <window_info anchor="bottom" id="Version Control" order="8" weight="0.32960895" />
       <window_info anchor="bottom" id="Python Console" order="9" weight="0.32849163" />
       <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49841937" weight="0.6994413" />
+=======
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49947864" visible="true" weight="0.18229716" />
+>>>>>>> 71263bb894122b925f090930798254bb8d746e6a
       <window_info id="Structure" order="1" sideWeight="0.50052136" side_tool="true" weight="0.12295082" />
       <window_info active="true" anchor="bottom" id="Terminal" order="10" sideWeight="0.49945414" visible="true" weight="0.29385474" />
       <window_info id="Favorites" order="2" side_tool="true" />
+<<<<<<< HEAD
       <window_info anchor="bottom" id="Debug" order="3" weight="0.49944136" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4989083" weight="0.73236513" />
@@ -348,6 +431,22 @@
       <window_info anchor="bottom" id="Find" order="1" />
       <window_info anchor="bottom" id="Terminal" order="10" sideWeight="0.49945414" weight="0.29253113" />
       <window_info id="Favorites" order="2" side_tool="true" />
+=======
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4989083" weight="0.49242425" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.6331169" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" weight="0.32883817" />
+      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.5010917" side_tool="true" weight="0.62772787" />
+      <window_info anchor="bottom" id="Version Control" order="8" weight="0.32883817" />
+      <window_info anchor="bottom" id="Python Console" order="9" weight="0.5670996" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="10" sideWeight="0.49945414" visible="true" weight="0.3051948" />
+      <window_info anchor="right" id="Commander" order="0" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+>>>>>>> 71263bb894122b925f090930798254bb8d746e6a
     </layout>
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -379,7 +478,8 @@
   <component name="VcsManagerConfiguration">
     <option name="MAXIMUM_HISTORY_ROWS" value="2000" />
     <MESSAGE value="Rebalance 12/31/2018" />
-    <option name="LAST_COMMIT_MESSAGE" value="Rebalance 12/31/2018" />
+    <MESSAGE value="Model Created 4/28/2019" />
+    <option name="LAST_COMMIT_MESSAGE" value="Model Created 4/28/2019" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -560,10 +660,22 @@
         </state>
       </provider>
     </entry>
+<<<<<<< HEAD
     <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/_pydev_imps/_pydev_execfile.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="310">
           <caret line="17" selection-start-line="17" selection-end-line="17" />
+=======
+    <entry file="file://$PROJECT_DIR$/../All_Country_ETF/country_etf_model.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="832">
+          <caret line="368" column="41" selection-start-line="368" selection-start-column="41" selection-end-line="368" selection-end-column="41" />
+          <folding>
+            <element signature="e#1138#1157#0" expanded="true" />
+            <element signature="e#1622#1701#0" expanded="true" />
+            <element signature="e#2317#6476#0" expanded="true" />
+          </folding>
+>>>>>>> 71263bb894122b925f090930798254bb8d746e6a
         </state>
       </provider>
     </entry>
@@ -574,6 +686,7 @@
     <entry file="file://$USER_HOME$/AppData/Local/Continuum/Anaconda3/Lib/site-packages/pandas/core/internals.py" />
     <entry file="file://$PROJECT_DIR$/interest_rates_fred.csv">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
         <state relative-caret-position="503">
           <caret line="4609" column="14" selection-start-line="4609" selection-start-column="14" selection-end-line="4609" selection-end-column="14" />
         </state>
@@ -613,19 +726,53 @@
           <caret line="423" column="78" selection-start-line="423" selection-start-column="78" selection-end-line="423" selection-end-column="78" />
           <folding>
             <element signature="e#1138#1157#0" expanded="true" />
+=======
+        <state relative-caret-position="832">
+          <caret line="396" selection-start-line="396" selection-end-line="396" />
+          <folding>
+            <element signature="e#1037#1116#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/GTAA_Model_V2.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="832">
+          <caret line="445" column="83" selection-start-line="445" selection-start-column="83" selection-end-line="445" selection-end-column="83" />
+          <folding>
+            <element signature="e#1138#1157#0" expanded="true" />
+            <element signature="e#1622#1701#0" expanded="true" />
+            <element signature="e#1739#1963#0" expanded="true" />
+            <element signature="e#2036#6656#0" expanded="true" />
+            <element signature="e#2546#3049#0" expanded="true" />
+            <element signature="e#4601#4643#0" expanded="true" />
+            <element signature="e#6682#7506#0" expanded="true" />
+            <element signature="e#7549#8150#0" expanded="true" />
+            <element signature="e#8198#12599#0" expanded="true" />
+            <element signature="e#8739#9019#0" expanded="true" />
+            <element signature="e#12631#13860#0" expanded="true" />
+>>>>>>> 71263bb894122b925f090930798254bb8d746e6a
+          </folding>
+        </state>
+      </provider>
+    </entry>
+<<<<<<< HEAD
     <entry file="file://$PROJECT_DIR$/../All_Country_ETF/country_etf_model.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="405">
           <caret line="18" column="29" selection-start-line="18" selection-start-column="29" selection-end-line="18" selection-end-column="29" />
+=======
+    <entry file="file://$USER_HOME$/Anaconda3/Lib/site-packages/pandas/core/indexes/multi.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="124">
+          <caret line="1095" selection-start-line="1095" selection-end-line="1095" />
+>>>>>>> 71263bb894122b925f090930798254bb8d746e6a
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Sectors/SectorRotationV2.py">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
         <state relative-caret-position="416">
           <caret line="463" lean-forward="true" selection-start-line="463" selection-end-line="463" />
         </state>
@@ -642,6 +789,32 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="354">
           <caret line="621" lean-forward="true" selection-start-line="621" selection-end-line="621" />
+=======
+        <state relative-caret-position="286">
+          <caret line="440" selection-start-line="440" selection-end-line="440" />
+          <folding>
+            <element signature="e#501#520#0" expanded="true" />
+            <element signature="e#1037#1116#0" expanded="true" />
+            <element signature="e#1155#1352#0" expanded="true" />
+            <element signature="e#14504#17905#0" expanded="true" />
+            <element signature="e#18956#19405#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Stock_Selection/stock_selection.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="515">
+          <caret line="182" column="61" lean-forward="true" selection-start-line="182" selection-start-column="61" selection-end-line="183" selection-end-column="61" />
+          <folding>
+            <element signature="e#94#113#0" expanded="true" />
+            <element signature="e#593#672#0" expanded="true" />
+            <element signature="e#710#969#0" expanded="true" />
+            <element signature="e#1421#2249#0" expanded="true" />
+            <element signature="e#4308#4352#0" expanded="true" />
+            <element signature="e#5058#5545#0" expanded="true" />
+          </folding>
+>>>>>>> 71263bb894122b925f090930798254bb8d746e6a
         </state>
       </provider>
     </entry>
