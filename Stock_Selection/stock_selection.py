@@ -25,23 +25,22 @@ def alphavantage_close_price(symbol):
 
 
 def read_price_file(frq='BM'):
-    df_price = pd.read_csv("C:/Python27/Git/SMA_GTAA/Stock_Selection/XLK/SPY_Tech_Stocks.csv", index_col='Date',
-                           parse_dates=True)
-
+    df_price = pd.read_csv("C:/Python27/Git/SMA_GTAA/Stock_Selection/XLK/SPY_Tech_Stocks.csv", index_col='Date', parse_dates=True)
     df_price = df_price.resample(frq, closed='right').last()
     df_price = df_price['2001':]
     return df_price
 
 
-def model_portfolios(cut_off=0.0, wList=[0.25, 0.25, 0.25, 0.25]):
+def model_portfolios(wList=[0.25, 0.25, 0.25, 0.25]):
+    periods='2013'
     df = pd.read_csv("C:/Python27/Git/SMA_GTAA/Stock_Selection/XLK/SPY_Tech_Stocks.csv", index_col='Date', parse_dates=True)
-    # df = df['01-2015':]
+    df = df[periods:]
     # calculating the daily return for benchmarks
     rframe = df.resample('BM', closed='right').last().pct_change()
     bench_mark = rframe.XLK
     bmbil = rframe.BIL
 
-    def clean_universe(df, rs='BM', per=1,cut_off = 0.5):
+    def clean_universe(df, rs='BM', per=1):
         # resampling price frame
         resamp_df = df.resample(rs, closed='right').last()
 
@@ -108,7 +107,7 @@ def model_portfolios(cut_off=0.0, wList=[0.25, 0.25, 0.25, 0.25]):
     persistence_long = df_1m.rolling(12).apply(return_persistence)
 
     # composte frame for the long and short persistence factors use long wts  = 0.9 and short wts = 0.1 for less drawdown
-    composite_persistence = 0.5 * persistence_short + 0.3 * persistence_inter + 0.2 * persistence_long
+    composite_persistence = 0.4 * persistence_short + 0.6 * persistence_inter + 0.0 * persistence_long
 
     # Generate the zscore of composite persistence dataframe Cross Sectional
     persistence_zscore = pd.DataFrame([(composite_persistence.iloc[i] - composite_persistence.iloc[i].mean()) / composite_persistence.iloc[i].std()
@@ -120,151 +119,134 @@ def model_portfolios(cut_off=0.0, wList=[0.25, 0.25, 0.25, 0.25]):
     rank_comp = wList[0] * zs_1m + wList[1] * zs_3m + wList[2] * zs_6m + wList[3] * zs_12m
 
     #quintle analysis
-    q_cut = rank_comp.quantile(q=[0.1,0.4,0.6,0.8,0.9],axis=1,numeric_only=True).T
+    q_cut = rank_comp.quantile(q=[0.2,0.4,0.6,0.8,0.9,1.0],axis=1,numeric_only=True).T
 
     def q_bucket(rankdf,qcut,q):
-        if q==0.1:
+        if q==0.2:
             boolean_df = pd.DataFrame({s: rankdf[s] <=qcut[q] for s in rankdf.columns},index = rankdf.index)
             return rankdf[boolean_df]
         elif q==0.9:
+            # q = round(q - 0.2, 1)
             boolean_df= pd.DataFrame({s: rankdf[s] > qcut[q] for s in rankdf.columns},index=rankdf.index)
             return rankdf[boolean_df]
         else:
-            q1=round(q+0.2,1)
-            boolean_df= pd.DataFrame({s: ((rankdf[s] > qcut[q]) & (rankdf[s] <= qcut[q1])) for s in rankdf.columns}, index = rankdf.index)
+            q_low=round(q-0.2,1)
+            boolean_df= pd.DataFrame({s: ((rankdf[s] > qcut[q_low]) & (rankdf[s] <= qcut[q])) for s in rankdf.columns}, index = rankdf.index)
             return rankdf[boolean_df]
 
-    q_one = q_bucket(rank_comp,q_cut,0.1)
+    q_one = q_bucket(rank_comp,q_cut,0.2)
     q_two = q_bucket(rank_comp, q_cut, 0.4)
     q_three = q_bucket(rank_comp, q_cut, 0.6)
-    q_four = q_bucket(rank_comp, q_cut, 0.9)
-    # q_five = q_bucket(rank_comp, q_cut, 1.0)
+    q_four = q_bucket(rank_comp, q_cut, 0.8)
+    q_five = q_bucket(rank_comp, q_cut, 0.9)
 
     qone_pers = persistence_zscore[q_one.notnull()]
     qtwo_pers = persistence_zscore[q_two.notnull()]
     qthree_pers = persistence_zscore[q_three.notnull()]
     qfour_pers = persistence_zscore[q_four.notnull()]
+    qfive_pers = persistence_zscore[q_five.notnull()]
+
 
     wts_one = pd.DataFrame([qone_pers.iloc[i] / abs(qone_pers.iloc[i]).sum() for i in range(len(qone_pers))]).abs()
     wts_two = pd.DataFrame([qtwo_pers.iloc[i] / abs(qtwo_pers.iloc[i]).sum() for i in range(len(qtwo_pers))]).abs()
     wts_three = pd.DataFrame([qthree_pers.iloc[i] / abs(qthree_pers.iloc[i]).sum() for i in range(len(qthree_pers))]).abs()
     wts_four = pd.DataFrame([qfour_pers.iloc[i] / abs(qfour_pers.iloc[i]).sum() for i in range(len(qfour_pers))]).abs()
+    wts_five = pd.DataFrame([qfive_pers.iloc[i] / abs(qfive_pers.iloc[i]).sum() for i in range(len(qfive_pers))]).abs()
 
-    # calculate the weights from the Sector weight mode
+    # calculate the weights from the Sector Rotation weight model
     cash_scaler = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/cashscaler.csv", parse_dates=True, index_col=[0])
+    cash_scaler = cash_scaler[periods:]
     sector_wts_cash = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/weights_cash.csv", parse_dates=True, index_col=[0])
-    sector_wts_nocash = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/weights_nocash.csv", parse_dates=True,
-                                    index_col=[0])
+    sector_wts_cash = sector_wts_cash[periods:]
+    sector_wts_nocash = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/weights_nocash.csv", parse_dates=True, index_col=[0])
+    sector_wts_nocash = sector_wts_nocash[periods:]
 
-    # reindex weights dataframe to align with cash_scale time period
-    df_weights = wts_one.loc[cash_scaler.index[0]:]
+    # reindex weights dataframe to align with cash_scale time period,
     sector_wts_cash = sector_wts_cash.loc[cash_scaler.index[0]:]
     sector_wts_nocash = sector_wts_nocash.loc[cash_scaler.index[0]:]
-
     cash_scaled_sector_wts = pd.DataFrame(index=cash_scaler.index)
+    cash_scaled_sector_wts['Sector_wt'] = np.where(cash_scaler.composite == 0, sector_wts_cash.XLK, sector_wts_nocash.XLK)
+    # scaled weights,input : cash_scaler,sector_wts_cash,sector_wts_nocash,bm
+    def final_weights_scaled_cash_model(quintileWeights, cashScaler=cash_scaler, cashScaledSecWts = cash_scaled_sector_wts):
 
-    cash_scaled_sector_wts['Sector_wt'] = np.where(cash_scaler.composite == 0, sector_wts_cash.XLK,
-                                                   sector_wts_nocash.XLK)
+        df_weights_q= quintileWeights.loc[cashScaler.index[0]:]
+        cash_wts_q = df_weights_q.multiply(cashScaledSecWts['Sector_wt'], axis=0)
+        final_wts_q = cash_wts_q[cash_wts_q.applymap(lambda x: x >= 0.00005)]
+        final_wts_q= pd.DataFrame([final_wts_q.iloc[i] / abs(final_wts_q.iloc[i]).sum() for i in range(len(final_wts_q))]).abs()
+        return final_wts_q
 
-    # scaled weights
-    cash_wts_one = df_weights.multiply(cash_scaled_sector_wts['Sector_wt'], axis=0)
-    final_wts_one = cash_wts_one[cash_wts_one.applymap(lambda x: x >= 0.005)]
-    final_wts_one = pd.DataFrame([final_wts_one.iloc[i] / abs(final_wts_one.iloc[i]).sum() for i in range(len(final_wts_one))]).abs()
+    final_wts_one = final_weights_scaled_cash_model(wts_one)
+    final_wts_two = final_weights_scaled_cash_model(wts_two)
+    final_wts_three = final_weights_scaled_cash_model(wts_three)
+    final_wts_four = final_weights_scaled_cash_model(wts_four)
+    final_wts_five = final_weights_scaled_cash_model(wts_five)
+    #Quintile returns
+    quint_ret_1 = rframe.shift(-1)[q_one.notnull()].multiply(final_wts_one)
+    quint_ret_2 = rframe.shift(-1)[q_two.notnull()].multiply(final_wts_two)
+    quint_ret_3 = rframe.shift(-1)[q_three.notnull()].multiply(final_wts_three)
+    quint_ret_4 = rframe.shift(-1)[q_four.notnull()].multiply(final_wts_four)
+    quint_ret_5 = rframe.shift(-1)[q_five.notnull()].multiply(final_wts_five)
+    q5_ew = rframe.shift(-1)[q_five.notnull()].mean(axis=1)
+    q1_ew = rframe.shift(-1)[q_one.notnull()].mean(axis=1)
 
-
-
-    quint_ret_1 = rframe.shift(-1)[q_one.notnull()].multiply(wts_one)
-    quint_ret_2 = rframe.shift(-1)[q_two.notnull()].multiply(wts_two)
-    quint_ret_3 = rframe.shift(-1)[q_three.notnull()].multiply(wts_three)
-    quint_ret_4 = rframe.shift(-1)[q_four.notnull()].multiply(wts_four)
-
+    #quintile returns wtd average returns
     quintile_returns = pd.DataFrame(index=rank_comp.index)
     quintile_returns['q1'] = quint_ret_1.shift(1).sum(axis=1)
     quintile_returns['q2'] = quint_ret_2.shift(1).sum(axis=1)
     quintile_returns['q3'] = quint_ret_3.shift(1).sum(axis=1)
     quintile_returns['q4'] = quint_ret_4.shift(1).sum(axis=1)
+    quintile_returns['q5'] = quint_ret_5.shift(1).sum(axis=1)
+    quintile_returns['eq_wt5'] = q5_ew.shift(1)
+    quintile_returns['eq_wt1'] = q1_ew.shift(1)
     quintile_returns['bench_mark'] = bench_mark
-    grouped = quintile_returns['2001':].groupby(quintile_returns['2001':].index.year).sum()
+    quintile_returns.index = pd.to_datetime(quintile_returns.index)
+    grouped = quintile_returns[periods:].groupby(quintile_returns[periods:].index.year).sum()
     print(grouped)
-    quintile_returns.add(1).cumprod().plot()
+
+    # pd.plotting.scatter_matrix(quintile_returns, alpha=0.5, figsize=(8, 8), diagonal='hist')
+    quintile_returns['2015':].add(1).cumprod().plot()
+
+    #excess return
+    q_delta = pd.DataFrame({s: quintile_returns[s] - quintile_returns['eq_wt5'] for s in quintile_returns.columns})
+    grp_delta = q_delta.groupby(q_delta.index.year).mean()
+    grp_delta.plot(kind='bar')
     plt.grid()
     plt.plot()
     plt.show()
 
-    # Generate 1 month forward return based on the filtered composite zscore retrun dataframe
-    df_portfolio = rframe.shift(-1)[rank_comp >= cut_off]
-    alt_df_portfolio = rframe.shift(-1)[rank_comp < cut_off]
+    def max_dd(returns):
+        """returns is a series"""
+        r = returns.add(1).cumprod()
+        dd = r.div(r.cummax()).sub(1)
+        mdd = dd.min()
+        # end = dd.argmin()
+        # start = r.loc[:end].argmax()
+        return mdd
 
-    # Using the persistence zscore dataframe to generate the position weights
-    pers_score = persistence_zscore
-    persistence_zscore = pers_score[rank_comp >= cut_off]
-    alt_persistence_zscore = pers_score[rank_comp < cut_off]
+    def max_dd_df(returns):
+        """returns is a dataframe"""
+        series = lambda x: pd.Series(x, ['Draw Down'])
+        return returns.apply(max_dd).apply(series)
 
-    df_weights = pd.DataFrame([persistence_zscore.iloc[i] / abs(persistence_zscore.iloc[i]).sum() for i in
-                               range(len(persistence_zscore))]).abs()
-
-    alt_df_weights = pd.DataFrame([alt_persistence_zscore.iloc[i] / abs(alt_persistence_zscore.iloc[i]).sum() for i in
-                                   range(len(alt_persistence_zscore))]).abs()
-
-    #calculate the weights from the Sector weight mode
-    cash_scaler = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/cashscaler.csv",parse_dates=True,index_col=[0])
-    sector_wts_cash = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/weights_cash.csv",parse_dates=True,index_col=[0])
-    sector_wts_nocash = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/weights_nocash.csv",parse_dates=True,index_col=[0])
-
-    #reindex weights dataframe to align with cash_scale time period
-    df_weights = df_weights.loc[cash_scaler.index[0]:]
-    sector_wts_cash = sector_wts_cash.loc[cash_scaler.index[0]:]
-    sector_wts_nocash = sector_wts_nocash.loc[cash_scaler.index[0]:]
-
-    cash_scaled_sector_wts = pd.DataFrame(index=cash_scaler.index)
-
-    cash_scaled_sector_wts['Sector_wt'] = np.where(cash_scaler.composite == 0, sector_wts_cash.XLK, sector_wts_nocash.XLK)
+    print(max_dd(quintile_returns))
 
 
-    #scaled weights
-    dff = df_weights.multiply(cash_scaled_sector_wts['Sector_wt'], axis=0)
-    new_df = dff[dff.applymap(lambda x: x >= 0.005)]
-    new_dff = pd.DataFrame([new_df.iloc[i] / abs(new_df.iloc[i]).sum() for i in range(len(new_df))]).abs()
-
-
-    print(df_weights.sum(axis=1).tail())
-    # print(alt_df_weights.sum(axis=1).tail())
-
-    # Generate the weighted portfolio returns
-    df_portfolio = df_weights * df_portfolio
-    alt_df_portfolio = alt_df_weights * alt_df_portfolio
-
-    # Realigining the index of the portfolio
-    df_portfolio = df_portfolio.shift(1)
-    alt_df_portfolio = alt_df_portfolio.shift(1)
-
-    # calculate the portfolio return series and benchmark. Annual expense of 35bps is deducted monthly from the portfolio
-    df_portfolio['Average'] = df_portfolio.sum(axis=1) - .00083  # 100bp of fees and transaction cost
-    df_portfolio['alt_Average'] = alt_df_portfolio.sum(axis=1) - .00083  # 100bp of fees and transaction cost
-    df_portfolio['bench_mark'] = bench_mark
-    df_portfolio['bmBIL'] = bmbil
-    # df_portfolio[['Average','alt_Average','bmSPY']].cumsum().plot()
-    # plt.grid()
-    return df_portfolio, df_weights, rframe
-
+    return quintile_returns
 
 if __name__ == "__main__":
 
-    adjusted_price = read_price_file('BM')
-    modBiL = adjusted_price.BIL.pct_change()
-
-    tickers_df = pd.read_csv("C:/Users/Yogesh/Dropbox/SPY_All_Holdings.csv")
-    sector_list = tickers_df.Sector.unique()
-    for sec in sector_list[6:7]:
-
-        sec_symbols = tickers_df[tickers_df.Sector == sec]['Identifier']
-        sec_symbols = sec_symbols.tolist()
-        df = pd.DataFrame({s: alphavantage_close_price(s) for s in sec_symbols})
-        sec = sec.strip()
-        df.to_csv("C:/Python27/Examples/SPY_"+sec+".csv")
+    # tickers_df = pd.read_csv("C:/Users/yprasad/Dropbox/SPY_All_Holdings.csv")
+    # sector_list = tickers_df.Sector.unique()
+    # for sec in sector_list[6:7]:
+    #
+    #     sec_symbols = tickers_df[tickers_df.Sector == sec]['Identifier']
+    #     sec_symbols = sec_symbols.tolist()
+    #     df = pd.DataFrame({s: alphavantage_close_price(s) for s in sec_symbols})
+    #     sec = sec.strip()
+    #     df.to_csv("C:/Python27/Examples/SPY_"+sec+".csv")
 
 
-    # model, wts, eqPort = model_portfolios(cut_off=0.2, wList=[0.0, 0.7, 0.3, 0.0])
+    model = model_portfolios(wList=[0.0, 0.7, 0.3, 0.0])
     # wts.index.name = 'Date'
     # model['EW'] = eqPort.mean(axis=1)
     # portfolio_returns = model[['Average', 'bench_mark', 'EW', 'alt_Average']]
