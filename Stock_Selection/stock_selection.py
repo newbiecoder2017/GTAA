@@ -253,20 +253,21 @@ if __name__ == "__main__":
     adjusted_price = read_price_file('BM')
     modBiL = adjusted_price.BIL.pct_change()
 
-    tickers_df = pd.read_csv("C:/Users/yprasad/Dropbox/SPY_All_Holdings.csv")
+    tickers_df = pd.read_csv("C:/Users/Yogesh/Dropbox/SPY_All_Holdings.csv")
     sector_list = tickers_df.Sector.unique()
-    for sec in sector_list[:3]:
+    for sec in sector_list[6:7]:
 
         sec_symbols = tickers_df[tickers_df.Sector == sec]['Identifier']
-        sec_symbols = sec_symbols.to_list()
+        sec_symbols = sec_symbols.tolist()
         df = pd.DataFrame({s: alphavantage_close_price(s) for s in sec_symbols})
-        df.to_csv("C:Python27/Examples/SPY_"+sec+".csv")
+        sec = sec.strip()
+        df.to_csv("C:/Python27/Examples/SPY_"+sec+".csv")
 
 
-    model, wts, eqPort = model_portfolios(cut_off=0.2, wList=[0.0, 0.7, 0.3, 0.0])
-    wts.index.name = 'Date'
-    model['EW'] = eqPort.mean(axis=1)
-    portfolio_returns = model[['Average', 'bench_mark', 'EW', 'alt_Average']]
-    portfolio_returns.index.name = 'Date'
-    portfolio_returns.to_csv("C:/Python27/Git/SMA_GTAA/Stock_Selection/XLK/returns.csv")
-    wts.to_csv("C:/Python27/Git/SMA_GTAA/Stock_Selection/XLK//weights.csv")
+    # model, wts, eqPort = model_portfolios(cut_off=0.2, wList=[0.0, 0.7, 0.3, 0.0])
+    # wts.index.name = 'Date'
+    # model['EW'] = eqPort.mean(axis=1)
+    # portfolio_returns = model[['Average', 'bench_mark', 'EW', 'alt_Average']]
+    # portfolio_returns.index.name = 'Date'
+    # portfolio_returns.to_csv("C:/Python27/Git/SMA_GTAA/Stock_Selection/XLK/returns.csv")
+    # wts.to_csv("C:/Python27/Git/SMA_GTAA/Stock_Selection/XLK//weights.csv")
