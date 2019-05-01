@@ -107,7 +107,7 @@ def model_portfolios(wList=[0.25, 0.25, 0.25, 0.25]):
     persistence_long = df_1m.rolling(12).apply(return_persistence)
 
     # composte frame for the long and short persistence factors use long wts  = 0.9 and short wts = 0.1 for less drawdown
-    composite_persistence = 0.4 * persistence_short + 0.6 * persistence_inter + 0.0 * persistence_long
+    composite_persistence = 0.0 * persistence_short + 1.0 * persistence_inter + 0.0 * persistence_long
 
     # Generate the zscore of composite persistence dataframe Cross Sectional
     persistence_zscore = pd.DataFrame([(composite_persistence.iloc[i] - composite_persistence.iloc[i].mean()) / composite_persistence.iloc[i].std()
@@ -119,16 +119,17 @@ def model_portfolios(wList=[0.25, 0.25, 0.25, 0.25]):
     rank_comp = wList[0] * zs_1m + wList[1] * zs_3m + wList[2] * zs_6m + wList[3] * zs_12m
 
     #quintle analysis
-    q_cut = rank_comp.quantile(q=[0.2,0.4,0.6,0.8,0.9,1.0],axis=1,numeric_only=True).T
+    q_cut = rank_comp.quantile(q=[0.0,0.2,0.4,0.6,0.8,1.0],axis=1,numeric_only=True).T
 
     def q_bucket(rankdf,qcut,q):
         if q==0.2:
-            boolean_df = pd.DataFrame({s: rankdf[s] <=qcut[q] for s in rankdf.columns},index = rankdf.index)
+            q_low = round(q - 0.2, 1)
+            boolean_df = pd.DataFrame({s: ((rankdf[s] > qcut[q_low]) & (rankdf[s] <= qcut[q])) for s in rankdf.columns},index = rankdf.index)
             return rankdf[boolean_df]
-        elif q==0.9:
-            # q = round(q - 0.2, 1)
-            boolean_df= pd.DataFrame({s: rankdf[s] > qcut[q] for s in rankdf.columns},index=rankdf.index)
-            return rankdf[boolean_df]
+        # elif q==0.9:
+        #     # q = round(q - 0.2, 1)
+        #     boolean_df= pd.DataFrame({s: rankdf[s] > qcut[q] for s in rankdf.columns},index=rankdf.index)
+        #     return rankdf[boolean_df]
         else:
             q_low=round(q-0.2,1)
             boolean_df= pd.DataFrame({s: ((rankdf[s] > qcut[q_low]) & (rankdf[s] <= qcut[q])) for s in rankdf.columns}, index = rankdf.index)
@@ -138,7 +139,7 @@ def model_portfolios(wList=[0.25, 0.25, 0.25, 0.25]):
     q_two = q_bucket(rank_comp, q_cut, 0.4)
     q_three = q_bucket(rank_comp, q_cut, 0.6)
     q_four = q_bucket(rank_comp, q_cut, 0.8)
-    q_five = q_bucket(rank_comp, q_cut, 0.9)
+    q_five = q_bucket(rank_comp, q_cut, 1.0)
 
     qone_pers = persistence_zscore[q_one.notnull()]
     qtwo_pers = persistence_zscore[q_two.notnull()]
@@ -186,8 +187,18 @@ def model_portfolios(wList=[0.25, 0.25, 0.25, 0.25]):
     quint_ret_3 = rframe.shift(-1)[q_three.notnull()].multiply(final_wts_three)
     quint_ret_4 = rframe.shift(-1)[q_four.notnull()].multiply(final_wts_four)
     quint_ret_5 = rframe.shift(-1)[q_five.notnull()].multiply(final_wts_five)
-    q5_ew = rframe.shift(-1)[q_five.notnull()].mean(axis=1)
-    q1_ew = rframe.shift(-1)[q_one.notnull()].mean(axis=1)
+
+    q1_ew = rframe.shift(-1)[qone_pers.notnull()].mean(axis=1)
+    q2_ew = rframe.shift(-1)[qtwo_pers.notnull()].mean(axis=1)
+    q3_ew = rframe.shift(-1)[qthree_pers.notnull()].mean(axis=1)
+    q4_ew = rframe.shift(-1)[qfour_pers.notnull()].mean(axis=1)
+    q5_ew = rframe.shift(-1)[qfive_pers.notnull()].mean(axis=1)
+
+    shifted_eq5 = qfive_pers.resample('BQ',closed='right').last()
+    shifted_ret = df.resample('BQ',closed='right').last().pct_change()
+    q5_ew_shifted = shifted_ret.shift(-1)[shifted_eq5.notnull()].mean(axis=1)
+    q5_ew_shifted.add(1).cumprod().plot()
+    # plt.show()
 
     #quintile returns wtd average returns
     quintile_returns = pd.DataFrame(index=rank_comp.index)
@@ -196,18 +207,26 @@ def model_portfolios(wList=[0.25, 0.25, 0.25, 0.25]):
     quintile_returns['q3'] = quint_ret_3.shift(1).sum(axis=1)
     quintile_returns['q4'] = quint_ret_4.shift(1).sum(axis=1)
     quintile_returns['q5'] = quint_ret_5.shift(1).sum(axis=1)
-    quintile_returns['eq_wt5'] = q5_ew.shift(1)
-    quintile_returns['eq_wt1'] = q1_ew.shift(1)
+
+    #equal weighed signals
+    eq_quintile_returns = pd.DataFrame(index=rank_comp.index)
+    eq_quintile_returns['eq_wt1'] = q1_ew.shift(1)
+    eq_quintile_returns['eq_wt2'] = q2_ew.shift(1)
+    eq_quintile_returns['eq_wt3'] = q3_ew.shift(1)
+    eq_quintile_returns['eq_wt4'] = q4_ew.shift(1)
+    eq_quintile_returns['eq_wt5'] = q5_ew.shift(1)
+    eq_quintile_returns['bench_mark'] = bench_mark
+
     quintile_returns['bench_mark'] = bench_mark
     quintile_returns.index = pd.to_datetime(quintile_returns.index)
-    grouped = quintile_returns[periods:].groupby(quintile_returns[periods:].index.year).sum()
+    grouped = eq_quintile_returns[periods:].groupby(eq_quintile_returns[periods:].index.year).sum()
     print(grouped)
 
     # pd.plotting.scatter_matrix(quintile_returns, alpha=0.5, figsize=(8, 8), diagonal='hist')
-    quintile_returns['2015':].add(1).cumprod().plot()
+    eq_quintile_returns['2015':].add(1).cumprod().plot()
 
     #excess return
-    q_delta = pd.DataFrame({s: quintile_returns[s] - quintile_returns['eq_wt5'] for s in quintile_returns.columns})
+    q_delta = pd.DataFrame({s: eq_quintile_returns[s] - eq_quintile_returns['eq_wt5'] for s in eq_quintile_returns.columns})
     grp_delta = q_delta.groupby(q_delta.index.year).mean()
     grp_delta.plot(kind='bar')
     plt.grid()
@@ -228,10 +247,10 @@ def model_portfolios(wList=[0.25, 0.25, 0.25, 0.25]):
         series = lambda x: pd.Series(x, ['Draw Down'])
         return returns.apply(max_dd).apply(series)
 
-    print(max_dd(quintile_returns))
+    print(max_dd(eq_quintile_returns))
 
 
-    return quintile_returns
+    return eq_quintile_returns
 
 if __name__ == "__main__":
 

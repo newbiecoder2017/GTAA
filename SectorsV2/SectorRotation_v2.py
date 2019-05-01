@@ -129,12 +129,12 @@ def model_portfolios(cut_off=0.0, wList=[0.25,0.25,0.25,0.25], mod='cash'):
         return ((data > 0).sum() - (data < 0).sum())
 
     #Generate the dataframe for Persistence return Factor from 1 month data frame
-    persistence_long = df_1m.rolling(6).apply(return_persistence)
     persistence_short = df_1m.rolling(3).apply(return_persistence)
-    persistence_inter= df_1m.rolling(12).apply(return_persistence)
+    persistence_inter = df_1m.rolling(6).apply(return_persistence)
+    persistence_long= df_1m.rolling(12).apply(return_persistence)
 
     # composte frame for the long and short persistence factors use long wts  = 0.9 and short wts = 0.1 for less drawdown
-    composite_persistence = 1.0* persistence_long  + 0.0* persistence_short + 0.0 * persistence_inter
+    composite_persistence = 0.0* persistence_short  + 1.0* persistence_inter + 0.0 * persistence_long
 
     # Generate the zscore of composite persistence dataframe Cross Sectional
     persistence_zscore = pd.DataFrame([(composite_persistence.iloc[i] - composite_persistence.iloc[i].mean()) / composite_persistence.iloc[i].std() for i in range(len(composite_persistence))])
@@ -346,31 +346,31 @@ def cash_scaling_model():
     # # rolling_12m['composite'] = np.where(c1,1,np.where(c2&c3,0.5,0))
     #
     # rolling_12m['composite'] = np.where(c1, 1, 0)
+    #reading the month end 3 month T-Bill rate from FRED DBT3
     ir_df = pd.read_csv("C:/Python27/Git/SMA_GTAA/interest_rates_fred.csv", index_col='DATE', parse_dates=True)
-
     ir_df[ir_df['DTB3'] == '.'] = np.nan
     ir_df = ir_df.astype(float) * .01
     ir_df.fillna(method='ffill', inplace=True)
 
+    #create and index for 3 month treasury bill
     ir_df['MV'] = 100.0
-
     ir_df['MV2'] = ir_df['MV'].shift(1) * (1 + ir_df['DTB3'])
 
+    # reading the S&P 500 price data
     sp_df = pd.read_csv("C:/Python27/Git/SMA_GTAA/sp500_yahoo.csv", index_col='Date', parse_dates=True)[['Adj Close']]
-
+    # appending the T-Bill Index to the S&P 500 Dataframe
     sp_df['BIL'] = ir_df['MV2']
-
+    # Resampling the S&P 500 dataframe to align with month end dates
     cs_df = sp_df.resample('BM', closed='right').last()
-
+    # calculating the 6 months change for S&P 500 and TBil
     roll_win = 6
-
     rolling_12m = cs_df / cs_df.shift(roll_win) - 1
-    # Condition 1 - Last month close greater 12 months average close
-    rolling_12m['avg_er'] = cs_df['Adj Close'] - cs_df['Adj Close'].rolling(roll_win).mean()
 
+    # Condition 1 - Last month close greater 6 months average close
+    rolling_12m['avg_er'] = cs_df['Adj Close'] - cs_df['Adj Close'].rolling(roll_win).mean()
     rolling_12m.dropna(inplace=True)
 
-    #condition 2 -  Last 12 months returns of SP500 in excess of Excess 12 month Tbil returns
+    #condition 2 -  Last 6 months returns of SP500 in excess of Excess 6 month Tbil returns
     rolling_12m['ER'] = rolling_12m['Adj Close'] - rolling_12m.BIL
 
     rolling_12m['c_exc_ret'] = np.where(rolling_12m['ER'] > 0, 1, 0)
@@ -569,7 +569,7 @@ if __name__ == "__main__":
     # plt.title("Equity Curve - YTD")
     # plt.show()
     #
-    # correaltion Plot
+    # correlation Plot
     # plt.matshow(all_portfolios.corr())
     # plt.xticks(range(len(all_portfolios.columns)), all_portfolios.columns)
     # plt.yticks(range(len(all_portfolios.columns)), all_portfolios.columns)
