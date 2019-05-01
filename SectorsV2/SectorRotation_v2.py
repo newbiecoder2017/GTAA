@@ -190,7 +190,7 @@ def drawdown(s):
 
     # Next we calculate the minimum (negative) daily drawdown in that window.
     # Again, use min_periods=1 if you want to allow the expanding window
-    #     Max_Daily_Drawdown = pd.rolling_min(Daily_Drawdown, window, min_periods=1)
+    # Max_Daily_Drawdown = pd.rolling_min(Daily_Drawdown, window, min_periods=1)
 
     Max_Daily_Drawdown = Daily_Drawdown.rolling(center=False, min_periods=1, window=12).min()
 
@@ -477,7 +477,7 @@ if __name__ == "__main__":
 
         # model = model['2014':]
 
-        # # Remove the first row with NaN's
+        # Remove the first row with NaN's
         # portfolio_returns = portfolio_returns[1:]
 
         portfolio_returns = model[['Average','bmSPY','EW']]
@@ -519,10 +519,10 @@ if __name__ == "__main__":
     all_portfolios = startegy_switch()
     all_portfolios.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/portfolio_returns.csv")
 
-    #BackTest Statistics for all the portfolios and indexes
+    # BackTest Statistics for all the portfolios and indexes
     stats_df = backtest_metrics(all_portfolios, rfr=modBiL)
 
-    #Regression stats for all portfolios and indices
+    # Regression stats for all portfolios and indices
     for c in stats_df.columns:
 
         stats_df[c].loc[['beta','ann_alpha','R_squared','p_value','tvalue']] = regression_fit(all_portfolios[c], all_portfolios.bmSPY.fillna(0), all_portfolios.RFR.fillna(0))
@@ -553,7 +553,7 @@ if __name__ == "__main__":
     plt.savefig("C:/Python27/Git/SMA_GTAA/Sectors/bar_chart.jpg", facecolor=fig.get_facecolor(), transparent=True)
     plt.show()
 
-    # # Portfolio Return Plot
+    # Portfolio Return Plot
     dollar_returns = dollar_retuns(all_portfolios[['portfolio','S&P500']])
     dollar_returns.plot(linewidth = 2.0)
     plt.legend()
@@ -562,14 +562,14 @@ if __name__ == "__main__":
     plt.title("Growth of a $10000 Portfolio ",color='blue',fontweight='heavy')
     plt.savefig("C:/Python27/Git/SMA_GTAA/Sectors/equity_curve.jpg", facecolor=fig.get_facecolor(), transparent=True)
     plt.show()
-    #
+
     # all_portfolios['07-2017':].cumsum().plot()
     # plt.legend()
     # plt.grid()
     # plt.title("Equity Curve - YTD")
     # plt.show()
     #
-    # # #correaltion Plot
+    # correaltion Plot
     # plt.matshow(all_portfolios.corr())
     # plt.xticks(range(len(all_portfolios.columns)), all_portfolios.columns)
     # plt.yticks(range(len(all_portfolios.columns)), all_portfolios.columns)
@@ -577,7 +577,7 @@ if __name__ == "__main__":
     # plt.title("Strategy Correlation Box")
     # plt.show()
     #
-    # # Rolling Correlation vs Benchamrk
+    # Rolling Correlation vs Benchamrk
     tcor = all_portfolios['portfolio'].rolling(window=6).corr(other=all_portfolios['S&P500'])
     tcor.plot(linewidth=1.5,color='red')
     plt.grid()
@@ -588,16 +588,15 @@ if __name__ == "__main__":
     #Distribution of returns
     # all_portfolios['portfolio'].hist()
     # plt.show()
-    # #
     # #saving files
     stats_df.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/Summary_Statistics.csv")
     print(stats_df)
 
 
 
-# # cutt_off=0.2
-#     stats_df.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/"+str(n1)+"_"+str(n2)+"_"+str(n3)+"_"+str(n4)+"_"+str(cutt_off)+".csv")
-#     print(stats_df)
+#   cutt_off=0.2
+#   stats_df.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/"+str(n1)+"_"+str(n2)+"_"+str(n3)+"_"+str(n4)+"_"+str(cutt_off)+".csv")
+#   print(stats_df)
 
 
     #Plot the rolling weights
