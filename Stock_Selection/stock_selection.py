@@ -32,7 +32,7 @@ def read_price_file(frq='BM'):
 
 
 def model_portfolios(wList=[0.25, 0.25, 0.25, 0.25]):
-    periods='2010'
+    periods='2012'
     df = pd.read_csv("C:/Python27/Git/SMA_GTAA/Stock_Selection/XLK/SPY_Tech_Stocks.csv", index_col='Date', parse_dates=True)
     df = df[periods:]
     # calculating the daily return for benchmarks
@@ -58,7 +58,7 @@ def model_portfolios(wList=[0.25, 0.25, 0.25, 0.25]):
         riskChg = df.pct_change()
 
         # calculating the rolling std deviations and re-sample the df
-        risk_df = riskChg.rolling(30).apply(np.std).resample(rs, closed='right').last()
+        risk_df = riskChg.rolling(45).apply(np.std).resample(rs, closed='right').last()
 
         # returning the risk asdjusted return frames
         return ret_frame2 / risk_df
@@ -107,7 +107,7 @@ def model_portfolios(wList=[0.25, 0.25, 0.25, 0.25]):
     persistence_long = df_1m.rolling(12).apply(return_persistence)
 
     # composte frame for the long and short persistence factors use long wts  = 0.9 and short wts = 0.1 for less drawdown
-    composite_persistence = 0.4 * persistence_short + 0.6 * persistence_inter + 0.0 * persistence_long
+    composite_persistence = 0.5 * persistence_short + 0.5 * persistence_inter + 0.0 * persistence_long
 
     # Generate the zscore of composite persistence dataframe Cross Sectional
     persistence_zscore = pd.DataFrame([(composite_persistence.iloc[i] - composite_persistence.iloc[i].mean()) / composite_persistence.iloc[i].std()
@@ -257,7 +257,7 @@ def model_portfolios(wList=[0.25, 0.25, 0.25, 0.25]):
     print(eq_grouped)
 
     # pd.plotting.scatter_matrix(quintile_returns, alpha=0.5, figsize=(8, 8), diagonal='hist')
-    eq_quintile_returns['2012':].add(1).cumprod().plot()
+    eq_quintile_returns['2014':].add(1).cumprod().plot()
 
     #excess return
     q_delta = pd.DataFrame({s: eq_quintile_returns[s] - eq_quintile_returns['eq_wt5'] for s in eq_quintile_returns.columns})
@@ -282,8 +282,7 @@ def model_portfolios(wList=[0.25, 0.25, 0.25, 0.25]):
 
     print(max_dd(eq_quintile_returns))
     print(eq_quintile_returns.describe())
-
-
+    print(eq_quintile_returns.skew())
     return eq_quintile_returns
 
 if __name__ == "__main__":
