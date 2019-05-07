@@ -31,13 +31,15 @@ def read_price_file(frq='BM'):
     return df_price
 
 
-def model_portfolios(wList=[0.25, 0.25, 0.25, 0.25]):
+def model_portfolios(sector, bm, wList=[0.25, 0.25, 0.25, 0.25]):
     periods='2012'
-    df = pd.read_csv("C:/Python27/Git/SMA_GTAA/Stock_Selection/XLK/SPY_Tech_Stocks.csv", index_col='Date', parse_dates=True)
+    read_tbill = pd.read_csv("C:/Python27/Git/SMA_GTAA/Stock_Selection/TBill.csv", index_col='Date', parse_dates=True)
+    df = pd.read_csv("C:/Python27/Git/SMA_GTAA/Stock_Selection/"+sector+"/SPY_Tech_Stocks.csv", index_col='Date', parse_dates=True)
+    df['BIL'] = read_tbill
     df = df[periods:]
     # calculating the daily return for benchmarks
     rframe = df.resample('BM', closed='right').last().pct_change()
-    bench_mark = rframe.XLK
+    bench_mark = rframe[bm]
     bmbil = rframe.BIL
 
     def clean_universe(df, rs='BM', per=1):
@@ -47,7 +49,7 @@ def model_portfolios(wList=[0.25, 0.25, 0.25, 0.25]):
         # calculating the resampled price returns in excess of the benchmark
         ret_frame = resamp_df.pct_change(per)
 
-        ret_frame1 = pd.DataFrame({s: ret_frame[s] - ret_frame.XLK for s in ret_frame.columns}, index=ret_frame.index)
+        ret_frame1 = pd.DataFrame({s: ret_frame[s] - ret_frame[bm] for s in ret_frame.columns}, index=ret_frame.index)
 
         if per == 1:
             ret_frame2 = ret_frame1.rolling(12).mean().sub(ret_frame)
@@ -67,9 +69,9 @@ def model_portfolios(wList=[0.25, 0.25, 0.25, 0.25]):
     df_1m = clean_universe(df, rs='BM', per=1)
 
     # Drop the benchmark from the return frame. Add symbols to the list to eliminate from the return frame
-    rframe.drop(['XLK', 'BIL'], inplace=True, axis=1)
+    rframe.drop([bm, 'BIL'], inplace=True, axis=1)
 
-    df_1m.drop(['XLK', 'BIL'], inplace=True, axis=1)
+    df_1m.drop([bm, 'BIL'], inplace=True, axis=1)
 
     # 3 month risk adjusted frame
     df_3m = clean_universe(df, rs='BM', per=3)
@@ -80,10 +82,10 @@ def model_portfolios(wList=[0.25, 0.25, 0.25, 0.25]):
     # 12 month risk adjusted  frame
     df_12m = clean_universe(df, rs='BM', per=12)
 
-    df.drop(['XLK', 'BIL'], inplace=True, axis=1)
-    df_3m.drop(['XLK', 'BIL'], inplace=True, axis=1)
-    df_6m.drop(['XLK', 'BIL'], inplace=True, axis=1)
-    df_12m.drop(['XLK', 'BIL'], inplace=True, axis=1)
+    df.drop([bm, 'BIL'], inplace=True, axis=1)
+    df_3m.drop([bm, 'BIL'], inplace=True, axis=1)
+    df_6m.drop([bm, 'BIL'], inplace=True, axis=1)
+    df_12m.drop([bm, 'BIL'], inplace=True, axis=1)
 
     # Zscore the risk adjusted return frames Cross Sectional
 
@@ -298,7 +300,7 @@ if __name__ == "__main__":
     #     df.to_csv("C:/Python27/Examples/SPY_"+sec+".csv")
 
 
-    model = model_portfolios(wList=[0.0, 0.5, 0.5, 0.0])
+    model = model_portfolios(sector='Information Technology', bm='XLK', wList=[0.0, 0.5, 0.5, 0.0])
     # wts.index.name = 'Date'
     # model['EW'] = eqPort.mean(axis=1)
     # portfolio_returns = model[['Average', 'bench_mark', 'EW', 'alt_Average']]

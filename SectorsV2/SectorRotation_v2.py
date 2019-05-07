@@ -258,9 +258,7 @@ def backtest_metrics(returnsframe, rfr):
     sortino_ratio = (AnnReturns- RFR_AnnRet.iloc[0]) / downward_risk
     # AnnSharpe = (AnnReturns-0.025) / AnnRisk
 
-#   # Calulate Average Daily Drawdowns and Max DD
-#
-
+  #Calulate Average Daily Drawdowns and Max DD
     dd = [drawdown(cummulative_return)[0]]
     mdd = [drawdown(cummulative_return)[1]]
     dailyDD = [drawdown(cummulative_return)[2]]
