@@ -20,7 +20,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import fix_yahoo_finance as yf
+import yfinance as yf
 from pandas_datareader import data as pdr
 from scipy import stats
 import statsmodels.api as sm
@@ -29,6 +29,8 @@ pd.set_option('precision',4)
 pd.options.display.float_format = '{:.3f}'.format
 import time
 import datetime
+from pandas.plotting import register_matplotlib_converters
+register_matplotlib_converters()
 import seaborn as sns
 # sns.set_palette(sns.color_palette("hls", 20))
 
@@ -37,7 +39,7 @@ today = datetime.datetime.today().strftime('%m/%d/%y')
 #Function to pull data from yahoo
 def pull_data(s):
 
-    return pdr.get_data_yahoo(s, start="2000-12-31", end="2019-04-30")['Adj Close']
+    return pdr.get_data_yahoo(s, start="2000-12-31", end="2019-05-31")['Adj Close']
 
 def read_price_file(frq = 'BM'):
     df_price = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/adj_close_sectors.csv", index_col='Date', parse_dates=True)
@@ -69,7 +71,7 @@ def model_portfolios(cut_off=0.0, wList=[0.25,0.25,0.25,0.25], mod='cash'):
         riskChg = df.pct_change()
 
         # calculating the rolling std deviations and re-sample the df
-        risk_df = riskChg.rolling(30).apply(np.std).resample(rs, closed='right').last()
+        risk_df = riskChg.rolling(30).apply(np.std, raw=True).resample(rs, closed='right').last()
 
         # returning the risk asdjusted return frames
         return ret_frame2 / risk_df
@@ -129,9 +131,9 @@ def model_portfolios(cut_off=0.0, wList=[0.25,0.25,0.25,0.25], mod='cash'):
         return ((data > 0).sum() - (data < 0).sum())
 
     #Generate the dataframe for Persistence return Factor from 1 month data frame
-    persistence_short = df_1m.rolling(3).apply(return_persistence)
-    persistence_inter = df_1m.rolling(6).apply(return_persistence)
-    persistence_long= df_1m.rolling(12).apply(return_persistence)
+    persistence_short = df_1m.rolling(3).apply(return_persistence, raw=True)
+    persistence_inter = df_1m.rolling(6).apply(return_persistence, raw=True)
+    persistence_long= df_1m.rolling(12).apply(return_persistence, raw=True)
 
     # composte frame for the long and short persistence factors use long wts  = 0.9 and short wts = 0.1 for less drawdown
     composite_persistence = 0.0* persistence_short  + 1.0* persistence_inter + 0.0 * persistence_long
@@ -437,8 +439,8 @@ def startegy_switch():
     return df_combined
 
 def dollar_retuns(data):
-    data['Portfolio'] = 10000
-    data['S&P 500'] = 10000
+    data.loc[:,'Portfolio'] = 10000
+    data.loc[:,'S&P 500'] = 10000
     for i in range(len(data)):
         if i == 0:
             data['Portfolio'].iloc[i] = 10000

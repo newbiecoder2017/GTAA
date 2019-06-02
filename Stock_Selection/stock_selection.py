@@ -3,13 +3,13 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import fix_yahoo_finance as yf
+# import fix_yahoo_finance as yf
 from scipy import stats
 import datetime
 import json
 import requests
 import statsmodels.api as sm
-yf.pdr_override()  # <== that's all it takes :-)
+# yf.pdr_override()  # <== that's all it takes :-)
 pd.set_option('precision', 4)
 pd.options.display.float_format = '{:.3f}'.format
 import time
@@ -34,7 +34,7 @@ def read_price_file(frq='BM'):
 def model_portfolios(sector, bm, wList=[0.25, 0.25, 0.25, 0.25]):
     periods='2012'
     read_tbill = pd.read_csv("C:/Python27/Git/SMA_GTAA/Stock_Selection/TBill.csv", index_col='Date', parse_dates=True)
-    df = pd.read_csv("C:/Python27/Git/SMA_GTAA/Stock_Selection/"+sector+"/SPY_Tech_Stocks.csv", index_col='Date', parse_dates=True)
+    df = pd.read_csv("C:/Python27/Git/SMA_GTAA/Stock_Selection/"+sector+"/"+sector+".csv", index_col='Date', parse_dates=True)
     df['BIL'] = read_tbill
     df = df[periods:]
     # calculating the daily return for benchmarks
@@ -60,7 +60,7 @@ def model_portfolios(sector, bm, wList=[0.25, 0.25, 0.25, 0.25]):
         riskChg = df.pct_change()
 
         # calculating the rolling std deviations and re-sample the df
-        risk_df = riskChg.rolling(45).apply(np.std).resample(rs, closed='right').last()
+        risk_df = riskChg.rolling(30).apply(np.std).resample(rs, closed='right').last()
 
         # returning the risk asdjusted return frames
         return ret_frame2 / risk_df
@@ -109,7 +109,7 @@ def model_portfolios(sector, bm, wList=[0.25, 0.25, 0.25, 0.25]):
     persistence_long = df_1m.rolling(12).apply(return_persistence)
 
     # composte frame for the long and short persistence factors use long wts  = 0.9 and short wts = 0.1 for less drawdown
-    composite_persistence = 0.5 * persistence_short + 0.5 * persistence_inter + 0.0 * persistence_long
+    composite_persistence = 0.0 * persistence_short + 1.0 * persistence_inter + 0.0 * persistence_long
 
     # Generate the zscore of composite persistence dataframe Cross Sectional
     persistence_zscore = pd.DataFrame([(composite_persistence.iloc[i] - composite_persistence.iloc[i].mean()) / composite_persistence.iloc[i].std()
@@ -148,7 +148,7 @@ def model_portfolios(sector, bm, wList=[0.25, 0.25, 0.25, 0.25]):
     def quintile_pers_sccore(df):
         stdev = df.std(axis=1, numeric_only=True, skipna=True)
         avg = df.mean(axis=1, numeric_only=True, skipna=True)
-        return pd.DataFrame([(df.iloc[i].dropna() - avg.iloc[i]) / stdev.iloc[i] for i in range(len(df))])
+        return pd.DataFrame([(df.iloc[i] - avg.iloc[i]) / stdev.iloc[i] for i in range(len(df))])
 
     comp_qone = composite_persistence[q_one.notnull()]
     comp_qtwo = composite_persistence[q_two.notnull()]
@@ -212,21 +212,26 @@ def model_portfolios(sector, bm, wList=[0.25, 0.25, 0.25, 0.25]):
     # print("***Fifth quin wts based on pers Final***")
     # print(final_wts_five.tail(3))
 
-    #Quintile returns
-    # quint_ret_1 = rframe.shift(-1)[q_one.notnull()].multiply(final_wts_one)
-    # quint_ret_2 = rframe.shift(-1)[q_two.notnull()].multiply(final_wts_two)
-    # quint_ret_3 = rframe.shift(-1)[q_three.notnull()].multiply(final_wts_three)
-    # quint_ret_4 = rframe.shift(-1)[q_four.notnull()].multiply(final_wts_four)
-    # quint_ret_5 = rframe.shift(-1)[q_five.notnull()].multiply(final_wts_five)
-    # print("***Fifth quint rets wts based on pers Final***")
-    # print(quint_ret_5.tail(3))
+    # Quintile returns
+    quint_ret_1 = rframe.shift(-1)[q_one.notnull()].multiply(wts_one)
+    quint_ret_2 = rframe.shift(-1)[q_two.notnull()].multiply(wts_two)
+    quint_ret_3 = rframe.shift(-1)[q_three.notnull()].multiply(wts_three)
+    quint_ret_4 = rframe.shift(-1)[q_four.notnull()].multiply(wts_four)
+    quint_ret_5 = rframe.shift(-1)[q_five.notnull()].multiply(wts_five)
+    print("***Fifth quint rets wts based on pers Final***")
+
+    print(quint_ret_5.tail(3))
+
+    [print(s) for s in q_five[-1:].dropna(axis=1).columns.tolist()]
+    print('First Q')
+    [print(s) for s in q_one[-1:].dropna(axis=1).columns.tolist()]
 
     #equal weighted quintile returns
-    q1_ew = rframe.shift(-1)[qone_pers.notnull()].mean(axis=1)
-    q2_ew = rframe.shift(-1)[qtwo_pers.notnull()].mean(axis=1)
-    q3_ew = rframe.shift(-1)[qthree_pers.notnull()].mean(axis=1)
-    q4_ew = rframe.shift(-1)[qfour_pers.notnull()].mean(axis=1)
-    q5_ew = rframe.shift(-1)[qfive_pers.notnull()].mean(axis=1)
+    # q1_ew = rframe.shift(-1)[qone_pers.notnull()].mean(axis=1)
+    # q2_ew = rframe.shift(-1)[qtwo_pers.notnull()].mean(axis=1)
+    # q3_ew = rframe.shift(-1)[qthree_pers.notnull()].mean(axis=1)
+    # q4_ew = rframe.shift(-1)[qfour_pers.notnull()].mean(axis=1)
+    # q5_ew = rframe.shift(-1)[qfive_pers.notnull()].mean(axis=1)
 
     # 3 month rebalance
     # shifted_eq5 = qfive_pers.resample('BQ',closed='right').last()
@@ -236,33 +241,34 @@ def model_portfolios(sector, bm, wList=[0.25, 0.25, 0.25, 0.25]):
     # plt.show()
 
     #wtd average quintile returns
-    # quintile_returns = pd.DataFrame(index=rank_comp.index)
-    # quintile_returns.index = pd.to_datetime(quintile_returns.index)
-    # quintile_returns['q1'] = quint_ret_1.shift(1).sum(axis=1)
-    # quintile_returns['q2'] = quint_ret_2.shift(1).sum(axis=1)
-    # quintile_returns['q3'] = quint_ret_3.shift(1).sum(axis=1)
-    # quintile_returns['q4'] = quint_ret_4.shift(1).sum(axis=1)
-    # quintile_returns['q5'] = quint_ret_5.shift(1).sum(axis=1)
-    # quintile_returns['bench_mark'] = bench_mark
-    # quint_grouped = quintile_returns[periods:].groupby(quintile_returns[periods:].index.year).sum()
-    # print(quint_grouped)
+    quintile_returns = pd.DataFrame(index=rank_comp.index)
+    quintile_returns.index = pd.to_datetime(quintile_returns.index)
+    quintile_returns['q1'] = quint_ret_1.shift(1).sum(axis=1)
+    quintile_returns['q2'] = quint_ret_2.shift(1).sum(axis=1)
+    quintile_returns['q3'] = quint_ret_3.shift(1).sum(axis=1)
+    quintile_returns['q4'] = quint_ret_4.shift(1).sum(axis=1)
+    quintile_returns['q5'] = quint_ret_5.shift(1).sum(axis=1)
+    quintile_returns['bench_mark'] = bench_mark
+    quint_grouped = quintile_returns[periods:].groupby(quintile_returns[periods:].index.year).sum()
+    print(quint_grouped)
 
     #equal weighed signals
-    eq_quintile_returns = pd.DataFrame(index=rank_comp.index)
-    eq_quintile_returns['eq_wt1'] = q1_ew.shift(1)
-    eq_quintile_returns['eq_wt2'] = q2_ew.shift(1)
-    eq_quintile_returns['eq_wt3'] = q3_ew.shift(1)
-    eq_quintile_returns['eq_wt4'] = q4_ew.shift(1)
-    eq_quintile_returns['eq_wt5'] = q5_ew.shift(1)
-    eq_quintile_returns['bench_mark'] = bench_mark
-    eq_grouped = eq_quintile_returns[periods:].groupby(eq_quintile_returns[periods:].index.year).sum()
-    print(eq_grouped)
+    # eq_quintile_returns = pd.DataFrame(index=rank_comp.index)
+    # eq_quintile_returns['eq_wt1'] = q1_ew.shift(1)
+    # eq_quintile_returns['eq_wt2'] = q2_ew.shift(1)
+    # eq_quintile_returns['eq_wt3'] = q3_ew.shift(1)
+    # eq_quintile_returns['eq_wt4'] = q4_ew.shift(1)
+    # eq_quintile_returns['eq_wt5'] = q5_ew.shift(1)
+    # eq_quintile_returns['bench_mark'] = bench_mark
+    # eq_grouped = eq_quintile_returns[periods:].groupby(eq_quintile_returns[periods:].index.year).sum()
+    # print(eq_grouped)
+    # print(eq_quintile_returns.head())
 
     # pd.plotting.scatter_matrix(quintile_returns, alpha=0.5, figsize=(8, 8), diagonal='hist')
-    eq_quintile_returns['2014':].add(1).cumprod().plot()
+    quintile_returns['2014':].add(1).cumprod().plot()
 
     #excess return
-    q_delta = pd.DataFrame({s: eq_quintile_returns[s] - eq_quintile_returns['eq_wt5'] for s in eq_quintile_returns.columns})
+    q_delta = pd.DataFrame({s: quintile_returns[s] - quintile_returns['q5'] for s in quintile_returns.columns})
     grp_delta = q_delta.groupby(q_delta.index.year).mean()
     grp_delta.plot(kind='bar')
     plt.grid()
@@ -282,10 +288,10 @@ def model_portfolios(sector, bm, wList=[0.25, 0.25, 0.25, 0.25]):
         series = lambda x: pd.Series(x, ['Draw Down'])
         return returns.apply(max_dd).apply(series)
 
-    print(max_dd(eq_quintile_returns))
-    print(eq_quintile_returns.describe())
-    print(eq_quintile_returns.skew())
-    return eq_quintile_returns
+    print(max_dd(quintile_returns))
+    print(quintile_returns.describe())
+    print(quintile_returns.skew())
+    return quintile_returns
 
 if __name__ == "__main__":
 
@@ -300,7 +306,7 @@ if __name__ == "__main__":
     #     df.to_csv("C:/Python27/Examples/SPY_"+sec+".csv")
 
 
-    model = model_portfolios(sector='Information Technology', bm='XLK', wList=[0.0, 0.5, 0.5, 0.0])
+    model = model_portfolios(sector='Information Technology', bm='XLK', wList=[0.0, 0.7, 0.3, 0.0])
     # wts.index.name = 'Date'
     # model['EW'] = eqPort.mean(axis=1)
     # portfolio_returns = model[['Average', 'bench_mark', 'EW', 'alt_Average']]
