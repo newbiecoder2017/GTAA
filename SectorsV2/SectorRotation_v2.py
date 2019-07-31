@@ -39,7 +39,7 @@ today = datetime.datetime.today().strftime('%m/%d/%y')
 #Function to pull data from yahoo
 def pull_data(s):
 
-    return pdr.get_data_yahoo(s, start="2000-12-31", end="2019-06-28")['Adj Close']
+    return pdr.get_data_yahoo(s, start="2000-12-31", end="2019-07-31")['Adj Close']
 
 def read_price_file(frq = 'BM'):
     df_price = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/adj_close_sectors.csv", index_col='Date', parse_dates=True)
