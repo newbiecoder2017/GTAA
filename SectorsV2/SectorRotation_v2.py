@@ -39,7 +39,7 @@ today = datetime.datetime.today().strftime('%m/%d/%y')
 #Function to pull data from yahoo
 def pull_data(s):
 
-    return pdr.get_data_yahoo(s, start="2000-12-31", end="2019-07-31")['Adj Close']
+    return pdr.get_data_yahoo(s, start="2000-12-31", end="2019-08-31")['Adj Close']
 
 def read_price_file(frq = 'BM'):
     df_price = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/adj_close_sectors.csv", index_col='Date', parse_dates=True)
@@ -539,7 +539,7 @@ if __name__ == "__main__":
     return_by_year = all_portfolios.add(1).cumprod().groupby(all_portfolios.index.year).last().pct_change()
     return_by_year.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/returns_by_year.csv")
     print(100 *return_by_year)
-    # print(100 * all_portfolios['2018'].groupby(all_portfolios['2018'].index.month).sum())
+    print(100 * all_portfolios['2019'].groupby(all_portfolios['2019'].index.month).sum())
     # print(100 * np.sqrt(12) *all_portfolios.groupby(all_portfolios.index.year).std())
     # print(100 * all_portfolios)
 
