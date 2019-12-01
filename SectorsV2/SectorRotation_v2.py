@@ -386,19 +386,19 @@ def cash_scaling_model():
     rolling_12m.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/cashscaler.csv")
 
     #Plot the risk on and risk off signals
-    dts = rolling_12m[rolling_12m['composite'] == 0].index
-
-    ls = [i for i in range(len(dts))]
-    for i in ls:
-        #     p = plt.axvspan(dts[i],dts[i+1], facecolor='r', alpha=0.3)
-        plt.axvline(x=dts[i])
-        plt.axis([dts[0], dts[-1], -1, 1])
-
-    sp_df['Adj Close'].resample('BM', closed='right').last().pct_change().cumsum().plot(color = 'r')
-    # plt.legend(['SP500'])
-    plt.title("Risk On/OFF Indicator vs S&P500 PR", color='crimson',fontweight='heavy')
-    plt.savefig("C:/Python27/Git/SMA_GTAA/Sectors/cashScalingPlot.jpg", transparent=True)
-    plt.show()
+    # dts = rolling_12m[rolling_12m['composite'] == 0].index
+    #
+    # ls = [i for i in range(len(dts))]
+    # for i in ls:
+    #     #     p = plt.axvspan(dts[i],dts[i+1], facecolor='r', alpha=0.3)
+    #     plt.axvline(x=dts[i])
+    #     plt.axis([dts[0], dts[-1], -1, 2])
+    #
+    # sp_df['Adj Close'].resample('BM', closed='right').last().pct_change().cumsum().plot(color = 'r')
+    # # plt.legend(['SP500'])
+    # plt.title("Risk On/OFF Indicator vs S&P500 PR", color='crimson',fontweight='heavy')
+    # plt.savefig("C:/Python27/Git/SMA_GTAA/Sectors/cashScalingPlot.jpg", transparent=True)
+    # plt.show()
 
     # Rolling IC between the 1 month Sp500 fwd returns and composite signal
     # rolling_12m['change'] = cs_df['Adj Close'].pct_change()
@@ -450,14 +450,38 @@ def dollar_retuns(data):
             data['S&P 500'].iloc[i] = (1 + data['S&P500'].iloc[i]) * data['S&P 500'].iloc[i - 1]
     return data[['Portfolio','S&P 500']]
 
+def plot_returns():
+    rolling_12m = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/cashscaler.csv", index_col='Date', parse_dates=True)
+    #Plot the risk on and risk off signals
+    dts = rolling_12m[rolling_12m['composite'] == 0].index
+
+    ls = [i for i in range(len(dts))]
+    for i in ls:
+        #     p = plt.axvspan(dts[i],dts[i+1], facecolor='r', alpha=0.3)
+        plt.axvline(x=dts[i])
+        plt.axis([dts[0], dts[-1], -1, 3])
+
+    sp_df = pd.read_csv("C:/Python27/Git/SMA_GTAA/sp500_yahoo.csv", index_col='Date', parse_dates=True)[['Adj Close']]
+    sp_df.rename(columns={'Adj Close':'S&P 500 TR'}, inplace=True)
+    sp_df['S&P 500 TR'].resample('BM', closed='right').last().pct_change().cumsum().plot(color = 'r')
+
+    portfolio = pd.read_csv("C:/Python27/Git/SMA_GTAA/Sectors/portfolio_returns.csv", index_col=[0], parse_dates=True)
+    portfolio['portfolio'].resample('BM', closed='right').last().cumsum().plot(color = 'g')
+    # plt.legend(['SP500'])
+    plt.title("Risk On/OFF Indicator vs S&P500 TR", color='crimson',fontweight='heavy')
+    plt.legend(loc='best')
+    plt.savefig("C:/Python27/Git/SMA_GTAA/Sectors/cashScalingPlot.jpg", transparent=True)
+    plt.show()
+
+
 if __name__ == "__main__":
 
     # universe list for the model
     universe_list = ['XLRE', 'XLB', 'XLI', 'XLY', 'XLP', 'XLE', 'XLF', 'XLU', 'XLV', 'XLK', 'XLC', 'BIL', 'SHY','SPY']
 
     # Universe Adj.Close dataframe
-    df = pd.DataFrame({s:pull_data(s) for s in universe_list})
-    df.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/adj_close_sectors.csv")
+    #df = pd.DataFrame({s:pull_data(s) for s in universe_list})
+    #df.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/adj_close_sectors.csv")
 
     adjusted_price = read_price_file('BM')
     modBiL = adjusted_price.BIL.pct_change()
@@ -568,7 +592,7 @@ if __name__ == "__main__":
     # plt.grid()
     # plt.title("Equity Curve - YTD")
     # plt.show()
-    #
+
     # correlation Plot
     # plt.matshow(all_portfolios.corr())
     # plt.xticks(range(len(all_portfolios.columns)), all_portfolios.columns)
@@ -591,6 +615,7 @@ if __name__ == "__main__":
     # #saving files
     stats_df.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/Summary_Statistics.csv")
     print(stats_df)
+    plot_returns()
 
 
 
@@ -617,5 +642,6 @@ if __name__ == "__main__":
 #     t1 = pd.concat([t1, df_test], axis=1)
 #
 # t1.to_csv("C:/Python27/Git/SMA_GTAA/Sectors/mod_comp.csv")
+
 
 
